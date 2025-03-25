@@ -1,0 +1,105 @@
+@use "../../styles/mixins" as *;
+
+$responsive: 700px;
+
+.type {
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  --size: var(--button-medium-height);
+  background-color: var(--primary-medium);
+  border-radius: var(--radius-rounded);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size);
+  height: var(--size);
+  position: relative;
+  color: var(--white);
+  margin-right: 1em;
+
+  &Svg {
+    font-size: calc(var(--size) / 2);
+  }
+
+  @include max($responsive) {
+    --size: var(--button-small-height);
+  }
+}
+
+.status {
+  position: absolute;
+  width: calc(var(--size) / 3);
+  height: calc(var(--size) / 3);
+  border-radius: var(--radius-rounded);
+  background-color: var(--bg);
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.warning {
+    --bg: var(--warning-medium);
+  }
+
+  &.danger {
+    --bg: var(--danger-medium);
+  }
+
+  &.success {
+    --bg: var(--success-medium);
+  }
+
+  svg {
+    width: 60%;
+    color: var(--white);
+
+    * {
+      stroke-width: 3;
+    }
+  }
+}
+
+.stronger {
+  @include ellipsis;
+  font-size: 1.15em;
+  padding-bottom: 0.1em;
+
+  @include max($responsive) {
+    font-size: 1em;
+  }
+}
+
+.small {
+  font-size: 0.95em;
+  color: var(--text-tertiary);
+}
+
+.cell {
+  &Amount {
+    @include min($responsive) {
+      .small {
+        display: none;
+      }
+    }
+
+    @include max($responsive) {
+      border-radius: 0 var(--td-radius) var(--td-radius) 0;
+      text-align: right;
+      padding-right: 2em;
+
+      .small {
+        display: block;
+      }
+    }
+  }
+
+  &Right {
+    @include max($responsive) {
+      display: none;
+    }
+  }
+}
