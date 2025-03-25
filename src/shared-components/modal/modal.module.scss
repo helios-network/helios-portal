@@ -1,0 +1,92 @@
+@use "../../styles/mixins" as *;
+
+.overlay {
+  @include backdrop;
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  overflow: scroll;
+  background-color: rgba(var(--light-rgb), 0.15);
+  padding: var(--main-padding);
+  @include no-scrollbar;
+
+  &Close {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+  }
+
+  @include max($responsiveNav) {
+    left: 0;
+  }
+
+  &.responsiveBottom {
+    @include max($responsiveMobile) {
+      align-items: flex-end;
+      padding: 0;
+      padding-top: var(--main-padding);
+
+      .modal {
+        margin: 0;
+        width: 100%;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+    }
+  }
+}
+
+.modal {
+  --modal-padding: var(--size-10);
+  position: relative;
+  background-color: var(--background-low);
+  padding: var(--modal-padding);
+  z-index: 10;
+  display: flex;
+  margin: auto;
+  flex-direction: column;
+  gap: calc(var(--modal-padding) / 2);
+  width: var(--modal-width, calc(450px + 100 * (100vw - 320px) / 1080));
+  max-width: 100%;
+  box-shadow: 0 24px 56px rgba(var(--dark-rgb), 0.1);
+  border-radius: var(--radius-m);
+
+  &.full {
+    min-height: 100%;
+    border-radius: var(--radius-1);
+  }
+
+  &:not(.full) {
+    animation: revealModal 0.3s;
+    animation-fill-mode: both;
+  }
+
+  & > * {
+    z-index: 5;
+  }
+
+  @keyframes revealModal {
+    from {
+      top: var(--size-10);
+      @include auto-alpha(0);
+    }
+    to {
+      top: 0;
+      @include auto-alpha(1);
+    }
+  }
+}
+
+.close {
+  position: absolute;
+  right: calc(var(--modal-padding) / 3);
+  top: calc(var(--modal-padding) / 3);
+}
+
+.title {
+  font-size: var(--size-6);
+  font-weight: bold;
+}

@@ -1,0 +1,135 @@
+@use "../../../../styles/mixins" as *;
+
+.list {
+  flex: 1;
+  display: flex;
+  gap: calc(4px + 16 * (100vw - 320px) / 1080);
+  min-height: 300px;
+  z-index: 5;
+}
+
+.item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+}
+
+.bar {
+  flex: 1;
+  width: 100%;
+  position: relative;
+  cursor: pointer;
+
+  & > div {
+    border-radius: var(--radius-m) var(--radius-m) 0 0;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    min-height: 20%;
+    background: radial-gradient(
+      150% 100% at 20% 0%,
+      var(--color) 0%,
+      rgba(255, 255, 255, 0) 100%
+    );
+
+    &::before {
+      transition: opacity var(--transition-link);
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0.75;
+      background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0),
+        var(--background-low)
+      );
+    }
+
+    &:hover {
+      &::before {
+        opacity: 0;
+      }
+
+      .hover {
+        @include auto-alpha(1);
+        top: 0;
+      }
+    }
+  }
+}
+
+.symbol {
+  --symbol-size: 2.5em;
+  margin-top: -0.5em;
+  z-index: 5;
+}
+
+.name {
+  font-weight: bold;
+  font-size: 0.95em;
+  margin: 0.75em 0 0.33em;
+}
+
+.price {
+  font-size: 0.7em;
+  color: var(--text-tertiary);
+  font-weight: 600;
+}
+
+.total {
+  font-weight: 700;
+
+  small {
+    color: var(--text-tertiary);
+    font-size: 0.85em;
+  }
+}
+
+.right {
+  text-align: right;
+  position: relative;
+}
+
+.holder {
+  color: var(--text-tertiary);
+  font-size: var(--size-3-5);
+  font-weight: 500;
+  margin-top: 0.25em;
+  position: absolute;
+  right: 0;
+  top: 120%;
+}
+
+.hover {
+  @include transition(link, (top, opacity, visibility));
+  position: absolute;
+  top: var(--size-4);
+  left: 50%;
+  transform: translate(-50%, -70%);
+  background: var(--background-lower);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--size-1);
+  padding: 1em;
+  font-size: var(--size-3-5);
+  border-radius: var(--radius-s);
+  box-shadow: 0 16px 32px rgba(var(--dark-rgb), 0.075);
+  line-height: 1;
+  pointer-events: none;
+  z-index: 5;
+  @include auto-alpha(0);
+
+  strong {
+    color: var(--color);
+  }
+
+  span {
+    font-size: 0.75em;
+    color: var(--text-tertiary);
+    font-weight: 700;
+  }
+}

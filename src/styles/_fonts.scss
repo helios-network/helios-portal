@@ -1,0 +1,11 @@
+@font-face {
+  font-family: 'Satoshi';
+  src: url('../public/fonts/satoshi/Satoshi-Variable.woff2') format('woff2');
+  font-weight: 300 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-main: 'Satoshi', system-ui, Arial;
+} 

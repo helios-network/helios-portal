@@ -1,0 +1,31 @@
+@use "../../../../styles/mixins" as *;
+
+.linker {
+  --heading-size: var(--size-4);
+  @include transition(link, (color));
+  background-color: var(--background-low);
+  display: block;
+  border-radius: var(--radius-l);
+  padding: var(--size-2);
+  display: flex;
+  align-items: center;
+  gap: var(--size-4);
+  position: relative;
+
+  &:hover {
+    color: var(--primary-medium);
+
+    .icon {
+      right: var(--size-3);
+      color: inherit;
+    }
+  }
+}
+
+.icon {
+  @include transition(link, (right));
+  position: absolute;
+  right: var(--size-5);
+  color: var(--text-tertiary);
+  font-size: var(--size-5);
+}

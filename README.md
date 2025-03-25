@@ -1,56 +1,46 @@
-# Helios Portal
+# Getting Started with Create React App
 
-Helios Portal is the official entry point to the Helios Blockchain, providing users with a seamless interface for bridging, staking, delegation, governance voting, and portfolio management. This platform simplifies interactions across the Helios ecosystem while ensuring security, efficiency, and interchain connectivity.
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Features
+## Available Scripts
 
-- Cross-Chain Bridging – Move assets between Helios and external blockchains.
-- Staking & Delegation – Secure the network by staking tokens and delegating to validators.
-- Governance & Voting – Participate in decentralized governance decisions.
-- Portfolio Management – Track assets, rewards, and governance activities.
-- EVM & Cosmos Integration – Seamlessly connects with EVM wallets and Cosmos-based tools.
-- Decentralized by Design – Helios Portal operates entirely on Helios Node RPC, eliminating reliance on centralized APIs or backend services. You can deploy and run the frontend on the mainnet independently.
+In the project directory, you can run:
 
+### `npm start`
 
-## Getting Started
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-### Clone the Repository
-```sh
-git clone https://github.com/helios-network/helios-portal.git
-cd helios-portal
-```
+The page will reload if you make edits.\
+You will also see any lint errors in the console.
 
-### 2Install Dependencies
-```sh
-npm install  # or yarn install
-```
+### `npm test`
 
-### 3Run the Development Server
-```sh
-npm run dev  # or yarn dev
-```
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-## Documentation
+### `npm run build`
 
-For detailed setup instructions, API references, and user guides, refer to the official documentation on Helios Hub.
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-## Contributing
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-We welcome contributions! To contribute:
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-name`).
-3. Commit your changes (`git commit -m 'Add new feature'`).
-4. Push the branch (`git push origin feature-name`).
-5. Open a pull request.
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-## License
+### `npm run eject`
 
-This project is licensed under the MIT License.
+**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
-## Contact
+If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-For questions or support, join our community or reach out to the Helios team.
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
----
+You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-**Helios Portal - Powering the Future of Interchain!**
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).

@@ -1,0 +1,83 @@
+@use "../../../../styles/mixins" as *;
+
+.validators {
+  --card-padding: var(--size-8);
+  gap: 0;
+
+  & > * {
+    flex: 1;
+  }
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress {
+  background-color: var(--background-higher);
+  width: 100%;
+  border-radius: var(--radius-rounded);
+  overflow: hidden;
+  margin: calc(var(--card-padding) / 2) 0 var(--size-3);
+
+  &Bar {
+    height: var(--size-1);
+    background: linear-gradient(
+      to right,
+      var(--background-higher),
+      var(--success-low)
+    );
+    border-radius: inherit;
+  }
+}
+
+.latest {
+  --latest-padding: var(--size-5);
+  background-color: var(--background-higher);
+  border-radius: var(--radius-3xs) var(--radius-3xs) var(--radius-m)
+    var(--radius-m);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--latest-padding) / 2.5);
+  position: relative;
+  padding: var(--latest-padding);
+
+  & > * {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    @include ellipsis;
+  }
+
+  &Top {
+    .left {
+      font-weight: 700;
+      color: var(--primary-medium);
+    }
+  }
+
+  &Bottom {
+    font-size: 0.75em;
+    color: var(--primary-lower);
+  }
+
+  .left {
+    @include ellipsis;
+  }
+
+  .right {
+    text-align: right;
+  }
+
+  .badge {
+    background-color: var(--success-low);
+    color: var(--white);
+    font-size: 0.6em;
+    font-weight: 800;
+    text-transform: uppercase;
+    border-radius: var(--radius-m);
+    padding: 0.35em 0.75em;
+  }
+}

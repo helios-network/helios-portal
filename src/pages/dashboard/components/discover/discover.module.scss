@@ -1,0 +1,62 @@
+@use "../../../../styles/mixins" as *;
+
+body .discover {
+  --card-bg: var(--primary-medium);
+  --card-padding: var(--size-8);
+  --card-gap: calc(var(--size-9) / 3);
+  --btn-border: rgba(var(--light-rgb), 0.1);
+  --btn-border-color: currentColor;
+  color: var(--white);
+  justify-content: flex-end;
+  overflow: hidden;
+  position: relative;
+
+  &::before {
+    transition: transform 0.3s ease-in-out;
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url("../../../../public/img/discover-explorer-bg.png") center center;
+    background-size: cover;
+    border-radius: var(--radius-l);
+    z-index: 0;
+    mix-blend-mode: soft-light;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(at 0% 50%, #1ccaff 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  &:hover {
+    &::after {
+      opacity: 0.75;
+    }
+  }
+}
+
+.logo {
+  width: 85%;
+  z-index: 5;
+  fill: currentColor;
+}
+
+.bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 400;
+  z-index: 5;
+}
+
+.btn {
+  right: -5px;
+  bottom: -5px;
+}
