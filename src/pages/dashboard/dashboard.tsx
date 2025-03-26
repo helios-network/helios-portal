@@ -12,6 +12,7 @@ import { TVL } from "./components/tvl"
 import { Validators } from "./components/validators"
 import s from "./dashboard.module.scss"
 import { useBlockInfo } from "../../hooks/useBlockInfo"
+import { Link } from "react-router-dom"
 
 export default function Page() {
   const { lastBlockNumber, blockTime, gasPriceUSD } = useBlockInfo()
@@ -53,18 +54,22 @@ export default function Page() {
           <Discover />
         </Area>
         <Area area="g">
-          <Linker
-            icon="hugeicons:chart-rose"
-            href={routes.delegations}
-            text="My Delegations"
-          />
+          <Link to={routes.delegations}>
+            <Linker
+              icon="hugeicons:chart-rose"
+              href={routes.delegations}
+              text="My Delegations"
+            />
+          </Link>
         </Area>
         <Area area="h">
-          <Linker
-            icon="hugeicons:bitcoin-withdraw"
-            href={routes.governance}
-            text="Governance Vote"
-          />
+          <Link to={routes.governance}>
+            <Linker
+              icon="hugeicons:bitcoin-withdraw"
+              href={routes.governance}
+              text="Governance Vote"
+            />
+          </Link>
         </Area>
         <Area area="i">
           <Recents />

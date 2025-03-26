@@ -59,6 +59,7 @@ export const Nav = () => {
         variant="secondary"
         className={s.bnav}
         onClick={() => setNav(!nav)}
+        data-active={nav}
         border
       />
     </nav>

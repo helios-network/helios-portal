@@ -16,7 +16,7 @@ body .discover {
     content: "";
     position: absolute;
     inset: 0;
-    background: url("/img/discover-explorer-bg.png") center center;
+    background: url("../../../../public/img/discover-explorer-bg.png") center center;
     background-size: cover;
     border-radius: var(--radius-l);
     z-index: 0;
