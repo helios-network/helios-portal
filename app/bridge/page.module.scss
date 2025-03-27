@@ -1,0 +1,15 @@
+@use "styles/mixins" as *;
+
+.bridge {
+  --grid-columns: 2;
+  align-items: start;
+  grid-template-areas:
+    "a b"
+    "a c"
+    "a d";
+}
+
+.card {
+  background-color: red;
+  height: 100%;
+}

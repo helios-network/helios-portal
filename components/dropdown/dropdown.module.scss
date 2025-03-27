@@ -1,5 +1,4 @@
-@import "styles/mixins";
-
+@use "styles/mixins" as *;
 .dropdown {
   --content-margin: var(--size-2);
   position: relative;

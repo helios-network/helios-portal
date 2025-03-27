@@ -1,0 +1,245 @@
+@use "styles/mixins" as *;
+
+.button {
+  [data-symbol] {
+    font-size: 2em;
+    margin-left: -0.4em;
+  }
+}
+
+.modal {
+  --modal-width: 450px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2);
+
+  .button {
+    width: 100%;
+    --btn-size: var(--size-4);
+
+    span {
+      flex: 1;
+      text-align: left;
+    }
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--size-10) / 2);
+}
+
+.form {
+  --padding: var(--size-8);
+  --input-padding: var(--size-6);
+  background-color: var(--background-medium);
+  border-radius: var(--radius-m);
+  padding: var(--padding);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--padding) / 2);
+}
+
+.input {
+  background-color: var(--background-low);
+  border-radius: var(--radius-m);
+  padding: var(--input-padding);
+  display: flex;
+  align-items: center;
+  gap: var(--size-4);
+  font-size: var(--size-5);
+
+  &Token {
+    cursor: pointer;
+  }
+
+  &:hover {
+    .arrow {
+      color: var(--primary-medium);
+    }
+  }
+
+  .icon {
+    width: 1em;
+    transform: scale(1.5);
+  }
+
+  .value {
+    flex: 1;
+    width: 70%;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  .label {
+    @include ellipsis;
+    text-align: right;
+    font-size: var(--size-3-5);
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding-bottom: 0.05em;
+
+    small {
+      display: block;
+      font-size: 0.6em;
+      margin-top: 0.25em;
+    }
+  }
+
+  .arrow {
+    color: var(--text-secondary);
+    transform: scale(1.15);
+  }
+
+  .max {
+    --btn-size: var(--size-3-5);
+    --btn-color: var(--primary-medium);
+    --btn-padding-x: 1.15em;
+  }
+
+  .btn {
+    --btn-color: var(--primary-medium);
+
+    & + .btn {
+      margin-left: calc(var(--input-padding) * -0.5);
+    }
+  }
+
+  &Address {
+    .value {
+      font-size: var(--size-4);
+    }
+  }
+}
+
+.swap {
+  --middle: var(--size-20);
+  display: flex;
+  gap: var(--middle);
+  position: relative;
+
+  &Button {
+    transition: transform var(--transition-scale),
+      background-color var(--transition-link);
+    position: absolute;
+    width: calc(var(--middle) / 2);
+    height: calc(var(--middle) / 2);
+    background-color: var(--primary-medium);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: var(--size-5);
+
+    &:hover {
+      background-color: var(--primary-low);
+    }
+
+    &:active {
+      transform: translate(-50%, -50%) scale(0.9);
+    }
+
+    svg {
+      animation: move 2s ease-in-out infinite;
+      position: relative;
+
+      @keyframes move {
+        0% {
+          left: -0.2em;
+        }
+        50% {
+          left: 0.2em;
+        }
+        100% {
+          left: -0.2em;
+        }
+      }
+    }
+  }
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    width: var(--middle);
+    height: 42%;
+    background-color: var(--background-medium);
+    display: block;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    border-radius: var(--radius-s);
+  }
+
+  &::before {
+    top: 0;
+    z-index: 5;
+  }
+
+  &::after {
+    bottom: 0;
+    z-index: 2;
+    box-shadow: 0 -2em 0 0.5em var(--background-low);
+  }
+
+  &Input {
+    width: calc(100% - var(--middle) / 2);
+    background-color: var(--background-low);
+    border-radius: var(--radius-m);
+    padding: var(--input-padding);
+    display: flex;
+    align-items: center;
+    gap: calc(var(--input-padding) / 2);
+    flex-wrap: wrap;
+    cursor: pointer;
+    position: relative;
+
+    &:hover {
+      .swapArrow {
+        color: var(--primary-medium);
+      }
+    }
+  }
+
+  &Label {
+    min-width: 100%;
+    width: 100%;
+    display: block;
+    font-size: var(--size-4);
+    color: var(--text-secondary);
+  }
+
+  &Value {
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+
+  &Icon {
+    --symbol-size: 1.5em;
+    transform: scale(1.25);
+  }
+
+  &Arrow {
+    transform: scale(1.25);
+    position: absolute;
+    right: var(--input-padding);
+    bottom: var(--input-padding);
+  }
+}
+
+.deposit {
+  width: 100%;
+}
