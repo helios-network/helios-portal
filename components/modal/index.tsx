@@ -13,6 +13,7 @@ interface ModalProps {
   title?: string
   full?: boolean
   open: boolean
+  closeButton?: boolean
   responsiveBottom?: boolean
 }
 
@@ -23,7 +24,8 @@ export function Modal({
   title,
   full,
   open,
-  responsiveBottom
+  responsiveBottom,
+  closeButton = true
 }: ModalProps) {
   const modalRootRef = useRef<Element | null>(null)
 
@@ -79,14 +81,16 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={title ? "modal-title" : undefined}
       >
-        <Button
-          icon="hugeicons:cancel-01"
-          onClick={handleClose}
-          variant="secondary"
-          size="xsmall"
-          border
-          className={s.close}
-        />
+        {closeButton && (
+          <Button
+            icon="hugeicons:cancel-01"
+            onClick={handleClose}
+            variant="secondary"
+            size="xsmall"
+            border
+            className={s.close}
+          />
+        )}
         {title && (
           <h2 id="modal-title" className={s.title}>
             {title}

@@ -1,5 +1,7 @@
 @use "styles/mixins" as *;
 
+$responsiveSwap: 800px;
+
 .button {
   [data-symbol] {
     font-size: 2em;
@@ -9,6 +11,14 @@
 
 .modal {
   --modal-width: 450px;
+
+  &Qrcode {
+    --modal-width: 350px;
+
+    .close {
+      margin-top: -1em;
+    }
+  }
 }
 
 .list {
@@ -36,12 +46,21 @@
 .form {
   --padding: var(--size-8);
   --input-padding: var(--size-6);
+  --gap: calc(var(--padding) / 2);
   background-color: var(--background-medium);
   border-radius: var(--radius-m);
   padding: var(--padding);
   display: flex;
-  flex-direction: column;
-  gap: calc(var(--padding) / 2);
+  gap: var(--gap);
+  flex-wrap: wrap;
+
+  & > * {
+    flex: 1 auto;
+  }
+
+  @include max(500px) {
+    --padding: var(--size-4);
+  }
 }
 
 .input {
@@ -118,16 +137,23 @@
 
 .swap {
   --middle: var(--size-20);
+  --btn-ratio: 2;
   display: flex;
   gap: var(--middle);
   position: relative;
+
+  @include max($responsiveSwap) {
+    --btn-ratio: 1.25;
+    --middle: var(--size-12);
+    flex-direction: column;
+  }
 
   &Button {
     transition: transform var(--transition-scale),
       background-color var(--transition-link);
     position: absolute;
-    width: calc(var(--middle) / 2);
-    height: calc(var(--middle) / 2);
+    width: calc(var(--middle) / var(--btn-ratio));
+    height: calc(var(--middle) / var(--btn-ratio));
     background-color: var(--primary-medium);
     position: absolute;
     top: 50%;
@@ -152,6 +178,11 @@
     svg {
       animation: move 2s ease-in-out infinite;
       position: relative;
+
+      @include max($responsiveSwap) {
+        animation: none;
+        transform: rotate(90deg);
+      }
 
       @keyframes move {
         0% {
@@ -179,21 +210,40 @@
     transform: translateX(-50%);
     z-index: 1;
     border-radius: var(--radius-s);
+
+    @include max($responsiveSwap) {
+      width: 48%;
+      height: var(--middle);
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+    }
   }
 
   &::before {
     top: 0;
     z-index: 5;
+
+    @include max($responsiveSwap) {
+      left: 0;
+      top: 50%;
+    }
   }
 
   &::after {
     bottom: 0;
     z-index: 2;
     box-shadow: 0 -2em 0 0.5em var(--background-low);
+
+    @include max($responsiveSwap) {
+      bottom: none;
+      right: 0;
+      left: auto;
+      box-shadow: -2em 0 0 0.5em var(--background-low);
+    }
   }
 
   &Input {
-    width: calc(100% - var(--middle) / 2);
     background-color: var(--background-low);
     border-radius: var(--radius-m);
     padding: var(--input-padding);
@@ -203,6 +253,10 @@
     flex-wrap: wrap;
     cursor: pointer;
     position: relative;
+
+    @include min($responsiveSwap) {
+      width: calc(100% - var(--middle) / 2);
+    }
 
     &:hover {
       .swapArrow {
@@ -263,4 +317,18 @@
 
 .deposit {
   width: 100%;
+}
+
+.qrcode {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background-lowest);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-m);
+
+  img {
+    width: 100%;
+  }
 }

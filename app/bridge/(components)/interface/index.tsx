@@ -13,6 +13,7 @@ import { useUserStore } from "@/stores/user"
 import { type Chain } from "@/types/Chains"
 import { type Token } from "@/types/Tokens"
 import clsx from "clsx"
+import Image from "next/image"
 import { useState } from "react"
 import { toast } from "sonner"
 import s from "./interface.module.scss"
@@ -70,6 +71,11 @@ export const Interface = () => {
     if (e.target === e.currentTarget) {
       e.currentTarget.querySelector("input")?.focus()
     }
+  }
+
+  const handleCopyAddress = () => {
+    navigator.clipboard.writeText(form.address)
+    toast.success("Address copied to clipboard")
   }
 
   return (
@@ -194,10 +200,7 @@ export const Interface = () => {
                 className={s.btn}
                 size="xsmall"
                 icon="hugeicons:copy-01"
-                onClick={() => {
-                  navigator.clipboard.writeText(form.address)
-                  toast.success("Address copied to clipboard")
-                }}
+                onClick={handleCopyAddress}
               />
               <Button
                 variant="secondary"
@@ -284,12 +287,23 @@ export const Interface = () => {
         </ul>
       </Modal>
       <Modal
-        title="QR Code"
         open={openQr}
         onClose={() => setOpenQr(false)}
-        className={s.modal}
+        className={s.modalQrcode}
+        closeButton={false}
       >
-        -
+        <div className={s.qrcode}>
+          <Image src="/img/qrcode.svg" alt="QR Code" width={200} height={200} />
+        </div>
+        <Button onClick={handleCopyAddress}>Copy this address</Button>
+        <Button
+          variant="secondary"
+          onClick={() => setOpenQr(false)}
+          size="small"
+          className={s.close}
+        >
+          Close
+        </Button>
       </Modal>
     </>
   )
