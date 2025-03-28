@@ -1,0 +1,44 @@
+@use "styles/mixins" as *;
+
+.secure {
+  --card-padding: var(--size-4);
+}
+
+.content {
+  --padding: var(--size-6);
+  background-color: var(--background-high);
+  border-radius: var(--radius-m);
+  padding: var(--padding);
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--padding) / 1.25);
+  color: var(--primary-medium);
+  line-height: 1.25;
+
+  svg {
+    width: var(--size-13);
+    align-self: center;
+    animation: pulse 1.5s infinite;
+
+    * {
+      stroke-width: 1;
+    }
+
+    @keyframes pulse {
+      0%,
+      100% {
+        transform: scale(0.9);
+        color: var(--success-medium);
+      }
+      50% {
+        transform: scale(1);
+        color: var(--primary-medium);
+      }
+    }
+  }
+
+  span {
+    color: var(--success-medium);
+    font-weight: bold;
+  }
+}

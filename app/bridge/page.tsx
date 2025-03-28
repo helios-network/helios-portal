@@ -1,7 +1,8 @@
-import { Card } from "@/components/card"
 import { Area, Grid } from "@/components/grid"
 import { Interface } from "./(components)/interface"
 import { Recents } from "./(components)/recents"
+import { Secure } from "./(components)/secure"
+import { Supported } from "./(components)/supported"
 import s from "./page.module.scss"
 
 export default function Page() {
@@ -15,10 +16,10 @@ export default function Page() {
           <Recents />
         </Area>
         <Area area="c">
-          <Card className={s.title}>Bridge</Card>
+          <Supported />
         </Area>
         <Area area="d">
-          <Card className={s.title}>Bridge</Card>
+          <Secure />
         </Area>
       </Grid>
     </>

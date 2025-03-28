@@ -208,6 +208,16 @@ export const Interface = () => {
               />
             </div>
           </div>
+          <div className={s.recap}>
+            <div className={s.recapItem}>
+              <span>Estimated Fees:</span>
+              <strong>0.005 ETH</strong>
+            </div>
+            <div className={s.recapItem}>
+              <span>You will receive:</span>
+              <strong>0.000 ETH</strong>
+            </div>
+          </div>
           <Button
             className={s.deposit}
             icon="hugeicons:download-03"

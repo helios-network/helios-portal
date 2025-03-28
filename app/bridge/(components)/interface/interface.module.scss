@@ -223,7 +223,6 @@
     font-weight: 600;
     letter-spacing: -0.015em;
     flex: 1;
-    width: auto;
     min-width: 0;
   }
 
@@ -237,6 +236,28 @@
     position: absolute;
     right: var(--input-padding);
     bottom: var(--input-padding);
+  }
+}
+
+.recap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--size-10) / 2);
+
+  &Item {
+    --padding: var(--size-6);
+    flex: 1 auto;
+    display: flex;
+    gap: calc(var(--padding) / 2);
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--background-medium);
+    padding: var(--padding);
+    border-radius: var(--radius-m);
+
+    span {
+      color: var(--text-secondary);
+    }
   }
 }
 

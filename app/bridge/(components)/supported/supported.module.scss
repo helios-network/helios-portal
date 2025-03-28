@@ -1,0 +1,51 @@
+@use "styles/mixins" as *;
+
+.supported {
+  overflow: hidden;
+  position: inherit;
+}
+
+.container {
+  width: 100%;
+  height: var(--size-20);
+  position: relative;
+  margin-bottom: var(--size-10);
+}
+
+.list {
+  overflow: visible;
+  cursor: grab;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.item {
+  --padding: var(--size-6);
+  --symbol-size: var(--size-7);
+  width: auto !important;
+  background-color: var(--background-lower);
+  border-radius: var(--radius-m);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--padding) calc(var(--padding) / 1.25);
+  flex: 1 auto;
+  white-space: nowrap;
+}
+
+.name {
+  font-weight: bold;
+  font-size: var(--size-3-5);
+  margin: calc(var(--padding) / 2.5) 0 0.35em;
+}
+
+.time {
+  font-size: var(--size-3);
+  color: var(--text-secondary);
+}

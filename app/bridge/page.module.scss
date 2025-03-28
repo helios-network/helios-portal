@@ -2,7 +2,7 @@
 
 .bridge {
   --grid-columns: 2;
-  align-items: start;
+  align-items: flex-start;
   grid-template-areas:
     "a b"
     "a c"
