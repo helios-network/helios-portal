@@ -4,7 +4,6 @@ import { Button } from "@/components/button"
 import { Icon } from "@/components/icon"
 import { Modal } from "@/components/modal"
 import clsx from "clsx"
-import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import s from "./claim.module.scss"
 import { formatNumber } from "@/lib/utils/number"
@@ -27,28 +26,33 @@ export const ModalClaim = ({
   rewards,
   rewardsPrice,
   validatorAddress
-}: // setRewards
-ModalClaimProps) => {
-  const [loading, setLoading] = useState(false)
+}: ModalClaimProps) => {
+  const { claimRewards, claimValidatorRewards, feedback, isLoading } =
+    useRewards()
+
   const classes = clsx(s.claim, rewards > 0 && s.claimAvailable)
-  const { claimRewards, claimValidatorRewards, feedback } = useRewards()
 
   const handleClaim = async () => {
-    setLoading(true)
-    if (validatorAddress) {
-      await claimValidatorRewards(validatorAddress)
-    } else {
-      await claimRewards()
-    }
-    setLoading(false)
-    toast.success("Rewards claimed successfully!")
-  }
+    try {
+      const claimPromise = validatorAddress
+        ? claimValidatorRewards(validatorAddress)
+        : claimRewards()
 
-  useEffect(() => {
-    if (!open) {
-      setLoading(false)
+      await toast.promise(claimPromise, {
+        loading: "Processing your claim...",
+        success: (data) => {
+          setTimeout(() => {
+            setOpen(false)
+          }, 3000)
+
+          return `Successfully claimed ${formatNumber(rewards)} HLS!`
+        },
+        error: (err) => err.message || "An unknown error occurred."
+      })
+    } catch (error) {
+      console.error("Claim failed:", error)
     }
-  }, [open])
+  }
 
   return (
     <Modal
@@ -66,26 +70,18 @@ ModalClaimProps) => {
         <div className={s.price}>≈${formatNumber(rewardsPrice)}</div>
       </div>
       <Button
-        icon={loading ? "svg-spinners:6-dots-rotate" : "helios"}
+        icon={isLoading ? "svg-spinners:6-dots-rotate" : "helios"}
         variant={rewards > 0 ? "success" : "primary"}
         onClick={handleClaim}
-        disabled={rewards <= 0 || loading}
+        disabled={rewards <= 0 || isLoading}
       >
-        {loading ? "Claiming..." : "Claim Rewards"}
+        {isLoading ? "Claiming..." : "Claim Rewards"}
       </Button>
       {feedback && feedback.message !== "" && (
         <Message title="Rewards feedback" variant={feedback.status}>
           {feedback.message}
         </Message>
       )}
-      {/* <Message
-        icon="hugeicons:information-circle"
-        title="About Claiming Rewards"
-        className={s.message}
-      >
-        Your rewards have been claimed successfully. You can now see your
-        rewards in your wallet.
-      </Message> */}
     </Modal>
   )
 }
