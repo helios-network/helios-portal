@@ -2,6 +2,7 @@
 
 import clsx from "clsx"
 import { ReactNode, useEffect, useRef } from "react"
+import { useCallback } from 'react';
 import { createPortal } from "react-dom"
 import { Button } from "../button"
 import s from "./modal.module.scss"
@@ -38,11 +39,11 @@ export function Modal({
       document.body.classList.remove("overflow")
     }
 
-    const handleEscKey = (event: KeyboardEvent) => {
+    const handleEscKey = useCallback((event: KeyboardEvent) => {
       if (event.key === "Escape" && open) {
-        handleClose()
+        handleClose();
       }
-    }
+    }, [open, handleClose]);
 
     document.addEventListener("keydown", handleEscKey)
 
