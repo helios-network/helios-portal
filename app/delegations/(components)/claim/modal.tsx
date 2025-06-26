@@ -9,6 +9,7 @@ import s from "./claim.module.scss"
 import { formatNumber } from "@/lib/utils/number"
 import { useRewards } from "@/hooks/useRewards"
 import { Message } from "@/components/message"
+import { useCallback } from "react"
 
 interface ModalClaimProps {
   title: string
@@ -32,7 +33,7 @@ export const ModalClaim = ({
 
   const classes = clsx(s.claim, rewards > 0 && s.claimAvailable)
 
-  const handleClaim = async () => {
+  const handleClaim = useCallback(async () => {
     try {
       const claimPromise = validatorAddress
         ? claimValidatorRewards(validatorAddress)
@@ -52,7 +53,13 @@ export const ModalClaim = ({
     } catch (error) {
       console.error("Claim failed:", error)
     }
-  }
+  }, [
+    validatorAddress,
+    claimValidatorRewards,
+    claimRewards,
+    rewards,
+    setOpen
+  ])
 
   return (
     <Modal
