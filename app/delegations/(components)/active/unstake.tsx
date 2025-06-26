@@ -91,21 +91,27 @@ export const ModalUnstake = ({
       className={s.modal}
       responsiveBottom
     >
-      <Select
-        value={selectedAsset}
-        onChange={(evt) => {
-          setSelectedAsset(evt.target.value)
-          setAmount("0")
-        }}
-        placeholder="Please select an asset"
-        options={
-          delegatedAssets?.map((asset) => ({
-            value: asset.functionnal.address,
-            label: asset.display.name
-          })) || []
-        }
-        label="Choose an asset"
-      />
+      {delegatedAssets && delegatedAssets.length > 0 ? (
+        <Select
+          value={selectedAsset}
+          onChange={(evt) => {
+            setSelectedAsset(evt.target.value)
+            setAmount("0")
+          }}
+          placeholder="Please select an asset"
+          options={
+            delegatedAssets.map((asset) => ({
+              value: asset.functionnal.address,
+              label: asset.display.name
+            }))
+          }
+          label="Choose an asset"
+        />
+      ) : (
+        <Message variant="warning" title="No Delegated Assets">
+          You do not have any assets to unstake from this validator.
+        </Message>
+      )}
 
       {enrichedAsset && (
         <Input

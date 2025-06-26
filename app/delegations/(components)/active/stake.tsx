@@ -34,7 +34,7 @@ export const ModalStake = ({
   const router = useRouter()
   const [amount, setAmount] = useState("0")
   const [selectedAsset, setSelectedAsset] = useState("")
-  const { assets } = useAssetsInfo()
+  const { assets, isLoading: isAssetsLoading } = useAssetsInfo()
   const { delegate, isLoading, feedback, resetFeedback } = useDelegate()
   const formattedMinDelegation = parseFloat(ethers.formatEther(minDelegation))
 
@@ -105,21 +105,27 @@ export const ModalStake = ({
       className={s.modal}
       responsiveBottom
     >
-      <Select
-        value={selectedAsset}
-        onChange={(evt) => {
-          setSelectedAsset(evt.target.value)
-          setAmount("0")
-        }}
-        placeholder="Please select an asset"
-        options={
-          assets?.map((asset) => ({
-            value: asset.enriched.functionnal.address,
-            label: asset.enriched.display.name
-          })) || []
-        }
-        label="Choose an asset"
-      />
+      {isAssetsLoading ? (
+        <Message title="Loading assets..." variant="primary">
+          Please wait while we fetch the list of available assets to stake.
+        </Message>
+      ) : (
+        <Select
+          value={selectedAsset}
+          onChange={(evt) => {
+            setSelectedAsset(evt.target.value)
+            setAmount("0")
+          }}
+          placeholder="Please select an asset"
+          options={
+            assets?.map((asset) => ({
+              value: asset.enriched.functionnal.address,
+              label: asset.enriched.display.name
+            })) || []
+          }
+          label="Choose an asset"
+        />
+      )}
 
       {assetIsHLS && (
         <Message
