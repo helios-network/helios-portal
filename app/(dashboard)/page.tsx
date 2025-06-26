@@ -13,9 +13,15 @@ import { Validators } from "./(components)/validators"
 import s from "./page.module.scss"
 import { Weights } from "./(components)/weights"
 import { formatNumber } from "@/lib/utils/number"
+import { useMemo } from "react"
 
 export default function Page() {
   const { lastBlockNumber, blockTime, gasPriceUSD } = useBlockInfo()
+
+  const formattedBlockNumber = useMemo(
+    () => formatNumber(lastBlockNumber),
+    [lastBlockNumber]
+  )
 
   return (
     <>
@@ -27,7 +33,7 @@ export default function Page() {
           <Stat
             icon="hugeicons:blockchain-02"
             label="Block Height"
-            value={formatNumber(lastBlockNumber)}
+            value={formattedBlockNumber}
             left="#"
           />
         </Area>

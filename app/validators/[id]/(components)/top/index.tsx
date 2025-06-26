@@ -10,7 +10,7 @@ import { useParams } from "next/navigation"
 import { useValidatorDetail } from "@/hooks/useValidatorDetail"
 import { useAccount, useChainId, useSwitchChain } from "wagmi"
 import { EXPLORER_URL, HELIOS_NETWORK_ID } from "@/config/app"
-import { useState } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { ModalStake } from "@/app/delegations/(components)/active/stake"
 import { Message } from "@/components/message"
 
@@ -24,56 +24,64 @@ export const Top = () => {
   const { switchChain } = useSwitchChain()
   const [openStake, setOpenStake] = useState(false)
 
-  if (!validator) return <></>
-
-  // const socials = [
-  //   {
-  //     icon: "hugeicons:globe-02",
-  //     url: "http://helioschain.network/"
-  //   },
-  //   {
-  //     icon: "hugeicons:mail-02",
-  //     url: "mailto:contact@helioschain.network"
-  //   },
-  //   {
-  //     icon: "hugeicons:new-twitter",
-  //     url: "https://x.com/heliosguardian"
-  //   },
-  //   {
-  //     icon: "hugeicons:telegram",
-  //     url: "https://t.me/heliosguardian"
-  //   }
-  // ]
-
-  const isActive = validator.status === 3
-  const enableDelegation = validator.delegationAuthorization
-  const formattedApr = parseFloat(validator.apr).toFixed(2) + "%"
-  const formattedCommission =
-    parseFloat(validator.commission.commission_rates.rate) * 100 + "%"
-
-  const formattedBoost =
-    Math.min((parseFloat(validator.boostPercentage) * 15) / 100, 15) + "%"
-  const tokens = delegation.assets
-  const minDelegation = validator.minDelegation
-
-  const totalDelegated = tokens.reduce(
-    (acc, token) => acc + token.balance.totalPrice,
-    0
+  const isActive = useMemo(() => validator?.status === 3, [validator])
+  const enableDelegation = useMemo(
+    () => validator?.delegationAuthorization,
+    [validator]
+  )
+  const formattedApr = useMemo(
+    () => (validator ? parseFloat(validator.apr).toFixed(2) + "%" : "0%"),
+    [validator]
+  )
+  const formattedCommission = useMemo(
+    () =>
+      validator
+        ? parseFloat(validator.commission.commission_rates.rate) * 100 + "%"
+        : "0%",
+    [validator]
+  )
+  const formattedBoost = useMemo(
+    () =>
+      validator
+        ? Math.min((parseFloat(validator.boostPercentage) * 15) / 100, 15) + "%"
+        : "0%",
+    [validator]
+  )
+  const tokens = useMemo(() => delegation?.assets || [], [delegation])
+  const minDelegation = useMemo(
+    () => validator?.minDelegation,
+    [validator]
   )
 
-  const ratioOptimal =
-    (tokens.find((token) => token.display.symbol === "hls")?.price.usd || 0) >=
-    totalDelegated
+  const totalDelegated = useMemo(
+    () =>
+      tokens.reduce((acc, token) => acc + token.balance.totalPrice, 0),
+    [tokens]
+  )
 
-  const handleOpenStake = () => {
+  const ratioOptimal = useMemo(
+    () =>
+      (tokens.find((token) => token.display.symbol === "hls")?.price.usd ||
+        0) >= totalDelegated,
+    [tokens, totalDelegated]
+  )
+
+  const explorerLink = useMemo(
+    () =>
+      validator
+        ? EXPLORER_URL + "/address/" + validator.validatorAddress
+        : "",
+    [validator]
+  )
+
+  const handleOpenStake = useCallback(() => {
     if (chainId !== HELIOS_NETWORK_ID) {
       switchChain({ chainId: HELIOS_NETWORK_ID })
     }
-
     setOpenStake(true)
-  }
+  }, [chainId, switchChain])
 
-  const explorerLink = EXPLORER_URL + "/address/" + validator.validatorAddress
+  if (!validator) return null
 
   return (
     <Grid className={s.top}>
@@ -82,22 +90,20 @@ export const Top = () => {
           <Heading
             title={validator.moniker}
             isActive={isActive}
-            // verified
             description={
               <>
                 <div className={s.bottom}>
-                  <a href={explorerLink} target="_blank">
+                  <a href={explorerLink} target="_blank" rel="noopener noreferrer">
                     {validator.validatorAddress}
                     <Icon icon="hugeicons:link-circle-02" />
                   </a>
-                  {/* <time>Join April 10, 2025</time> */}
                 </div>
               </>
             }
           >
             <Button
               icon="hugeicons:download-03"
-              onClick={() => handleOpenStake()}
+              onClick={handleOpenStake}
               disabled={!enableDelegation || !isConnected}
             >
               Stake now
@@ -105,7 +111,7 @@ export const Top = () => {
             <ModalStake
               title={`Stake on ${validator.moniker}`}
               validatorAddress={validator.validatorAddress}
-              minDelegation={minDelegation}
+              minDelegation={minDelegation || "0"}
               hasAlreadyDelegated={userHasDelegated}
               open={openStake}
               setOpen={setOpenStake}
@@ -122,30 +128,6 @@ export const Top = () => {
               Please choose another validator to stake your tokens.
             </Message>
           )}
-          {/* <div className={s.description}>
-            <p>
-              Helios Guardian is a professional validator service with 99.98%
-              uptime and a strong focus on security and reliability. We operate
-              enterprise-grade infrastructure with multiple redundancies and
-              24/7 monitoring.
-            </p>
-          </div> */}
-          {/* <div className={s.plus}>
-            <ul className={s.socials}>
-              {socials.map(({ url, icon }, index) => (
-                <li key={index}>
-                  <Button
-                    href={url}
-                    icon={icon}
-                    size="xsmall"
-                    variant="secondary"
-                    border
-                  />
-                </li>
-              ))}
-            </ul>
-            <p>Located in Frankfurt, Germany</p>
-          </div> */}
         </Card>
       </Area>
       <Area area="b">

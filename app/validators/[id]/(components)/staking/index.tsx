@@ -1,14 +1,13 @@
 import { Card } from "@/components/card"
 import { Heading } from "@/components/heading"
 import { Symbol } from "@/components/symbol"
-// import { TOKENS } from "@/config/tokens"
-// import { formatNumber } from "@/lib/utils/number"
 import s from "./staking.module.scss"
 import { useValidatorDetail } from "@/hooks/useValidatorDetail"
 import { useParams } from "next/navigation"
 import { useAssetsInfo } from "@/hooks/useAssetsInfo"
 import clsx from "clsx"
 import Image from "next/image"
+import { useMemo } from "react"
 
 export const Staking = () => {
   const params = useParams()
@@ -16,55 +15,47 @@ export const Staking = () => {
   const { validator } = useValidatorDetail(validatorId)
   const { assets } = useAssetsInfo()
 
-  if (!validator) return <></>
+  const minDelegation = useMemo(
+    () => (validator ? parseFloat(validator.minSelfDelegation) : 0),
+    [validator]
+  )
 
-  const minDelegation = parseFloat(validator.minSelfDelegation)
-  const minStakeAssets = assets
-    .map(
-      (asset) =>
-        (minDelegation / asset.baseWeight).toFixed(2) +
-        " " +
-        asset.enriched.display.symbol.toUpperCase()
-    )
-    .join(" / ")
+  const minStakeAssets = useMemo(
+    () =>
+      assets
+        .map(
+          (asset) =>
+            (minDelegation / asset.baseWeight).toFixed(2) +
+            " " +
+            asset.enriched.display.symbol.toUpperCase()
+        )
+        .join(" / "),
+    [assets, minDelegation]
+  )
 
-  const details = [
-    {
-      label: "Minimum Stake",
-      value: minDelegation === 0 ? "None" : minStakeAssets
-    },
-    // {
-    //   label: "Unbonding Period",
-    //   value: "14 days"
-    // },
-    {
-      label: "Commission Rate",
-      value: parseFloat(validator.commission.commission_rates.rate) + "%"
-    },
-    {
-      label: "Commission Max Rate",
-      value: parseFloat(validator.commission.commission_rates.max_rate) + "%"
-    }
-  ]
+  const details = useMemo(
+    () => [
+      {
+        label: "Minimum Stake",
+        value: minDelegation === 0 ? "None" : minStakeAssets
+      },
+      {
+        label: "Commission Rate",
+        value: validator
+          ? parseFloat(validator.commission.commission_rates.rate) + "%"
+          : "0%"
+      },
+      {
+        label: "Commission Max Rate",
+        value: validator
+          ? parseFloat(validator.commission.commission_rates.max_rate) + "%"
+          : "0%"
+      }
+    ],
+    [minDelegation, minStakeAssets, validator]
+  )
 
-  // const assets = [
-  //   {
-  //     ...TOKENS.get("hls"),
-  //     amount: 1000000
-  //   },
-  //   {
-  //     ...TOKENS.get("eth"),
-  //     amount: 5
-  //   },
-  //   {
-  //     ...TOKENS.get("bnb"),
-  //     amount: 10
-  //   },
-  //   {
-  //     ...TOKENS.get("usdt"),
-  //     amount: 500
-  //   }
-  // ]
+  if (!validator) return null
 
   return (
     <Card auto>
@@ -109,9 +100,6 @@ export const Staking = () => {
                   <small>{asset.enriched.display.symbol}</small>
                 </div>
               </div>
-              {/* <div className={s.amount}>
-                {formatNumber(asset.amount, 2)} <small>Available</small>
-              </div> */}
             </li>
           ))}
         </ul>

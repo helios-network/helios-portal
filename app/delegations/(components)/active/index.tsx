@@ -1,26 +1,27 @@
 import { Card } from "@/components/card"
 import { Heading } from "@/components/heading"
 import { Table, TableCell, TableRow } from "@/components/table"
-// import { TOKENS } from "@/config/tokens"
 import { ValidatorRow } from "@/types/faker"
-// import { TokenWithAmount } from "@/types/Tokens"
 import { Row } from "./row"
 import { useDelegationInfo } from "@/hooks/useDelegationInfo"
 import { Message } from "@/components/message"
+import { useMemo } from "react"
 
 export const Active = () => {
   const { delegationsByValidator } = useDelegationInfo()
 
-  const validators: ValidatorRow[] = delegationsByValidator.map(
-    (validator) => ({
-      address: validator.validatorAddress,
-      name: validator.moniker,
-      commission: validator.commission,
-      apy: validator.apr,
-      assets: validator.tokens,
-      rewards: validator.rewards,
-      rewardsPrice: validator.rewardsPrice
-    })
+  const validators: ValidatorRow[] = useMemo(
+    () =>
+      delegationsByValidator.map((validator) => ({
+        address: validator.validatorAddress,
+        name: validator.moniker,
+        commission: validator.commission,
+        apy: validator.apr,
+        assets: validator.tokens,
+        rewards: validator.rewards,
+        rewardsPrice: validator.rewardsPrice
+      })),
+    [delegationsByValidator]
   )
 
   return (
@@ -32,14 +33,12 @@ export const Active = () => {
             <TableCell>Validator</TableCell>
             <TableCell>Staked Assets</TableCell>
             <TableCell>APY</TableCell>
-            {/* <TableCell>Pending Rewards</TableCell>
-            <TableCell>Last Reward</TableCell> */}
             <TableCell align="right">Actions</TableCell>
           </TableRow>
         </thead>
         <tbody>
-          {validators.map((validator, index) => (
-            <Row key={index} {...validator} />
+          {validators.map((validator) => (
+            <Row key={validator.address} {...validator} />
           ))}
         </tbody>
       </Table>

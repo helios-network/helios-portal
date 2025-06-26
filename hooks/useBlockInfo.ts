@@ -7,6 +7,7 @@ import { formatCurrency } from "@/lib/utils/number"
 import { fromHex, fromWeiToEther, secondsToMilliseconds } from "@/utils/number"
 import { fetchCGTokenData } from "@/utils/price"
 import { useQuery } from "@tanstack/react-query"
+import { useMemo } from 'react';
 
 export const useBlockInfo = () => {
   const qBlockNumber = useQuery({
@@ -48,13 +49,14 @@ export const useBlockInfo = () => {
     queryFn: getGasPrice
   })
 
-  let blockTime = 0
-  if (qBlockData.data && qPreviousBlockData.data) {
-    const currentBlockTimestamp = parseInt(qBlockData.data.timestamp)
-    const previousBlockTimestamp = parseInt(qPreviousBlockData.data.timestamp)
-    const timeDifference = currentBlockTimestamp - previousBlockTimestamp
-    blockTime = timeDifference
-  }
+  const blockTime = useMemo(() => {
+    if (qBlockData.data && qPreviousBlockData.data) {
+      const currentBlockTimestamp = parseInt(qBlockData.data.timestamp);
+      const previousBlockTimestamp = parseInt(qPreviousBlockData.data.timestamp);
+      return currentBlockTimestamp - previousBlockTimestamp;
+    }
+    return 0;
+  }, [qBlockData.data, qPreviousBlockData.data]);
 
   const gasPriceInETH = qGasPrice.data ? fromWeiToEther(qGasPrice.data) : "0"
   const heliosPrice = qHeliosPrice.data?.["helios"]?.price ?? 0

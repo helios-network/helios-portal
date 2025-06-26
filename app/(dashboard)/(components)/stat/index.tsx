@@ -1,7 +1,7 @@
 import { Card } from "@/components/card"
 import { Heading } from "@/components/heading"
 import s from "./stat.module.scss"
-import { JSX } from "react"
+import { JSX, memo } from "react" // Import memo
 
 interface StatProps {
   icon: string
@@ -11,7 +11,7 @@ interface StatProps {
   right?: string
 }
 
-export const Stat = ({ icon, label, value, left, right }: StatProps) => {
+export const Stat = memo(({ icon, label, value, left, right }: StatProps) => {
   return (
     <Card className={s.stat}>
       <Heading icon={icon} />
@@ -25,4 +25,6 @@ export const Stat = ({ icon, label, value, left, right }: StatProps) => {
       </div>
     </Card>
   )
-}
+})
+
+Stat.displayName = "Stat"
