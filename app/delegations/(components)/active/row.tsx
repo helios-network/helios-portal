@@ -1,19 +1,23 @@
 "use client"
 
 import { Button } from "@/components/button"
-// import { Icon } from "@/components/icon"
-import { Symbol } from "@/components/symbol"
 import { TableCell, TableRow } from "@/components/table"
 import { ValidatorRow } from "@/types/faker"
-import { useState } from "react"
-// import { ModalClaim } from "../claim/modal"
+import { lazy, Suspense, useState } from "react"
+import { ModalClaim } from "../claim/modal"
 import s from "./active.module.scss"
-import { ModalStake } from "./stake"
-import { ModalUnstake } from "./unstake"
 import { useChainId, useSwitchChain } from "wagmi"
 import { HELIOS_NETWORK_ID, HELIOS_TOKEN_ADDRESS } from "@/config/app"
-import { ModalClaim } from "../claim/modal"
 import Image from "next/image"
+import { Symbol } from "@/components/symbol"
+import { TokenExtended } from "@/types/token"
+
+const ModalStake = lazy(
+  () => import("./stake").then((module) => ({ default: module.ModalStake }))
+)
+const ModalUnstake = lazy(
+  () => import("./unstake").then((module) => ({ default: module.ModalUnstake }))
+)
 
 export const Row = ({
   address,
@@ -23,8 +27,7 @@ export const Row = ({
   rewards,
   rewardsPrice,
   apy
-}: // base
-ValidatorRow) => {
+}: ValidatorRow) => {
   const [openRewards, setOpenRewards] = useState(false)
   const [openStake, setOpenStake] = useState(false)
   const [openUnstake, setOpenUnstake] = useState(false)
@@ -38,6 +41,7 @@ ValidatorRow) => {
 
     setOpenStake(true)
   }
+
   const handleOpenUnstake = () => {
     if (chainId !== HELIOS_NETWORK_ID) {
       switchChain({ chainId: HELIOS_NETWORK_ID })
@@ -45,6 +49,7 @@ ValidatorRow) => {
 
     setOpenUnstake(true)
   }
+
   const handleOpenRewards = () => {
     if (chainId !== HELIOS_NETWORK_ID) {
       switchChain({ chainId: HELIOS_NETWORK_ID })
@@ -66,7 +71,7 @@ ValidatorRow) => {
       </TableCell>
       <TableCell>
         <ul className={s.assets}>
-          {assets.map((asset, index) => (
+          {assets.map((asset: TokenExtended, index: number) => (
             <li key={index}>
               <div className={s.name}>
                 {asset.display.logo !== "" ? (
@@ -94,19 +99,7 @@ ValidatorRow) => {
       </TableCell>
       <TableCell className={s.apy}>
         <strong>{apy.toFixed(2)}%</strong>
-        {/* <small>{base}%</small> */}
       </TableCell>
-      {/* <TableCell>
-        <strong className={s.rewards}>
-          {rewardsAmount} <Icon icon="helios" />
-        </strong>
-        <small>${rewardsAmount * 100}</small>
-      </TableCell>
-      <TableCell>
-        <time className={s.last}>
-          <Icon icon="hugeicons:clock-02" /> 2 hours ago
-        </time>
-      </TableCell> */}
       <TableCell align="right">
         <div className={s.actions}>
           <Button
@@ -131,14 +124,18 @@ ValidatorRow) => {
             border
             onClick={handleOpenStake}
           />
-          <ModalStake
-            title={`Stake on ${name}`}
-            minDelegation={"0"}
-            hasAlreadyDelegated={true}
-            validatorAddress={address}
-            open={openStake}
-            setOpen={setOpenStake}
-          />
+          <Suspense fallback={null}>
+            {openStake && (
+              <ModalStake
+                title={`Stake on ${name}`}
+                minDelegation={"0"}
+                hasAlreadyDelegated={true}
+                validatorAddress={address}
+                open={openStake}
+                setOpen={setOpenStake}
+              />
+            )}
+          </Suspense>
           <Button
             icon="hugeicons:minus-sign-circle"
             variant="warning"
@@ -146,13 +143,17 @@ ValidatorRow) => {
             border
             onClick={handleOpenUnstake}
           />
-          <ModalUnstake
-            title={`Unstake from ${name}`}
-            validatorAddress={address}
-            delegatedAssets={assets}
-            open={openUnstake}
-            setOpen={setOpenUnstake}
-          />
+          <Suspense fallback={null}>
+            {openUnstake && (
+              <ModalUnstake
+                title={`Unstake from ${name}`}
+                validatorAddress={address}
+                delegatedAssets={assets}
+                open={openUnstake}
+                setOpen={setOpenUnstake}
+              />
+            )}
+          </Suspense>
           <Button
             href={`/validators/${address}`}
             icon="hugeicons:link-circle-02"
