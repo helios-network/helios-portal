@@ -1,8 +1,7 @@
 "use client"
 
 import clsx from "clsx"
-import { ReactNode, useEffect, useRef } from "react"
-import { useCallback } from 'react';
+import { ReactNode, useEffect, useRef, useCallback } from "react"
 import { createPortal } from "react-dom"
 import { Button } from "../button"
 import s from "./modal.module.scss"
@@ -30,32 +29,31 @@ export function Modal({
 }: ModalProps) {
   const modalRootRef = useRef<Element | null>(null)
 
+  const handleClose = useCallback(() => {
+    onClose()
+  }, [onClose])
+
+  const handleEscKey = useCallback((event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      handleClose();
+    }
+  }, [handleClose]);
+
   useEffect(() => {
     modalRootRef.current = document.getElementById("modal-root")
 
     if (open) {
       document.body.classList.add("overflow")
+      document.addEventListener("keydown", handleEscKey)
     } else {
       document.body.classList.remove("overflow")
     }
-
-    const handleEscKey = useCallback((event: KeyboardEvent) => {
-      if (event.key === "Escape" && open) {
-        handleClose();
-      }
-    }, [open, handleClose]);
-
-    document.addEventListener("keydown", handleEscKey)
 
     return () => {
       document.body.classList.remove("overflow")
       document.removeEventListener("keydown", handleEscKey)
     }
-  }, [open])
-
-  const handleClose = () => {
-    onClose()
-  }
+  }, [open, handleEscKey])
 
   const isBrowser = typeof window !== "undefined"
 
