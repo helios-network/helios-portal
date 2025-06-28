@@ -1,0 +1,14 @@
+.layoutWrapper {
+  min-height: 100vh;
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+.pageContent {
+  flex: 1;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-bottom: 2rem;
+  overflow-y: auto;
+}

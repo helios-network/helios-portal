@@ -26,7 +26,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" dir="ltr">
-      <head>
+      <head suppressHydrationWarning={true}>
         {/* Microsoft Clarity */}
         <script
           type="text/javascript"

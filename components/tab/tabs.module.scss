@@ -1,0 +1,70 @@
+.tabContainer {
+  align-items: center;
+  width: 100%;
+  position: relative;
+  background-color: #f5f7ff;
+  border-radius: 2rem;
+  padding: 2rem;
+}
+
+.sidebar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); // Three equal-width columns
+  gap: 1rem; // Space between the buttons
+  width: 100%;
+  padding-top: 1rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tabButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #002dcb;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0, 45, 203, 0.3);
+  width: 100%; // Ensures each button fills its grid cell
+
+  &:hover {
+    background: #0000ff;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (max-width: 640px) {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+  }
+}
+
+.icon {
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+
+  @media (max-width: 640px) {
+    font-size: 1rem;
+  }
+}
+
+.label {
+  white-space: nowrap;
+}
+
+.description {
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin-top: calc(var(--card-padding) * -0.25);
+  padding-top: 1rem;
+}

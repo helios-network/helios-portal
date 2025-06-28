@@ -1,0 +1,40 @@
+.container {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1360px;
+  background-color: #f5f7ff;
+  border-radius: 2rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-bottom: 1rem;
+  margin-top: 1rem;
+}
+
+.cardHeard {
+  padding-top: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  width: fit-content !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 1rem;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 996px) {
+  .cardGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .cardGrid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}

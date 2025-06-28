@@ -1,7 +1,6 @@
+import TabSelector from "@/components/tab"
 import { Guide } from "./(components)/guide"
 import { History } from "./(components)/history"
-import { List } from "./(components)/list"
-import { Power } from "./(components)/power"
 import { Proposal } from "./(components)/proposal"
 import { Statistics } from "./(components)/statistics"
 import s from "./page.module.scss"
@@ -11,14 +10,15 @@ export default function Page() {
     <>
       <div className={s.governance}>
         <div className={s.left}>
-          <Power />
-          <List />
+          {/* <Power /> */}
+          {/* <List /> */}
           <History />
+          <Guide />
         </div>
         <div className={s.right}>
+          <TabSelector />
           <Proposal />
           <Statistics />
-          <Guide />
         </div>
       </div>
     </>

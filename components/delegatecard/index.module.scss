@@ -1,0 +1,86 @@
+.card {
+  background: white;
+  border-radius: 0.75rem;
+  border: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+}
+
+.line {
+  height: 1px;
+  background-color: #ccc;
+  width: 100%;
+}
+
+.card:hover {
+  text-decoration: none;
+}
+
+.cardTitle {
+  margin: 1rem;
+  font-size: 18px;
+  font-weight: 600;
+  color: #002dcb;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.cardLabel {
+  padding-top: 5px;
+  margin: 1rem;
+  font-size: 18px;
+  font-weight: bolder;
+  color: black;
+}
+
+.cardDescription {
+  font-size: 18px;
+  color: #5c6584;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  min-height: 45px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Number of lines before truncating */
+  line-clamp: 2; /* Standard property for compatibility */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardActions {
+  margin: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.iconscontainer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.delegatebutton {
+  font-size: 16px;
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: white;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.delegatebutton:hover {
+  background-color: #f0f0f0;
+}
+
+.roundfull {
+  border-radius: 100%;
+}
+
+.clickable {
+  cursor: pointer;
+}

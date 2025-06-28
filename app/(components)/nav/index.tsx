@@ -41,7 +41,7 @@ export const Nav = () => {
       icon: "hugeicons:chart-breakout-circle",
       label: "Governance",
       href: routes.governance,
-      disabled: true
+      disabled: false
     }
   ]
 
