@@ -108,7 +108,7 @@ export const Hyperion = () => {
             {Math.round(trustScore)}%
           </div>
           <Icon
-            icon="hugeicons:time-04"
+            icon="hugeicons:security-check"
             className={`${s.statIcon} ${s.trustIcon}`}
           />
         </div>
