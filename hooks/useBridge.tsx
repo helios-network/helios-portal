@@ -213,7 +213,13 @@ export const useBridge = () => {
 
         // simulate the transaction
         const resultOfSimulation = await contract.methods
-          .sendToChain(chainId, receiverAddress, tokenAddress, amount.toString(), fees.toString())
+          .sendToChain(
+            chainId,
+            receiverAddress,
+            tokenAddress,
+            amount.toString(),
+            fees.toString()
+          )
           .call({
             from: address
           })
@@ -229,7 +235,13 @@ export const useBridge = () => {
 
         // estimate the gas
         const gasEstimate = await contract.methods
-          .sendToChain(chainId, receiverAddress, tokenAddress, amount.toString(), fees.toString())
+          .sendToChain(
+            chainId,
+            receiverAddress,
+            tokenAddress,
+            amount.toString(),
+            fees.toString()
+          )
           .estimateGas({
             from: address
           })
@@ -241,24 +253,56 @@ export const useBridge = () => {
         const gasLimit = (gasEstimate * 120n) / 100n
 
         // send the transaction
-        const receipt = await new Promise<TransactionReceipt>((resolve, reject) => {
-          web3Provider.eth.sendTransaction({
+        const tx = await contract.methods
+          .sendToChain(
+            chainId,
+            receiverAddress,
+            tokenAddress,
+            amount.toString(),
+            fees.toString()
+          )
+          .send({
             from: address,
-            to: BRIDGE_CONTRACT_ADDRESS,
-            data: contract.methods.sendToChain(chainId, receiverAddress, tokenAddress, amount.toString(), fees.toString()).encodeABI(),
-            gas: gasLimit.toString()
-          }).then((tx) => {
-            resolve(tx as any)
-          }).catch((error) => {
-            console.log("error", error)
-            reject(error)
+            gas: gasLimit.toString(),
+            gasPrice: bestGasPrice.toString()
           })
-        })
 
         setFeedback({
           status: "primary",
-          message: `Transaction sent (hash: ${receipt.transactionHash}), waiting for confirmation...`
+          message: `Transaction sent (hash: ${tx.transactionHash}), waiting for confirmation...`
         })
+
+        // Wait for transaction receipt with retry mechanism
+        let receipt = null
+        let retries = 0
+        const maxRetries = 10
+
+        while (!receipt && retries < maxRetries) {
+          try {
+            receipt = await web3Provider.eth.getTransactionReceipt(
+              tx.transactionHash
+            )
+            if (!receipt) {
+              // Wait before retrying
+              await new Promise((resolve) => setTimeout(resolve, 2000))
+              retries++
+            }
+          } catch (receiptError) {
+            console.log(
+              `Retry ${
+                retries + 1
+              }/${maxRetries} - waiting for transaction confirmation...`
+            )
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            retries++
+          }
+        }
+
+        if (!receipt) {
+          throw new Error(
+            "Transaction was sent but receipt could not be retrieved after multiple attempts"
+          )
+        }
 
         setFeedback({
           status: "success",
@@ -404,7 +448,12 @@ export const useBridge = () => {
 
         // estimate the gas
         const gasEstimate = await hyperionContract.methods
-          .sendToHelios(tokenAddress, destinationBytes32, amountWithFees.toString(), "")
+          .sendToHelios(
+            tokenAddress,
+            destinationBytes32,
+            amountWithFees.toString(),
+            ""
+          )
           .estimateGas({
             from: address
           })
@@ -416,18 +465,55 @@ export const useBridge = () => {
         const gasLimit = (gasEstimate * 120n) / 100n
 
         // send the transaction
-        const receipt = await new Promise<TransactionReceipt>((resolve, reject) => {
-          web3Provider.eth.sendTransaction({
+        const tx = await hyperionContract.methods
+          .sendToHelios(
+            tokenAddress,
+            destinationBytes32,
+            amountWithFees.toString(),
+            ""
+          )
+          .send({
             from: address,
-            to: chainContractAddress,
-            data: hyperionContract.methods.sendToHelios(tokenAddress, destinationBytes32, amountWithFees.toString(), "").encodeABI(),
-            gas: gasLimit.toString()
-          }).then((tx) => {
-            resolve(tx as any)
-          }).catch((error) => {
-            reject(error)
+            gas: gasLimit.toString(),
+            gasPrice: bestGasPrice.toString()
           })
+
+        setFeedback({
+          status: "primary",
+          message: `Transaction sent (hash: ${tx.transactionHash}), waiting for confirmation...`
         })
+
+        // Wait for transaction receipt with retry mechanism
+        let receipt = null
+        let retries = 0
+        const maxRetries = 10
+
+        while (!receipt && retries < maxRetries) {
+          try {
+            receipt = await web3Provider.eth.getTransactionReceipt(
+              tx.transactionHash
+            )
+            if (!receipt) {
+              // Wait before retrying
+              await new Promise((resolve) => setTimeout(resolve, 2000))
+              retries++
+            }
+          } catch (receiptError) {
+            console.log(
+              `Retry ${
+                retries + 1
+              }/${maxRetries} - waiting for transaction confirmation...`
+            )
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            retries++
+          }
+        }
+
+        if (!receipt) {
+          throw new Error(
+            "Transaction was sent but receipt could not be retrieved after multiple attempts"
+          )
+        }
 
         setFeedback({
           status: "success",

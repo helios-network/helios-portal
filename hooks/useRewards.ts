@@ -40,21 +40,63 @@ export const useRewards = () => {
           REWARDS_CONTRACT_ADDRESS
         )
 
-        // Read call to verify transaction will pass
+        // Simulate the transaction
         await contract.methods.claimRewards(address, 10).call({ from: address })
+
+        setFeedback({
+          status: "primary",
+          message: "Estimating gas..."
+        })
+
+        // Estimate gas
+        const gasEstimate = await contract.methods
+          .claimRewards(address, 10)
+          .estimateGas({ from: address })
+
+        // Add 20% buffer to gas estimation
+        const gasLimit = (gasEstimate * 120n) / 100n
+
         // Send actual transaction
         const tx = await contract.methods
           .claimRewards(address, 10)
-          .send({ from: address, gas: "15000000" })
+          .send({ from: address, gas: gasLimit.toString() })
 
         setFeedback({
           status: "primary",
           message: `Transaction sent (hash: ${tx.transactionHash}), waiting for confirmation...`
         })
 
-        const receipt = await web3Provider.eth.getTransactionReceipt(
-          tx.transactionHash
-        )
+        // Wait for transaction receipt with retry mechanism
+        let receipt = null
+        let retries = 0
+        const maxRetries = 10
+
+        while (!receipt && retries < maxRetries) {
+          try {
+            receipt = await web3Provider.eth.getTransactionReceipt(
+              tx.transactionHash
+            )
+            if (!receipt) {
+              // Wait before retrying
+              await new Promise((resolve) => setTimeout(resolve, 2000))
+              retries++
+            }
+          } catch (receiptError) {
+            console.log(
+              `Retry ${
+                retries + 1
+              }/${maxRetries} - waiting for transaction confirmation...`
+            )
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            retries++
+          }
+        }
+
+        if (!receipt) {
+          throw new Error(
+            "Transaction was sent but receipt could not be retrieved after multiple attempts"
+          )
+        }
 
         await queryClient.refetchQueries({ queryKey: ["delegations", address] })
         await queryClient.refetchQueries({ queryKey: ["whitelistedAssets"] })
@@ -94,22 +136,64 @@ export const useRewards = () => {
           REWARDS_CONTRACT_ADDRESS
         )
 
+        // Simulate the transaction
         await contract.methods
           .withdrawDelegatorRewards(address, validatorAddress)
           .call({ from: address })
 
+        setFeedback({
+          status: "primary",
+          message: "Estimating gas..."
+        })
+
+        // Estimate gas
+        const gasEstimate = await contract.methods
+          .withdrawDelegatorRewards(address, validatorAddress)
+          .estimateGas({ from: address })
+
+        // Add 20% buffer to gas estimation
+        const gasLimit = (gasEstimate * 120n) / 100n
+
         const tx = await contract.methods
           .withdrawDelegatorRewards(address, validatorAddress)
-          .send({ from: address, gas: "15000000" })
+          .send({ from: address, gas: gasLimit.toString() })
 
         setFeedback({
           status: "primary",
           message: `Transaction sent (hash: ${tx.transactionHash}), waiting for confirmation...`
         })
 
-        const receipt = await web3Provider.eth.getTransactionReceipt(
-          tx.transactionHash
-        )
+        // Wait for transaction receipt with retry mechanism
+        let receipt = null
+        let retries = 0
+        const maxRetries = 10
+
+        while (!receipt && retries < maxRetries) {
+          try {
+            receipt = await web3Provider.eth.getTransactionReceipt(
+              tx.transactionHash
+            )
+            if (!receipt) {
+              // Wait before retrying
+              await new Promise((resolve) => setTimeout(resolve, 2000))
+              retries++
+            }
+          } catch (receiptError) {
+            console.log(
+              `Retry ${
+                retries + 1
+              }/${maxRetries} - waiting for transaction confirmation...`
+            )
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            retries++
+          }
+        }
+
+        if (!receipt) {
+          throw new Error(
+            "Transaction was sent but receipt could not be retrieved after multiple attempts"
+          )
+        }
 
         await queryClient.refetchQueries({ queryKey: ["delegations", address] })
 

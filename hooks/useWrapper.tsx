@@ -9,7 +9,10 @@ import { CHAIN_CONFIG, isWrappableChain } from "@/config/chain-config"
 import { useQuery } from "@tanstack/react-query"
 import { secondsToMilliseconds } from "@/utils/number"
 
-export const useWrapper = (options?: { enableNativeBalance?: boolean; enableWrappedBalance?: boolean }) => {
+export const useWrapper = (options?: {
+  enableNativeBalance?: boolean
+  enableWrappedBalance?: boolean
+}) => {
   const { address } = useAccount()
   const chainId = useChainId()
   const web3Provider = useWeb3Provider()
@@ -21,8 +24,9 @@ export const useWrapper = (options?: { enableNativeBalance?: boolean; enableWrap
   const WRAPPER_CONTRACT_ADDRESS = chainConfig?.wrapperContract
   const decimals = chainConfig?.decimals || 18
   const isWrappable = isWrappableChain(chainId)
-  
-  const { enableNativeBalance = true, enableWrappedBalance = true } = options || {}
+
+  const { enableNativeBalance = true, enableWrappedBalance = true } =
+    options || {}
 
   const { data: balance = "0" } = useQuery({
     queryKey: ["nativeBalance", address, chainId],
@@ -43,10 +47,17 @@ export const useWrapper = (options?: { enableNativeBalance?: boolean; enableWrap
         wrapperAbi,
         WRAPPER_CONTRACT_ADDRESS
       )
-      const balance = await contract.methods.balanceOf(address).call() as string
+      const balance = (await contract.methods
+        .balanceOf(address)
+        .call()) as string
       return ethers.formatUnits(balance, decimals)
     },
-    enabled: enableWrappedBalance && !!web3Provider && !!address && !!chainId && !!WRAPPER_CONTRACT_ADDRESS,
+    enabled:
+      enableWrappedBalance &&
+      !!web3Provider &&
+      !!address &&
+      !!chainId &&
+      !!WRAPPER_CONTRACT_ADDRESS,
     refetchInterval: secondsToMilliseconds(60)
   })
 
@@ -65,26 +76,68 @@ export const useWrapper = (options?: { enableNativeBalance?: boolean; enableWrap
         WRAPPER_CONTRACT_ADDRESS
       )
 
+      // Simulate the transaction
       await contract.methods.deposit().call({
         from: address,
-        value: wrapAmount.toString(),
-        gas: "1500000"
-      })
-
-      const tx = await contract.methods.deposit().send({
-        from: address,
-        value: wrapAmount.toString(),
-        gas: "1500000"
+        value: wrapAmount.toString()
       })
 
       setFeedback({
         status: "primary",
-        message: `Transaction sent, waiting for confirmation...`
+        message: "Estimating gas..."
       })
 
-      const receipt = await web3Provider.eth.getTransactionReceipt(
-        tx.transactionHash
-      )
+      // Estimate gas
+      const gasEstimate = await contract.methods.deposit().estimateGas({
+        from: address,
+        value: wrapAmount.toString()
+      })
+
+      // Add 20% buffer to gas estimation
+      const gasLimit = (gasEstimate * 120n) / 100n
+
+      const tx = await contract.methods.deposit().send({
+        from: address,
+        value: wrapAmount.toString(),
+        gas: gasLimit.toString()
+      })
+
+      setFeedback({
+        status: "primary",
+        message: `Transaction sent (hash: ${tx.transactionHash}), waiting for confirmation...`
+      })
+
+      // Wait for transaction receipt with retry mechanism
+      let receipt = null
+      let retries = 0
+      const maxRetries = 10
+
+      while (!receipt && retries < maxRetries) {
+        try {
+          receipt = await web3Provider.eth.getTransactionReceipt(
+            tx.transactionHash
+          )
+          if (!receipt) {
+            // Wait before retrying
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            retries++
+          }
+        } catch (receiptError) {
+          console.log(
+            `Retry ${
+              retries + 1
+            }/${maxRetries} - waiting for transaction confirmation...`
+          )
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+          retries++
+        }
+      }
+
+      if (!receipt) {
+        throw new Error(
+          "Transaction was sent but receipt could not be retrieved after multiple attempts"
+        )
+      }
 
       setFeedback({
         status: "success",
@@ -121,24 +174,67 @@ export const useWrapper = (options?: { enableNativeBalance?: boolean; enableWrap
         WRAPPER_CONTRACT_ADDRESS
       )
 
+      // Simulate the transaction
       await contract.methods.withdraw(unwrapAmount).call({
-        from: address,
-        gas: "1500000"
-      })
-
-      const tx = await contract.methods.withdraw(unwrapAmount).send({
-        from: address,
-        gas: "1500000"
+        from: address
       })
 
       setFeedback({
         status: "primary",
-        message: `Transaction sent, waiting for confirmation...`
+        message: "Estimating gas..."
       })
 
-      const receipt = await web3Provider.eth.getTransactionReceipt(
-        tx.transactionHash
-      )
+      // Estimate gas
+      const gasEstimate = await contract.methods
+        .withdraw(unwrapAmount)
+        .estimateGas({
+          from: address
+        })
+
+      // Add 20% buffer to gas estimation
+      const gasLimit = (gasEstimate * 120n) / 100n
+
+      const tx = await contract.methods.withdraw(unwrapAmount).send({
+        from: address,
+        gas: gasLimit.toString()
+      })
+
+      setFeedback({
+        status: "primary",
+        message: `Transaction sent (hash: ${tx.transactionHash}), waiting for confirmation...`
+      })
+
+      // Wait for transaction receipt with retry mechanism
+      let receipt = null
+      let retries = 0
+      const maxRetries = 10
+
+      while (!receipt && retries < maxRetries) {
+        try {
+          receipt = await web3Provider.eth.getTransactionReceipt(
+            tx.transactionHash
+          )
+          if (!receipt) {
+            // Wait before retrying
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            retries++
+          }
+        } catch (receiptError) {
+          console.log(
+            `Retry ${
+              retries + 1
+            }/${maxRetries} - waiting for transaction confirmation...`
+          )
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+          retries++
+        }
+      }
+
+      if (!receipt) {
+        throw new Error(
+          "Transaction was sent but receipt could not be retrieved after multiple attempts"
+        )
+      }
 
       setFeedback({
         status: "success",
