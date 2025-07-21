@@ -10,6 +10,7 @@ import { useState } from "react"
 import { useWeb3Provider } from "@/hooks/useWeb3Provider"
 import { getErrorMessage } from "@/utils/string"
 import { HELIOS_NETWORK_ID } from "@/config/app"
+import { TransactionReceipt } from "viem"
 
 export const useRewards = () => {
   const queryClient = useQueryClient()
@@ -30,39 +31,71 @@ export const useRewards = () => {
       }
 
       try {
-        setFeedback({
-          status: "primary",
-          message: "Transaction in progress..."
-        })
-
         const contract = new web3Provider.eth.Contract(
           claimAllRewardsAbi,
           REWARDS_CONTRACT_ADDRESS
         )
 
-        // Read call to verify transaction will pass
-        await contract.methods.claimRewards(address, 10).call({ from: address })
-        // Send actual transaction
-        const tx = await contract.methods
-          .claimRewards(address, 10)
-          .send({ from: address, gas: "15000000" })
+        setFeedback({
+          status: "primary",
+          message: "Simulating claim..."
+        })
+
+                // simulate the transaction
+        const resultOfSimulation = await contract.methods.claimRewards(address, 10).call({ from: address })
+
+        if (!resultOfSimulation) {
+          throw new Error("Error during simulation, please try again later")
+        }
 
         setFeedback({
           status: "primary",
-          message: `Transaction sent (hash: ${tx.transactionHash}), waiting for confirmation...`
+          message: "Estimating gas..."
         })
 
-        const receipt = await web3Provider.eth.getTransactionReceipt(
-          tx.transactionHash
-        )
+        // estimate the gas
+        const gasEstimate = await contract.methods
+          .claimRewards(address, 10)
+          .estimateGas({
+            from: address
+          })
+        const gasLimit = (gasEstimate * 120n) / 100n
+
+
+        setFeedback({
+          status: "primary",
+          message: "Sending transaction..."
+        })
+
+        const receipt = await new Promise<TransactionReceipt>((resolve, reject) => {
+          web3Provider.eth.sendTransaction({
+            from: address,
+            to: REWARDS_CONTRACT_ADDRESS,
+            data: contract.methods
+          .claimRewards(address, 10).encodeABI(),
+            gas: gasLimit.toString()
+          }).then((tx) => {
+            resolve(tx as any)
+          }).catch((error) => {
+            console.log("error", error)
+            reject(error)
+          })
+        })
 
         await queryClient.refetchQueries({ queryKey: ["delegations", address] })
         await queryClient.refetchQueries({ queryKey: ["whitelistedAssets"] })
 
         setFeedback({
           status: "success",
-          message: `Transaction confirmed in block ${receipt.blockNumber}`
+          message: (
+            <>
+              Transaction confirmed in block{" "}
+              <strong>#{receipt.blockNumber}</strong>. It will be available in a
+              few minutes.
+            </>
+          )
         })
+
         return receipt
       } catch (error: any) {
         console.error(error)
@@ -84,38 +117,71 @@ export const useRewards = () => {
       }
 
       try {
-        setFeedback({
-          status: "primary",
-          message: "Transaction in progress..."
-        })
-
         const contract = new web3Provider.eth.Contract(
           withdrawDelegatorRewardsAbi,
           REWARDS_CONTRACT_ADDRESS
         )
 
-        await contract.methods
-          .withdrawDelegatorRewards(address, validatorAddress)
-          .call({ from: address })
+        setFeedback({
+          status: "primary",
+          message: "Simulating claim..."
+        })
 
-        const tx = await contract.methods
+        // simulate the transaction
+        const resultOfSimulation = await contract.methods
           .withdrawDelegatorRewards(address, validatorAddress)
-          .send({ from: address, gas: "15000000" })
+          .call({
+            from: address
+          })
+
+        if (!resultOfSimulation) {
+          throw new Error("Error during simulation, please try again later")
+        }
 
         setFeedback({
           status: "primary",
-          message: `Transaction sent (hash: ${tx.transactionHash}), waiting for confirmation...`
+          message: "Estimating gas..."
         })
 
-        const receipt = await web3Provider.eth.getTransactionReceipt(
-          tx.transactionHash
-        )
+        // estimate the gas
+        const gasEstimate = await contract.methods
+          .withdrawDelegatorRewards(address, validatorAddress)
+          .estimateGas({
+            from: address
+          })
+        const gasLimit = (gasEstimate * 120n) / 100n
+
+        setFeedback({
+          status: "primary",
+          message: "Sending transaction..."
+        })
+
+        // send the transaction
+        const receipt = await new Promise<TransactionReceipt>((resolve, reject) => {
+          web3Provider.eth.sendTransaction({
+            from: address,
+            to: REWARDS_CONTRACT_ADDRESS,
+            data: contract.methods.withdrawDelegatorRewards(address, validatorAddress).encodeABI(),
+            gas: gasLimit.toString()
+          }).then((tx) => {
+            resolve(tx as any)
+          }).catch((error) => {
+            console.log("error", error)
+            reject(error)
+          })
+        })
 
         await queryClient.refetchQueries({ queryKey: ["delegations", address] })
 
         setFeedback({
           status: "success",
-          message: `Transaction confirmed in block ${receipt.blockNumber}`
+          message: (
+            <>
+              Transaction confirmed in block{" "}
+              <strong>#{receipt.blockNumber}</strong>. It will be available in a
+              few minutes.
+            </>
+          )
         })
         return receipt
       } catch (error: any) {

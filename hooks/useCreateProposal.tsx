@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { useAccount } from "wagmi"
 import { useWeb3Provider } from "./useWeb3Provider"
+import { TransactionReceipt } from "viem"
 
 const createProposalAbi = [
   {
@@ -85,35 +86,62 @@ export const useCreateProposal = () => {
         )
 
         // Call first to check if transaction will succeed
-        await contract.methods
+        const resultOfSimulation = await contract.methods
           .hyperionProposal(title, description, msg, initialDepositAmount)
           .call({
             from: address,
             value: initialDepositAmount
           })
 
-        // Send the transaction
-        const tx = await contract.methods
-          .hyperionProposal(title, description, msg, initialDepositAmount)
-          .send({
-            from: address,
-            value: initialDepositAmount,
-            gasPrice: "50000000000",
-            gas: "5000000"
-          })
-
-        console.log("Transaction sent, hash:", tx.transactionHash)
+        if (!resultOfSimulation) {
+          throw new Error("Error during simulation, please try again later")
+        }
 
         setFeedback({
           status: "primary",
-          message: `Transaction sent, waiting for confirmation...`
+          message: "Estimating gas..."
         })
 
-        // Wait for transaction receipt
-        const receipt = await web3Provider.eth.getTransactionReceipt(
-          tx.transactionHash
-        )
-        console.log("Transaction confirmed in block:", receipt.blockNumber)
+        // estimate the gas
+        const gasEstimate = await contract.methods
+          .hyperionProposal(title, description, msg, initialDepositAmount)
+          .estimateGas({
+            from: address,
+            value: initialDepositAmount,
+          })
+        setFeedback({
+          status: "primary",
+          message: "Sending cross-chain transaction..."
+        })
+        // add 20% to the gas estimation to be safe
+        const gasLimit = (gasEstimate * 120n) / 100n
+
+        // send the transaction
+        const receipt = await new Promise<TransactionReceipt>((resolve, reject) => {
+          web3Provider.eth.sendTransaction({
+            from: address,
+            to: GOVERNANCE_CONTRACT_ADDRESS,
+            data: contract.methods.hyperionProposal(title, description, msg, initialDepositAmount).encodeABI(),
+            value: initialDepositAmount,
+            gas: gasLimit.toString()
+          }).then((tx) => {
+            resolve(tx as any)
+          }).catch((error) => {
+            console.log("error", error)
+            reject(error)
+          })
+        })
+
+        setFeedback({
+          status: "success",
+          message: (
+            <>
+              Transaction confirmed in block{" "}
+              <strong>#{receipt.blockNumber}</strong>. It will be available in a
+              few minutes.
+            </>
+          )
+        })
 
         // Extract proposal ID from transaction logs if available
         const proposalId = null

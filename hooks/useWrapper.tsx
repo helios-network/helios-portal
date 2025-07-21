@@ -8,8 +8,12 @@ import { wrapperAbi } from "@/constant/helios-contracts"
 import { CHAIN_CONFIG, isWrappableChain } from "@/config/chain-config"
 import { useQuery } from "@tanstack/react-query"
 import { secondsToMilliseconds } from "@/utils/number"
+import { TransactionReceipt } from "viem"
 
-export const useWrapper = (options?: { enableNativeBalance?: boolean; enableWrappedBalance?: boolean }) => {
+export const useWrapper = (options?: {
+  enableNativeBalance?: boolean
+  enableWrappedBalance?: boolean
+}) => {
   const { address } = useAccount()
   const chainId = useChainId()
   const web3Provider = useWeb3Provider()
@@ -21,8 +25,9 @@ export const useWrapper = (options?: { enableNativeBalance?: boolean; enableWrap
   const WRAPPER_CONTRACT_ADDRESS = chainConfig?.wrapperContract
   const decimals = chainConfig?.decimals || 18
   const isWrappable = isWrappableChain(chainId)
-  
-  const { enableNativeBalance = true, enableWrappedBalance = true } = options || {}
+
+  const { enableNativeBalance = true, enableWrappedBalance = true } =
+    options || {}
 
   const { data: balance = "0" } = useQuery({
     queryKey: ["nativeBalance", address, chainId],
@@ -43,10 +48,17 @@ export const useWrapper = (options?: { enableNativeBalance?: boolean; enableWrap
         wrapperAbi,
         WRAPPER_CONTRACT_ADDRESS
       )
-      const balance = await contract.methods.balanceOf(address).call() as string
+      const balance = (await contract.methods
+        .balanceOf(address)
+        .call()) as string
       return ethers.formatUnits(balance, decimals)
     },
-    enabled: enableWrappedBalance && !!web3Provider && !!address && !!chainId && !!WRAPPER_CONTRACT_ADDRESS,
+    enabled:
+      enableWrappedBalance &&
+      !!web3Provider &&
+      !!address &&
+      !!chainId &&
+      !!WRAPPER_CONTRACT_ADDRESS,
     refetchInterval: secondsToMilliseconds(60)
   })
 
@@ -59,31 +71,64 @@ export const useWrapper = (options?: { enableNativeBalance?: boolean; enableWrap
     try {
       const wrapAmount = ethers.parseUnits(amount, decimals)
 
-      setFeedback({ status: "primary", message: "Wrap in progress..." })
       const contract = new web3Provider.eth.Contract(
         wrapperAbi,
         WRAPPER_CONTRACT_ADDRESS
       )
 
-      await contract.methods.deposit().call({
-        from: address,
-        value: wrapAmount.toString(),
-        gas: "1500000"
+      setFeedback({
+        status: "primary",
+        message: "Simulating wrap transaction..."
       })
 
-      const tx = await contract.methods.deposit().send({
+      // simulate the transaction
+      const resultOfSimulation = await contract.methods.deposit().call({
         from: address,
-        value: wrapAmount.toString(),
-        gas: "1500000"
+        value: wrapAmount.toString()
       })
+
+      if (!resultOfSimulation) {
+        throw new Error("Error during simulation, please try again later")
+      }
 
       setFeedback({
         status: "primary",
-        message: `Transaction sent, waiting for confirmation...`
+        message: "Estimating gas..."
       })
 
-      const receipt = await web3Provider.eth.getTransactionReceipt(
-        tx.transactionHash
+      // estimate the gas
+      const gasEstimate = await contract.methods.deposit().estimateGas({
+        from: address,
+        value: wrapAmount.toString()
+      })
+
+      // add 20% to the gas estimation to be safe
+      const gasLimit = (gasEstimate * 120n) / 100n
+
+      setFeedback({
+        status: "primary",
+        message: "Sending wrap transaction..."
+      })
+
+      // send the transaction
+      const receipt = await new Promise<TransactionReceipt>(
+        (resolve, reject) => {
+          web3Provider.eth
+            .sendTransaction({
+              from: address,
+              to: WRAPPER_CONTRACT_ADDRESS,
+              data: contract.methods.deposit().encodeABI(),
+              value: wrapAmount.toString(),
+              gas: gasLimit.toString()
+            })
+            .then((tx) => {
+              resolve(tx as any)
+            })
+            .catch((error) => {
+              console.log("error", error)
+              reject(error)
+            })
+        }
       )
 
       setFeedback({
@@ -115,30 +160,62 @@ export const useWrapper = (options?: { enableNativeBalance?: boolean; enableWrap
     try {
       const unwrapAmount = ethers.parseUnits(amount, decimals)
 
-      setFeedback({ status: "primary", message: "Unwrap in progress..." })
       const contract = new web3Provider.eth.Contract(
         wrapperAbi,
         WRAPPER_CONTRACT_ADDRESS
       )
 
-      await contract.methods.withdraw(unwrapAmount).call({
-        from: address,
-        gas: "1500000"
-      })
-
-      const tx = await contract.methods.withdraw(unwrapAmount).send({
-        from: address,
-        gas: "1500000"
-      })
-
-      setFeedback({
+            setFeedback({
         status: "primary",
-        message: `Transaction sent, waiting for confirmation...`
+        message: "Simulating unwrap transaction..."
       })
 
-      const receipt = await web3Provider.eth.getTransactionReceipt(
-        tx.transactionHash
-      )
+              // simulate the transaction
+        const resultOfSimulation = await contract.methods
+          .withdraw(unwrapAmount)
+          .call({
+            from: address
+          })
+
+        if (!resultOfSimulation) {
+          throw new Error("Error during simulation, please try again later")
+        }
+
+        setFeedback({
+          status: "primary",
+          message: "Estimating gas..."
+        })
+
+        // estimate the gas
+        const gasEstimate = await contract.methods
+          .withdraw(unwrapAmount)
+          .estimateGas({
+            from: address
+          })
+
+        // add 20% to the gas estimation to be safe
+        const gasLimit = (gasEstimate * 120n) / 100n
+
+        setFeedback({
+          status: "primary",
+          message: "Sending unwrap transaction..."
+        })
+
+        // send the transaction
+        const receipt = await new Promise<TransactionReceipt>((resolve, reject) => {
+          web3Provider.eth.sendTransaction({
+            from: address,
+            to: WRAPPER_CONTRACT_ADDRESS,
+            data: contract.methods.withdraw(unwrapAmount).encodeABI(),
+            gas: gasLimit.toString()
+          }).then((tx) => {
+            resolve(tx as any)
+          }).catch((error) => {
+            console.log("error", error)
+            reject(error)
+          })
+        })
+
 
       setFeedback({
         status: "success",
@@ -149,7 +226,7 @@ export const useWrapper = (options?: { enableNativeBalance?: boolean; enableWrap
               {amount} {chainConfig?.token}
             </b>{" "}
             !<br />
-            Transaction hash: <code>{tx.transactionHash}</code>
+            Transaction hash: <code>{receipt.transactionHash}</code>
           </>
         )
       })
