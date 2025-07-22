@@ -8,6 +8,8 @@ import { useState, useEffect, useRef } from "react"
 import { toast } from "sonner"
 import s from "./settings-modal.module.scss"
 import { getGasPriceLabel, getGasPriceTimeEstimate } from "@/utils/gas"
+import { useAccount } from "wagmi"
+import { useWeb3Provider } from "@/hooks/useWeb3Provider"
 
 interface SettingsModalProps {
   open: boolean
@@ -24,6 +26,9 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
     setGasPriceOption
   } = useAppStore()
 
+  const { address, isConnected } = useAccount()
+  const web3Provider = useWeb3Provider()
+
   // Initialize local state from the current store values
   // Using useEffect to ensure we always have the latest values from the store
   const [localDebugMode, setLocalDebugMode] = useState(debugMode)
@@ -31,9 +36,31 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
   const [localGasPriceOption, setLocalGasPriceOption] =
     useState<GasPriceOption>(gasPriceOption)
   const [isGasPriceDropdownOpen, setIsGasPriceDropdownOpen] = useState(false)
+  const [isResettingNonce, setIsResettingNonce] = useState(false)
+  const [currentNonce, setCurrentNonce] = useState<number | null>(null)
 
   // Ref for the dropdown to handle click outside
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Fetch current nonce when modal opens and wallet is connected
+  useEffect(() => {
+    const fetchCurrentNonce = async () => {
+      if (open && isConnected && address && web3Provider) {
+        try {
+          const nonce = await web3Provider.eth.getTransactionCount(
+            address,
+            "pending"
+          )
+          setCurrentNonce(Number(nonce))
+        } catch (error) {
+          console.error("Error fetching nonce:", error)
+          setCurrentNonce(null)
+        }
+      }
+    }
+
+    fetchCurrentNonce()
+  }, [open, isConnected, address, web3Provider])
 
   // Update local state when the modal is opened
   useEffect(() => {
@@ -110,6 +137,125 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
           window.location.reload()
         }
       })
+    }
+  }
+
+  const handleResetNonce = async () => {
+    if (!isConnected || !address || !web3Provider) {
+      toast.error("Please connect your wallet first")
+      return
+    }
+
+    setIsResettingNonce(true)
+
+    try {
+      // Send a 0 value transaction to self to reset nonce
+      // This will use the next available nonce and help sync wallet with chain
+      const gasPrice = await web3Provider.eth.getGasPrice()
+
+      const transaction = {
+        from: address,
+        to: address,
+        value: "0x0", // Use hex format for value
+        gas: "0x5208", // Use hex format for gas (21000 in hex)
+        gasPrice: gasPrice
+      }
+
+      // Send the transaction
+      const txResult = await web3Provider.eth.sendTransaction(transaction)
+
+      // Extract transaction hash - it might be in different formats
+      const txHash =
+        typeof txResult === "string" ? txResult : txResult.transactionHash
+
+      if (!txHash) {
+        throw new Error("No transaction hash received")
+      }
+
+      toast.success(`Nonce reset transaction sent: ${txHash}`)
+
+      // Wait a bit before trying to get the receipt
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      // Try to get transaction receipt with retries
+      let receipt = null
+      let retries = 0
+      const maxRetries = 10
+
+      while (!receipt && retries < maxRetries) {
+        try {
+          receipt = await web3Provider.eth.getTransactionReceipt(txHash)
+          if (!receipt) {
+            // Wait before retrying
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            retries++
+          }
+        } catch {
+          console.log(
+            `Retry ${
+              retries + 1
+            }/${maxRetries} - waiting for transaction confirmation...`
+          )
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+          retries++
+        }
+      }
+
+      if (receipt) {
+        if (
+          receipt.status === BigInt("0x1") ||
+          Number(receipt.status) === 1 ||
+          receipt.status === BigInt(1)
+        ) {
+          toast.success(
+            "Nonce reset successful! Your wallet nonce is now synced with the chain."
+          )
+
+          // Refresh the current nonce display
+          const newNonce = await web3Provider.eth.getTransactionCount(
+            address,
+            "pending"
+          )
+          setCurrentNonce(Number(newNonce))
+        } else {
+          toast.error("Nonce reset transaction failed")
+        }
+      } else {
+        // Even if we can't get the receipt, the transaction was sent
+        toast.info(
+          "Transaction sent but confirmation status unknown. Please check your wallet."
+        )
+
+        // Still try to refresh the nonce
+        try {
+          const newNonce = await web3Provider.eth.getTransactionCount(
+            address,
+            "pending"
+          )
+          setCurrentNonce(Number(newNonce))
+        } catch (nonceError) {
+          console.error("Error refreshing nonce:", nonceError)
+        }
+      }
+    } catch (error: any) {
+      console.error("Error resetting nonce:", error)
+
+      // Handle specific error cases
+      if (error.message?.includes("nonce")) {
+        toast.error(
+          "Nonce mismatch detected. Please try again or manually adjust your wallet nonce."
+        )
+      } else if (error.message?.includes("insufficient funds")) {
+        toast.error("Insufficient funds for gas fees")
+      } else if (error.message?.includes("User denied")) {
+        toast.error("Transaction was cancelled by user")
+      } else {
+        toast.error(
+          `Failed to reset nonce: ${error.message || "Unknown error"}`
+        )
+      }
+    } finally {
+      setIsResettingNonce(false)
     }
   }
 
@@ -260,6 +406,52 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
                   helperText="Custom RPC endpoint for Helios testnet"
                 />
               </div>
+            </div>
+          </div>
+        )}
+
+        {isConnected && (
+          <div className={s.section}>
+            <h3 className={s.sectionTitle}>Wallet Management</h3>
+            <p className={s.sectionDescription}>
+              Manage your wallet settings and resolve transaction issues. Use
+              nonce reset when your wallet nonce is out of sync with the Helios
+              chain.
+            </p>
+
+            <div className={s.walletInfo}>
+              <div className={s.walletInfoItem}>
+                <span className={s.walletInfoLabel}>Connected Address:</span>
+                <span className={s.walletInfoValue}>{address}</span>
+              </div>
+              {currentNonce !== null && (
+                <div className={s.walletInfoItem}>
+                  <span className={s.walletInfoLabel}>Current Nonce:</span>
+                  <span className={s.walletInfoValue}>{currentNonce}</span>
+                </div>
+              )}
+            </div>
+
+            <div className={s.walletActions}>
+              <Button
+                variant="secondary"
+                onClick={handleResetNonce}
+                disabled={isResettingNonce}
+                icon={
+                  isResettingNonce
+                    ? "hugeicons:loading-03"
+                    : "hugeicons:refresh"
+                }
+                className={s.resetNonceButton}
+              >
+                {isResettingNonce ? "Resetting Nonce..." : "Reset Nonce"}
+              </Button>
+              <p className={s.resetNonceDescription}>
+                This will send a 0-value transaction to yourself to sync your
+                wallet nonce with the Helios chain. Use this if you&apos;re
+                experiencing &quot;nonce too high&quot; or similar transaction
+                errors.
+              </p>
             </div>
           </div>
         )}

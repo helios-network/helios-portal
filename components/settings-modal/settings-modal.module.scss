@@ -265,6 +265,74 @@
   line-height: 1.5;
 }
 
+.walletInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2);
+  margin-top: var(--size-2);
+  padding: var(--size-3);
+  background: var(--background-medium);
+  border-radius: var(--radius-s);
+  border: 1px solid var(--border-medium);
+}
+
+.walletInfoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--size-3);
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--size-1);
+  }
+}
+
+.walletInfoLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-medium);
+}
+
+.walletInfoValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-high);
+  font-family: monospace;
+  word-break: break-all;
+
+  @media (max-width: 600px) {
+    font-size: 0.75rem;
+  }
+}
+
+.walletActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-3);
+  margin-top: var(--size-3);
+}
+
+.resetNonceButton {
+  align-self: flex-start;
+
+  @media (max-width: 600px) {
+    width: 100%;
+  }
+}
+
+.resetNonceDescription {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+  padding: var(--size-2);
+  background: var(--background-highest);
+  border-radius: var(--radius-s);
+  border-left: 3px solid var(--primary-medium);
+}
+
 .actions {
   display: flex;
   gap: var(--size-3);

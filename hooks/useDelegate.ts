@@ -53,24 +53,63 @@ export const useDelegate = () => {
 
         setFeedback({
           status: "primary",
-          message: `Transaction sent, waiting for confirmation...`
+          message: "Estimating gas..."
         })
+
+        // estimate the gas
+        const gasEstimate = await contract.methods
+          .delegate(address, validatorAddress, delegateAmount, symbol)
+          .estimateGas({
+            from: address
+          })
+
+        // add 20% to the gas estimation to be safe
+        const gasLimit = (gasEstimate * 120n) / 100n
 
         // send the transaction
-        const receipt = await new Promise<TransactionReceipt>((resolve, reject) => {
-          web3Provider.eth.sendTransaction({
+        const tx = await contract.methods
+          .delegate(address, validatorAddress, delegateAmount, symbol)
+          .send({
             from: address,
-            to: DELEGATE_CONTRACT_ADDRESS,
-            data: contract.methods.delegate(address, validatorAddress, delegateAmount, symbol).encodeABI()
-
-          }).then((tx) => {
-            console.log("tx", tx.transactionHash)
-            resolve(tx as any)
-          }).catch((error) => {
-            console.log("error", error)
-            reject(error)
+            gas: gasLimit.toString()
           })
+
+        setFeedback({
+          status: "primary",
+          message: `Transaction sent (hash: ${tx.transactionHash}), waiting for confirmation...`
         })
+
+        // Wait for transaction receipt with retry mechanism
+        let receipt = null
+        let retries = 0
+        const maxRetries = 10
+
+        while (!receipt && retries < maxRetries) {
+          try {
+            receipt = await web3Provider.eth.getTransactionReceipt(
+              tx.transactionHash
+            )
+            if (!receipt) {
+              // Wait before retrying
+              await new Promise((resolve) => setTimeout(resolve, 2000))
+              retries++
+            }
+          } catch (receiptError) {
+            console.log(
+              `Retry ${
+                retries + 1
+              }/${maxRetries} - waiting for transaction confirmation...`
+            )
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            retries++
+          }
+        }
+
+        if (!receipt) {
+          throw new Error(
+            "Transaction was sent but receipt could not be retrieved after multiple attempts"
+          )
+        }
 
         return receipt
       } catch (error: any) {
@@ -118,21 +157,63 @@ export const useDelegate = () => {
 
         setFeedback({
           status: "primary",
-          message: `Transaction sent, waiting for confirmation...`
+          message: "Estimating gas..."
         })
 
-        // send the transaction
-        const receipt = await new Promise<TransactionReceipt>((resolve, reject) => {
-          web3Provider.eth.sendTransaction({
-            from: address,
-            to: DELEGATE_CONTRACT_ADDRESS,
-            data: contract.methods.undelegate(address, validatorAddress, undelegateAmount, symbol).encodeABI()
-          }).then((tx) => {
-            resolve(tx as any)
-          }).catch((error) => {
-            reject(error)
+        // estimate the gas
+        const gasEstimate = await contract.methods
+          .undelegate(address, validatorAddress, undelegateAmount, symbol)
+          .estimateGas({
+            from: address
           })
+
+        // add 20% to the gas estimation to be safe
+        const gasLimit = (gasEstimate * 120n) / 100n
+
+        // send the transaction
+        const tx = await contract.methods
+          .undelegate(address, validatorAddress, undelegateAmount, symbol)
+          .send({
+            from: address,
+            gas: gasLimit.toString()
+          })
+
+        setFeedback({
+          status: "primary",
+          message: `Transaction sent (hash: ${tx.transactionHash}), waiting for confirmation...`
         })
+
+        // Wait for transaction receipt with retry mechanism
+        let receipt = null
+        let retries = 0
+        const maxRetries = 10
+
+        while (!receipt && retries < maxRetries) {
+          try {
+            receipt = await web3Provider.eth.getTransactionReceipt(
+              tx.transactionHash
+            )
+            if (!receipt) {
+              // Wait before retrying
+              await new Promise((resolve) => setTimeout(resolve, 2000))
+              retries++
+            }
+          } catch (receiptError) {
+            console.log(
+              `Retry ${
+                retries + 1
+              }/${maxRetries} - waiting for transaction confirmation...`
+            )
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            retries++
+          }
+        }
+
+        if (!receipt) {
+          throw new Error(
+            "Transaction was sent but receipt could not be retrieved after multiple attempts"
+          )
+        }
 
         return receipt
       } catch (error: any) {

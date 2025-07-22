@@ -82,31 +82,74 @@ export const useVote = () => {
           GOVERNANCE_CONTRACT_ADDRESS
         )
 
-        // Call first to check if transaction will succeed
+        // Simulate the transaction
         await contract.methods
           .vote(address, proposalId, option, metadata)
           .call({
             from: address
           })
 
+        setFeedback({
+          status: "primary",
+          message: "Estimating gas..."
+        })
+
+        // Estimate gas
+        const gasEstimate = await contract.methods
+          .vote(address, proposalId, option, metadata)
+          .estimateGas({
+            from: address
+          })
+
+        // Add 20% buffer to gas estimation
+        const gasLimit = (gasEstimate * 120n) / 100n
+
         // Send the transaction
         const tx = await contract.methods
           .vote(address, proposalId, option, metadata)
           .send({
-            from: address
+            from: address,
+            gas: gasLimit.toString()
           })
 
         console.log("Transaction sent, hash:", tx.transactionHash)
 
         setFeedback({
           status: "primary",
-          message: `Transaction sent, waiting for confirmation...`
+          message: `Transaction sent (hash: ${tx.transactionHash}), waiting for confirmation...`
         })
 
-        // Wait for transaction receipt
-        const receipt = await web3Provider.eth.getTransactionReceipt(
-          tx.transactionHash
-        )
+        // Wait for transaction receipt with retry mechanism
+        let receipt = null
+        let retries = 0
+        const maxRetries = 10
+
+        while (!receipt && retries < maxRetries) {
+          try {
+            receipt = await web3Provider.eth.getTransactionReceipt(
+              tx.transactionHash
+            )
+            if (!receipt) {
+              // Wait before retrying
+              await new Promise((resolve) => setTimeout(resolve, 2000))
+              retries++
+            }
+          } catch (receiptError) {
+            console.log(
+              `Retry ${
+                retries + 1
+              }/${maxRetries} - waiting for transaction confirmation...`
+            )
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            retries++
+          }
+        }
+
+        if (!receipt) {
+          throw new Error(
+            "Transaction was sent but receipt could not be retrieved after multiple attempts"
+          )
+        }
         console.log("Transaction confirmed in block:", receipt.blockNumber)
 
         return receipt
