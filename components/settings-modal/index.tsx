@@ -190,7 +190,7 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
             retries++
           }
-        } catch (receiptError) {
+        } catch {
           console.log(
             `Retry ${
               retries + 1
@@ -448,8 +448,9 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
               </Button>
               <p className={s.resetNonceDescription}>
                 This will send a 0-value transaction to yourself to sync your
-                wallet nonce with the Helios chain. Use this if you're
-                experiencing "nonce too high" or similar transaction errors.
+                wallet nonce with the Helios chain. Use this if you&apos;re
+                experiencing &quot;nonce too high&quot; or similar transaction
+                errors.
               </p>
             </div>
           </div>
