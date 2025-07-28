@@ -78,6 +78,7 @@ const AllProposals: React.FC = () => {
   const [showModal, setShowModal] = useState(false)
   const [hasLoadedInitial, setHasLoadedInitial] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [mountKey] = useState(() => Math.random()) // Unique key per component mount
 
   const handleCreateProposal = () => {
     setIsLoading(true)
@@ -220,18 +221,20 @@ const AllProposals: React.FC = () => {
     }
   }
 
-  // Initial load effect using useQuery
+  // Initial load effect using useQuery with unique mount key
   useQuery({
-    queryKey: ["proposals", "initial-load"],
+    queryKey: ["proposals", "initial-load", mountKey],
     queryFn: async () => {
       if (!hasLoadedInitial) {
+        // Reset current page and load fresh data
+        setCurrentPage(1)
         await loadProposalsCountAndPages()
-        // Load the first page after getting the count
         loadProposals(1)
       }
       return null
     },
-    enabled: !hasLoadedInitial
+    enabled: !hasLoadedInitial,
+    refetchOnWindowFocus: false
   })
 
   // Pagination component
