@@ -12,6 +12,23 @@ import { useAccount } from "wagmi"
 import { ModalProposal } from "../(components)/proposal/modal"
 import styles from "./page.module.scss"
 
+// Fetch proposals count using the new API endpoint
+const fetchProposalsCount = async (): Promise<number> => {
+  try {
+    const result = await request<string>("eth_getProposalsCount", [])
+    // Convert hex string to number
+    if (result === null) {
+      throw new Error("Failed to fetch proposals count")
+    }
+    return parseInt(result, 16)
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw error
+    }
+    throw new Error("Failed to fetch proposals count")
+  }
+}
+
 // Updated fetchProposals function using the new request utility
 const fetchProposals = async (page: number, pageSize: number) => {
   try {
@@ -70,45 +87,25 @@ const AllProposals: React.FC = () => {
     }, 200)
   }
 
-  // Function to discover total pages by fetching until we get empty results
-  const discoverTotalPages = async () => {
-    let page = 1
-    let totalFound = 0
-    let totalProposalCount = 0
-
+  // Function to get total pages and proposals count using the new API
+  const loadProposalsCountAndPages = async () => {
     try {
-      while (true) {
-        const data = await fetchProposals(page, pageSize)
+      const totalProposalCount = await fetchProposalsCount()
+      const totalPages = Math.max(1, Math.ceil(totalProposalCount / pageSize))
 
-        if (!data || data.length === 0) {
-          // No data on this page, so previous page was the last
-          totalFound = Math.max(0, page - 1)
-          break
-        }
+      setTotalPages(totalPages)
+      setTotalProposals(totalProposalCount)
+      setHasNextPage(currentPage < totalPages)
 
-        // Add the count from this page
-        totalProposalCount += data.length
-
-        if (data.length < pageSize) {
-          // This page has data but less than pageSize, so it's the last page
-          totalFound = page
-          break
-        }
-
-        // This page is full, continue to next page
-        page++
-      }
+      return { totalPages, totalProposalCount }
     } catch (error) {
-      console.error("Error discovering total pages:", error)
+      console.error("Error fetching proposals count:", error)
       // If there's an error, assume at least 1 page exists
-      totalFound = 1
-      totalProposalCount = 0 // Reset count on error
+      setTotalPages(1)
+      setTotalProposals(0)
+      setHasNextPage(false)
+      return { totalPages: 1, totalProposalCount: 0 }
     }
-
-    setTotalPages(totalFound)
-    setTotalProposals(totalProposalCount)
-    setHasNextPage(totalFound > 1)
-    return { totalFound, totalProposalCount }
   }
 
   const loadProposals = async (page: number) => {
@@ -124,34 +121,11 @@ const AllProposals: React.FC = () => {
       setHasLoadedInitial(true)
 
       if (!rawData || rawData.length === 0) {
-        // We've reached the end - set total pages to the previous page
-        const actualTotalPages = Math.max(1, page - 1)
-        setHasNextPage(false)
-        setTotalProposals(0) // No proposals found
-
         // If we're on page 1 and get no results, show empty state
         if (page === 1) {
           setProposals([])
-        } else {
-          // If we're on a page beyond the total, redirect to last valid page
-          setCurrentPage(actualTotalPages)
-          if (actualTotalPages > 0) {
-            loadProposals(actualTotalPages)
-          }
         }
         return
-      }
-
-      // Update hasNextPage based on returned data length
-      const isLastPage = rawData.length < pageSize
-      setHasNextPage(!isLastPage)
-
-      // Only update total proposals if we haven't discovered them yet
-      // The accurate count will come from discoverTotalPages
-      if (totalProposals === null && page === 1) {
-        // If this is the first page and we haven't discovered total yet,
-        // trigger the discovery process
-        discoverTotalPages()
       }
 
       const newProposals: ProposalData[] = rawData.map((item: any) => {
@@ -210,6 +184,11 @@ const AllProposals: React.FC = () => {
       })
 
       setProposals(newProposals)
+
+      // Update hasNextPage based on total pages if we know them
+      if (totalPages !== null) {
+        setHasNextPage(page < totalPages)
+      }
     } catch (error: unknown) {
       console.error("Failed to fetch proposals", error)
       const message =
@@ -246,8 +225,8 @@ const AllProposals: React.FC = () => {
     queryKey: ["proposals", "initial-load"],
     queryFn: async () => {
       if (!hasLoadedInitial) {
-        await discoverTotalPages()
-        // The state is already set in discoverTotalPages, just load the first page
+        await loadProposalsCountAndPages()
+        // Load the first page after getting the count
         loadProposals(1)
       }
       return null
