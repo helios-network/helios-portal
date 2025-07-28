@@ -6,7 +6,8 @@ import { Icon } from "@/components/icon"
 import { request } from "@/helpers/request"
 import { truncateAddress } from "@/lib/utils"
 import { useRouter } from "next/navigation"
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { useAccount } from "wagmi"
 import { ModalProposal } from "../(components)/proposal/modal"
 import styles from "./page.module.scss"
@@ -240,14 +241,18 @@ const AllProposals: React.FC = () => {
     }
   }
 
-  // Initial load effect
-  useEffect(() => {
-    if (!hasLoadedInitial) {
-      discoverTotalPages().then(() => {
+  // Initial load effect using useQuery
+  useQuery({
+    queryKey: ["proposals", "initial-load"],
+    queryFn: async () => {
+      if (!hasLoadedInitial) {
+        await discoverTotalPages()
         // The state is already set in discoverTotalPages, just load the first page
         loadProposals(1)
-      })
-    }
+      }
+      return null
+    },
+    enabled: !hasLoadedInitial
   })
 
   // Pagination component
