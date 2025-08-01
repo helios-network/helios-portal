@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { useAccount } from "wagmi"
 import { useWeb3Provider } from "./useWeb3Provider"
+import { TransactionReceipt } from "viem"
 
 const voteAbi = [
   {
@@ -82,32 +83,67 @@ export const useVote = () => {
           GOVERNANCE_CONTRACT_ADDRESS
         )
 
-        // Call first to check if transaction will succeed
-        await contract.methods
+        setFeedback({
+          status: "primary",
+          message: "Simulating vote transaction..."
+        })
+
+        // simulate the transaction
+        const resultOfSimulation = await contract.methods
           .vote(address, proposalId, option, metadata)
           .call({
             from: address
           })
 
-        // Send the transaction
-        const tx = await contract.methods
-          .vote(address, proposalId, option, metadata)
-          .send({
-            from: address
-          })
-
-        console.log("Transaction sent, hash:", tx.transactionHash)
+        if (!resultOfSimulation) {
+          throw new Error("Error during simulation, please try again later")
+        }
 
         setFeedback({
           status: "primary",
-          message: `Transaction sent, waiting for confirmation...`
+          message: "Estimating gas..."
         })
 
-        // Wait for transaction receipt
-        const receipt = await web3Provider.eth.getTransactionReceipt(
-          tx.transactionHash
-        )
-        console.log("Transaction confirmed in block:", receipt.blockNumber)
+        // estimate the gas
+        const gasEstimate = await contract.methods
+          .vote(address, proposalId, option, metadata)
+          .estimateGas({
+            from: address
+          })
+
+        // add 20% to the gas estimation to be safe
+        const gasLimit = (gasEstimate * 120n) / 100n
+
+        setFeedback({
+          status: "primary",
+          message: "Sending vote transaction..."
+        })
+
+        // send the transaction
+        const receipt = await new Promise<TransactionReceipt>((resolve, reject) => {
+          web3Provider.eth.sendTransaction({
+            from: address,
+            to: GOVERNANCE_CONTRACT_ADDRESS,
+            data: contract.methods.vote(address, proposalId, option, metadata).encodeABI(),
+            gas: gasLimit.toString()
+          }).then((tx) => {
+            resolve(tx as any)
+          }).catch((error) => {
+            console.log("error", error)
+            reject(error)
+          })
+        })
+        
+        setFeedback({
+          status: "success",
+          message: (
+            <>
+              Transaction confirmed in block{" "}
+              <strong>#{receipt.blockNumber}</strong>. It will be available in a
+              few minutes.
+            </>
+          )
+        })
 
         return receipt
       } catch (error: any) {
