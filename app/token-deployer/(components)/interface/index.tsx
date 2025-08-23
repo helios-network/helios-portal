@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react"
 import { Button } from "@/components/button"
 import { Card } from "@/components/card"
 import { Heading } from "@/components/heading"
@@ -9,24 +8,13 @@ import { Input } from "@/components/input"
 import { Modal } from "@/components/modal"
 import { formatNumber } from "@/lib/utils/number"
 import Image from "next/image"
-import { ChangeEvent, useState, useCallback } from "react"
+import { ChangeEvent, useState } from "react"
 import { toast } from "sonner"
 import s from "./interface.module.scss"
-import {
-  useAccount,
-  useChainId,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-  usePublicClient,
-  useWalletClient
-} from "wagmi"
-import {
-  PRECOMPILE_CONTRACT_ADDRESS,
-  precompileAbi
-} from "@/constant/helios-contracts"
+import { useAccount, useChainId, useWalletClient } from "wagmi"
 import { HELIOS_NETWORK_ID } from "@/config/app"
-import { parseUnits } from "viem"
-import { getErrorMessage } from "@/utils/string"
+import { useCreateToken, type TokenParams } from "@/hooks/useCreateToken"
+import { useRecentTokensContext } from "@/context/RecentTokensContext"
 
 type TokenForm = {
   name: string
@@ -35,30 +23,14 @@ type TokenForm = {
   totalSupply: string
   decimals: string
   logoBase64: string
-  inProgress: boolean
-}
-
-type DeployedToken = {
-  address: string
-  name: string
-  symbol: string
-  denom: string
-  totalSupply: string
-  decimals: number
-  logoBase64: string
-  txHash: string
-  timestamp: number
 }
 
 export const TokenDeployerInterface = () => {
   const chainId = useChainId()
   const { address } = useAccount()
-  const publicClient = usePublicClient()
   const { data: walletClient } = useWalletClient()
   const [showPreview, setShowPreview] = useState(false)
-  const [deployedToken, setDeployedToken] = useState<DeployedToken | null>(null)
   const [showSuccess, setShowSuccess] = useState(false)
-  const [hasProcessedSuccess, setHasProcessedSuccess] = useState(false)
 
   const [form, setForm] = useState<TokenForm>({
     name: "",
@@ -66,69 +38,12 @@ export const TokenDeployerInterface = () => {
     denom: "",
     totalSupply: "",
     decimals: "18",
-    logoBase64: "",
-    inProgress: false
+    logoBase64: ""
   })
 
-  const {
-    writeContract,
-    data: hash,
-    isPending,
-    error: writeError
-  } = useWriteContract()
+  const { createToken, reset, deployedToken, isLoading } = useCreateToken()
 
-  const {
-    isLoading: isConfirming,
-    isSuccess: isConfirmed,
-    error: confirmError
-  } = useWaitForTransactionReceipt({
-    hash
-  })
-
-  // Handle transaction confirmation status
-  React.useEffect(() => {
-    if (isConfirming && hash) {
-      toast.info("Transaction is being confirmed...")
-    }
-  }, [isConfirming, hash])
-
-  // Handle transaction errors
-  React.useEffect(() => {
-    if (writeError || confirmError) {
-      const errorMessage = writeError
-        ? getErrorMessage(writeError)
-        : getErrorMessage(confirmError)
-
-      toast.error(errorMessage || "Transaction failed")
-      setForm((prev) => ({ ...prev, inProgress: false }))
-      setShowPreview(false) // Close the preview modal if open
-    }
-  }, [writeError, confirmError])
-
-  // Reset form state if transaction is pending for too long
-  React.useEffect(() => {
-    let timeoutId: NodeJS.Timeout
-
-    if (isPending && form.inProgress) {
-      // Increase timeout to 2 minutes to account for MetaMask interaction time
-      // MetaMask can take 30+ seconds to show confirmation modal
-      timeoutId = setTimeout(() => {
-        // Check if still pending after timeout
-        if (form.inProgress && isPending) {
-          toast.error(
-            "Transaction is taking longer than expected. Please check your wallet."
-          )
-          // Don't reset the form state here, let the user decide
-          // setForm((prev) => ({ ...prev, inProgress: false }))
-          // setShowPreview(false)
-        }
-      }, 120000) // 2 minutes timeout - just for notification, not reset
-    }
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId)
-    }
-  }, [isPending, form.inProgress])
+  const { addToken } = useRecentTokensContext()
 
   const handleInputChange =
     (field: keyof TokenForm) =>
@@ -204,350 +119,48 @@ export const TokenDeployerInterface = () => {
     reader.readAsDataURL(file)
   }
 
-  const validateForm = (): boolean => {
-    // Check name
-    if (!form.name.trim()) {
-      toast.error("Token name is required")
-      return false
-    }
-
-    // Check symbol
-    if (!form.symbol.trim()) {
-      toast.error("Token symbol is required")
-      return false
-    }
-
-    // Validate symbol format (alphanumeric only)
-    const symbolRegex = /^[a-zA-Z0-9]+$/
-    if (!symbolRegex.test(form.symbol.trim())) {
-      toast.error("Token symbol must contain only letters and numbers")
-      return false
-    }
-
-    // Check denomination
-    if (!form.denom.trim()) {
-      toast.error("Token denomination is required")
-      return false
-    }
-
-    // Validate denom format (lowercase letters, numbers, and underscores only)
-    const denomRegex = /^[a-z0-9_]+$/
-    if (!denomRegex.test(form.denom.trim())) {
-      toast.error(
-        "Denomination must contain only lowercase letters, numbers, and underscores"
-      )
-      return false
-    }
-
-    // Check total supply
-    if (
-      !form.totalSupply.trim() ||
-      isNaN(Number(form.totalSupply)) ||
-      Number(form.totalSupply) <= 0
-    ) {
-      toast.error("Total supply must be a valid number greater than 0")
-      return false
-    }
-
-    // Check if total supply is too large
-    try {
-      parseUnits(form.totalSupply, parseInt(form.decimals) || 18)
-    } catch {
-      toast.error("Total supply value is too large or invalid")
-      return false
-    }
-
-    // Check decimals
-    if (
-      !form.decimals.trim() ||
-      isNaN(Number(form.decimals)) ||
-      Number(form.decimals) < 0 ||
-      Number(form.decimals) > 18 ||
-      !Number.isInteger(Number(form.decimals))
-    ) {
-      toast.error("Decimals must be an integer between 0 and 18")
-      return false
-    }
-
-    // Check logo size if present
-    if (form.logoBase64 && form.logoBase64.length > 100000) {
-      toast.error("Logo image is too large. Please use a smaller image")
-      return false
-    }
-
-    return true
-  }
-
   const handlePreview = () => {
-    if (!validateForm()) return
     setShowPreview(true)
   }
 
-  const extractTokenAddressFromReceipt = useCallback(
-    async (txHash: string): Promise<string> => {
-      try {
-        // Use publicClient from wagmi instead of Web3 to avoid wallet conflicts
-        if (!publicClient) {
-          throw new Error("Public client not available")
-        }
-
-        const receipt = await new Promise<any>((resolve, reject) => {
-          let attempts = 0
-          const maxAttempts = 30 // 30 attempts with 2 second intervals = 60 seconds max
-
-          const checkReceipt = async () => {
-            try {
-              attempts++
-              const txReceipt = await publicClient.getTransactionReceipt({
-                hash: txHash as `0x${string}`
-              })
-
-              if (txReceipt) {
-                resolve(txReceipt)
-              } else if (attempts >= maxAttempts) {
-                reject(
-                  new Error(
-                    `Transaction receipt not found after ${maxAttempts} attempts`
-                  )
-                )
-              } else {
-                // Show progress every 5 attempts (10 seconds)
-                if (attempts % 5 === 0) {
-                  console.log(
-                    `Waiting for transaction receipt... Attempt ${attempts}/${maxAttempts}`
-                  )
-                }
-                // Wait 2 seconds before next attempt
-                setTimeout(checkReceipt, 2000)
-              }
-            } catch (error) {
-              if (attempts >= maxAttempts) {
-                reject(error)
-              } else {
-                // Wait 2 seconds before next attempt
-                setTimeout(checkReceipt, 2000)
-              }
-            }
-          }
-
-          checkReceipt()
-        })
-
-        // Look for the log that contains the contract address
-        // The precompile adds a log with the contract address in the data field
-        const createLog = receipt.logs.find(
-          (log: any) =>
-            log.address.toLowerCase() ===
-            PRECOMPILE_CONTRACT_ADDRESS.toLowerCase()
-        )
-
-        if (createLog && createLog.data && createLog.data !== "0x") {
-          // The contract address is stored in the data field as bytes (32 bytes padded)
-          // Extract the last 20 bytes (40 hex characters) for the address
-          let addressHex = createLog.data.slice(-40)
-
-          // Ensure it's a valid address format
-          if (
-            addressHex.length === 40 &&
-            addressHex.match(/^[a-fA-F0-9]{40}$/)
-          ) {
-            return `0x${addressHex}`
-          }
-
-          // If data is exactly 66 chars (0x + 64 hex), it's 32 bytes padded
-          if (createLog.data.length === 66) {
-            addressHex = createLog.data.slice(-40)
-            if (addressHex.match(/^[a-fA-F0-9]{40}$/)) {
-              return `0x${addressHex}`
-            }
-          }
-        }
-
-        // Fallback: look for any ERC20-related logs that might contain the address
-        for (const log of receipt.logs) {
-          // Check if this could be a Transfer event from the newly created token
-          // Transfer events have 3 topics: event signature, from, to
-          if (
-            log.topics.length === 3 &&
-            log.address.match(/^0x[a-fA-F0-9]{40}$/)
-          ) {
-            // Check if the 'from' address is the zero address (mint operation)
-            const fromAddress = log.topics[1]
-            if (
-              fromAddress ===
-              "0x0000000000000000000000000000000000000000000000000000000000000000"
-            ) {
-              // This is likely a mint operation from the newly created token
-              return log.address
-            }
-          }
-        }
-
-        console.error("Could not find contract address in transaction receipt")
-        return ""
-      } catch (error) {
-        console.error("Failed to extract token address from receipt:", error)
-        return ""
-      }
-    },
-    [publicClient]
-  )
-
   const handleDeploy = async () => {
-    if (!validateForm()) return
-
-    if (!address) {
-      toast.error("Please connect your wallet to deploy tokens")
-      return
+    const tokenParams: TokenParams = {
+      name: form.name,
+      symbol: form.symbol,
+      denom: form.denom,
+      totalSupply: form.totalSupply,
+      decimals: form.decimals,
+      logoBase64: form.logoBase64
     }
-
-    if (chainId !== HELIOS_NETWORK_ID) {
-      toast.error("Please switch to Helios network to deploy tokens")
-      return
-    }
-
-    setForm((prev) => ({ ...prev, inProgress: true }))
-
-    // Reset the flag for new deployment and clear any stored transaction hash
-    setHasProcessedSuccess(false)
-    localStorage.removeItem("lastProcessedTxHash")
-
-    // Set a timeout to reset the form state if the transaction takes too long
-    const timeoutId = setTimeout(() => {
-      if (form.inProgress) {
-        toast.error(
-          "Transaction timeout. Please check your wallet and try again if needed."
-        )
-        setForm((prev) => ({ ...prev, inProgress: false }))
-        setShowPreview(false)
-      }
-    }, 180000) // 3 minutes timeout - enough time for MetaMask interaction
 
     try {
-      // Ensure decimals is a valid number between 0 and 18
-      const decimals = Math.min(Math.max(parseInt(form.decimals) || 18, 0), 18)
+      const result = await createToken(tokenParams)
 
-      // Format total supply with the correct number of decimals
-      const totalSupplyWei = parseUnits(form.totalSupply, decimals)
-
-      // Trim the logo if it's too large (optional)
-      const logoBase64 = form.logoBase64 || ""
-
-      console.log("Deployment parameters:", {
-        name: form.name,
-        symbol: form.symbol,
-        denom: form.denom,
-        totalSupply: totalSupplyWei.toString(),
-        decimals: decimals,
-        logoBase64Length: logoBase64.length
-      })
-
-      await writeContract({
-        address: PRECOMPILE_CONTRACT_ADDRESS as `0x${string}`,
-        abi: precompileAbi,
-        functionName: "createErc20",
-        args: [
-          form.name.trim(),
-          form.symbol.trim(),
-          form.denom.trim(),
-          totalSupplyWei,
-          decimals,
-          logoBase64
-        ]
-      })
-
-      toast.info("Transaction submitted, waiting for confirmation...")
-      clearTimeout(timeoutId) // Clear the timeout if transaction is submitted
-    } catch (err: any) {
-      clearTimeout(timeoutId) // Clear the timeout if there's an error
-      console.error("Token deployment error:", err)
-      toast.error(getErrorMessage(err) || "Failed to deploy token")
-      setForm((prev) => ({ ...prev, inProgress: false }))
+      // Check if deployment was successful
+      if (result && result.deployedToken) {
+        // Add token to recent list
+        addToken(result.deployedToken)
+        setShowPreview(false)
+        setShowSuccess(true)
+      } else if (result === null) {
+        // Validation failed (result is null) - validation already showed toast
+        setShowPreview(false)
+        console.error("Token deployment failed: Validation error")
+      } else {
+        // Deployment failed for other reasons
+        setShowPreview(false)
+        toast.error("Token deployment failed. Please try again.")
+        console.error("Token deployment failed: No result returned")
+      }
+    } catch (error: any) {
+      setShowPreview(false)
+      // Show user-friendly error message in toast
+      const errorMessage =
+        error?.message || "Token deployment failed. Please try again."
+      toast.error(errorMessage)
+      console.error("Token deployment failed:", error)
     }
   }
-
-  // Handle successful deployment
-  React.useEffect(() => {
-    let isMounted = true
-
-    // Store the current transaction hash to prevent reprocessing
-    const currentHash = hash
-
-    if (isConfirmed && currentHash && !hasProcessedSuccess) {
-      const handleSuccess = async () => {
-        if (!isMounted) return
-
-        // Set this flag immediately to prevent multiple executions
-        setHasProcessedSuccess(true)
-
-        try {
-          // Extract the actual contract address from the transaction receipt
-          const contractAddress = await extractTokenAddressFromReceipt(
-            currentHash
-          )
-
-          if (!contractAddress) {
-            throw new Error(
-              "Could not extract contract address from transaction receipt"
-            )
-          }
-
-          const deployedTokenData: DeployedToken = {
-            address: contractAddress,
-            name: form.name,
-            symbol: form.symbol,
-            denom: form.denom,
-            totalSupply: form.totalSupply,
-            decimals: parseInt(form.decimals),
-            logoBase64: form.logoBase64,
-            txHash: currentHash,
-            timestamp: Date.now()
-          }
-
-          setDeployedToken(deployedTokenData)
-          setShowPreview(false)
-          setShowSuccess(true)
-          setForm((prev) => ({ ...prev, inProgress: false }))
-
-          // Store in localStorage for recents
-          const recents = JSON.parse(
-            localStorage.getItem("deployedTokens") || "[]"
-          )
-          recents.unshift(deployedTokenData)
-          localStorage.setItem(
-            "deployedTokens",
-            JSON.stringify(recents.slice(0, 10))
-          ) // Keep only last 10
-
-          toast.success("Token deployed successfully!")
-
-          // Store this hash in localStorage to prevent reprocessing on page refresh
-          localStorage.setItem("lastProcessedTxHash", currentHash)
-        } catch (error) {
-          console.error("Failed to get transaction details:", error)
-          toast.error("Failed to get deployed token address")
-          setForm((prev) => ({ ...prev, inProgress: false }))
-        }
-      }
-
-      // Check if we've already processed this hash (in case of page refresh)
-      const lastProcessedHash = localStorage.getItem("lastProcessedTxHash")
-      if (lastProcessedHash !== currentHash) {
-        handleSuccess()
-      }
-    }
-
-    // Cleanup function to prevent state updates after unmount
-    return () => {
-      isMounted = false
-    }
-  }, [
-    isConfirmed,
-    hash,
-    hasProcessedSuccess,
-    form,
-    extractTokenAddressFromReceipt
-  ])
 
   const handleAddToWallet = async () => {
     if (!deployedToken || !walletClient) return
@@ -574,8 +187,9 @@ export const TokenDeployerInterface = () => {
   }
 
   const cancelTransaction = () => {
-    setForm((prev) => ({ ...prev, inProgress: false }))
+    reset()
     setShowPreview(false)
+    setShowSuccess(false) // Explicitly ensure success modal is closed
     toast.info("Transaction cancelled. You can try again.")
   }
 
@@ -586,15 +200,11 @@ export const TokenDeployerInterface = () => {
       denom: "",
       totalSupply: "",
       decimals: "18",
-      logoBase64: "",
-      inProgress: false
+      logoBase64: ""
     })
-    setDeployedToken(null)
+    reset()
     setShowSuccess(false)
     setShowPreview(false)
-
-    // We don't reset hasProcessedSuccess here to prevent the modal from reopening
-    // It will be reset when a new deployment is initiated
   }
 
   const isFormValid =
@@ -732,17 +342,11 @@ export const TokenDeployerInterface = () => {
                   !isFormValid ||
                   !isHeliosNetwork ||
                   !isWalletConnected ||
-                  form.inProgress ||
-                  isPending ||
-                  isConfirming
+                  isLoading
                 }
                 className={s.deployBtn}
               >
-                {form.inProgress || isPending || isConfirming
-                  ? "Deploying..."
-                  : !isWalletConnected
-                  ? "Connect Wallet"
-                  : "Deploy Token"}
+                {isLoading ? "Deploying..." : "Deploy Token"}
               </Button>
             </div>
           </div>
@@ -798,7 +402,7 @@ export const TokenDeployerInterface = () => {
           </div>
 
           <div className={s.modalActions}>
-            {form.inProgress || isPending || isConfirming ? (
+            {isLoading ? (
               <>
                 <Button
                   variant="secondary"
@@ -807,9 +411,7 @@ export const TokenDeployerInterface = () => {
                 >
                   Cancel
                 </Button>
-                <Button disabled>
-                  {isConfirming ? "Confirming..." : "Deploying..."}
-                </Button>
+                <Button disabled>Deploying...</Button>
               </>
             ) : (
               <>
@@ -829,7 +431,7 @@ export const TokenDeployerInterface = () => {
 
       {/* Success Modal */}
       <Modal
-        open={showSuccess}
+        open={showSuccess && deployedToken && deployedToken.address}
         onClose={() => {
           setShowSuccess(false)
         }}

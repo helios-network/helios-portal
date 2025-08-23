@@ -4,11 +4,12 @@ import { TokenDeployerRecents } from "./(components)/recents"
 import { DeploymentSteps } from "./(components)/steps"
 import { BestPractices } from "./(components)/tips"
 import { ImportantNotes } from "./(components)/notes"
+import { RecentTokensProvider } from "@/context/RecentTokensContext"
 import s from "./page.module.scss"
 
 export default function Page() {
   return (
-    <>
+    <RecentTokensProvider>
       <Grid className={s.tokenDeployer}>
         <Area area="a">
           <TokenDeployerInterface />
@@ -26,6 +27,6 @@ export default function Page() {
           <ImportantNotes />
         </Area>
       </Grid>
-    </>
+    </RecentTokensProvider>
   )
 }

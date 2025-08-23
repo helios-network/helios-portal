@@ -1,6 +1,5 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
 import { Card } from "@/components/card"
 import { Heading } from "@/components/heading"
 import { Icon } from "@/components/icon"
@@ -8,34 +7,14 @@ import { Button } from "@/components/button"
 import Image from "next/image"
 import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns"
+import {
+  useRecentTokensContext,
+  type DeployedToken
+} from "@/context/RecentTokensContext"
 import s from "./recents.module.scss"
 
-type DeployedToken = {
-  address: string
-  name: string
-  symbol: string
-  denom: string
-  totalSupply: string
-  decimals: number
-  logoBase64: string
-  txHash: string
-  timestamp: number
-}
-
 export const TokenDeployerRecents = () => {
-  const [recentTokens, setRecentTokens] = useState<DeployedToken[]>([])
-
-  useEffect(() => {
-    const stored = localStorage.getItem("deployedTokens")
-    if (stored) {
-      try {
-        const tokens = JSON.parse(stored)
-        setRecentTokens(tokens)
-      } catch (error) {
-        console.error("Failed to parse stored tokens:", error)
-      }
-    }
-  }, [])
+  const { recentTokens, clearTokens } = useRecentTokensContext()
 
   const handleCopyAddress = (address: string) => {
     navigator.clipboard.writeText(address)
@@ -75,8 +54,7 @@ export const TokenDeployerRecents = () => {
   }
 
   const clearRecents = () => {
-    localStorage.removeItem("deployedTokens")
-    setRecentTokens([])
+    clearTokens()
     toast.success("Recent tokens cleared")
   }
 
