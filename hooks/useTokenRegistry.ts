@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react"
 import { useChainId, useAccount } from "wagmi"
-import { fetchTokenInfo } from "@/hooks/useTokenInfo"
+import { fetchTokenBalance, fetchTokenInfo } from "@/hooks/useTokenInfo"
 import { TokenExtended } from "@/types/token"
 import { fetchCGTokenData } from "@/utils/price"
 import { TOKEN_COLORS } from "@/config/constants"
@@ -35,7 +35,7 @@ export const useTokenRegistry = () => {
         t.functionnal.chainId === chainId
     )
     if (existing) {
-      const info = await fetchTokenInfo(tokenAddress, chainId, userAddress)
+      const info = await fetchTokenBalance(tokenAddress, chainId, userAddress)
       existing.balance.amount = info.readableBalance
       existing.balance.totalPrice = info.readableBalance * existing.price.usd
       return existing
