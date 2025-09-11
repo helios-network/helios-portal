@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useAccount } from "wagmi"
 import { getTokensBalance } from "@/helpers/rpc-calls"
-import { toHex } from "@/utils/number"
+import { toHex, secondsToMilliseconds } from "@/utils/number"
 import { useTokenRegistry } from "./useTokenRegistry"
 import { TokenExtended } from "@/types/token"
 import { ethers } from "ethers"
@@ -14,18 +14,21 @@ export const usePortfolioInfo = () => {
   const qTokenBalances = useQuery({
     queryKey: ["tokensBalance", address],
     queryFn: () => getTokensBalance(address!, toHex(1), toHex(10)),
-    enabled: !!address
+    enabled: !!address,
+    refetchInterval: secondsToMilliseconds(30)
   })
 
   const enrichedTokensQuery = useQuery({
-    queryKey: ["enrichedPortfolio", address, qTokenBalances.data],
+    queryKey: ["enrichedPortfolio", address, qTokenBalances.dataUpdatedAt],
     enabled: !!qTokenBalances.data,
+    refetchOnWindowFocus: false,
     queryFn: async (): Promise<TokenExtended[]> => {
       const results = await Promise.all(
         qTokenBalances.data!.Balances.map(async (token) => {
           const enriched = await getTokenByAddress(
             token.address,
-            HELIOS_NETWORK_ID
+            HELIOS_NETWORK_ID,
+            { updateBalance: true }
           )
           if (!enriched) return null
 

@@ -2,7 +2,11 @@
 
 import { useState, useRef } from "react"
 import { useChainId, useAccount } from "wagmi"
-import { fetchTokenBalance, fetchTokenInfo } from "@/hooks/useTokenInfo"
+import {
+  fetchTokenBalance,
+  fetchTokenInfo,
+  fetchTokenBalanceOnly
+} from "@/hooks/useTokenInfo"
 import { TokenExtended } from "@/types/token"
 import { fetchCGTokenData } from "@/utils/price"
 import { TOKEN_COLORS } from "@/config/constants"
@@ -21,9 +25,12 @@ export const useTokenRegistry = () => {
   const getTokenKey = (address: string, chainId: number) =>
     `${address.toLowerCase()}-${chainId}`
 
+  type GetTokenOpts = { updateBalance?: boolean }
+
   const getTokenByAddress = async (
     tokenAddress: string,
-    tempChainId?: number
+    tempChainId?: number,
+    opts: GetTokenOpts = { updateBalance: false }
   ): Promise<TokenExtended | null> => {
     const chainId = tempChainId || currentChainId
     const key = getTokenKey(tokenAddress, chainId)
@@ -35,9 +42,16 @@ export const useTokenRegistry = () => {
         t.functionnal.chainId === chainId
     )
     if (existing) {
-      const info = await fetchTokenBalance(tokenAddress, chainId, userAddress)
-      existing.balance.amount = info.readableBalance
-      existing.balance.totalPrice = info.readableBalance * existing.price.usd
+      if (opts.updateBalance && userAddress) {
+        const info = await fetchTokenBalanceOnly(
+          tokenAddress,
+          chainId,
+          userAddress,
+          existing.functionnal.decimals
+        )
+        existing.balance.amount = info.readableBalance
+        existing.balance.totalPrice = info.readableBalance * existing.price.usd
+      }
       return existing
     }
 
@@ -52,17 +66,17 @@ export const useTokenRegistry = () => {
         const data = await getTokenDetail(tokenAddress)
         if (!data) throw new Error("Token not found")
 
-        const info = await fetchTokenInfo(tokenAddress, chainId, userAddress)
+        // Use only RPC metadata for static fields; defer on-chain balance unless explicitly requested
         const symbol = data.metadata.symbol.toLowerCase()
         const cgData = await fetchCGTokenData([symbol])
         const cgToken = cgData[symbol]
         const unitPrice = cgToken?.price || 0
 
-        let originBlockchain = "42000";
+        let originBlockchain = "42000"
 
         for (const chainMetadata of data.metadata.chainsMetadatas) {
           if (chainMetadata.isOriginated) {
-            originBlockchain = `${chainMetadata.chainId}`;
+            originBlockchain = `${chainMetadata.chainId}`
             break
           }
         }
@@ -80,8 +94,8 @@ export const useTokenRegistry = () => {
           },
           price: { usd: unitPrice },
           balance: {
-            amount: info.readableBalance,
-            totalPrice: info.readableBalance * unitPrice
+            amount: 0,
+            totalPrice: 0
           },
           functionnal: {
             address: tokenAddress,

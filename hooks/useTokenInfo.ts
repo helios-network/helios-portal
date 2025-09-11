@@ -37,14 +37,12 @@ export const fetchTokenBalance = async (
 
     const contract = new web3.eth.Contract(erc20Abi, tokenAddress)
 
-    const [decimals, balanceRaw] = await Promise.all(
-      [
-        contract.methods.decimals().call() as Promise<string>,
-        userAddress
-          ? (contract.methods.balanceOf(userAddress).call() as Promise<string>)
-          : Promise.resolve("0")
-      ]
-    )
+    const [decimals, balanceRaw] = await Promise.all([
+      contract.methods.decimals().call() as Promise<string>,
+      userAddress
+        ? (contract.methods.balanceOf(userAddress).call() as Promise<string>)
+        : Promise.resolve("0")
+    ])
 
     const decimalsInt = parseInt(decimals)
     const readableBalance = parseFloat(
@@ -57,6 +55,48 @@ export const fetchTokenBalance = async (
     }
   } catch (e) {
     console.error("Error fetching token info:", e, tokenAddress, chainId)
+    throw new Error("Token not found")
+  }
+}
+
+export const fetchTokenBalanceOnly = async (
+  tokenAddress: string,
+  chainId: number,
+  userAddress: string,
+  decimals: number
+): Promise<{ balance: string; readableBalance: number }> => {
+  const chainConfig = getChainConfig(chainId)
+  if (!chainConfig)
+    throw new Error(`Chain configuration not found for chain ${chainId}`)
+  const rpcUrl = chainConfig.rpcUrl
+  if (!rpcUrl) throw new Error(`Missing RPC URL for chain ${chainId}`)
+
+  try {
+    const web3 = new Web3(rpcUrl)
+
+    if (!tokenAddress.startsWith("0x")) {
+      throw new Error(
+        "Address is not a contract : " + tokenAddress + " , " + chainId
+      )
+    }
+
+    const contract = new web3.eth.Contract(erc20Abi, tokenAddress)
+    const balanceRaw = (await contract.methods
+      .balanceOf(userAddress)
+      .call()) as string
+    const readableBalance = parseFloat(ethers.formatUnits(balanceRaw, decimals))
+
+    return {
+      balance: balanceRaw.toString(),
+      readableBalance
+    }
+  } catch (e) {
+    console.error(
+      "Error fetching token balance only:",
+      e,
+      tokenAddress,
+      chainId
+    )
     throw new Error("Token not found")
   }
 }
@@ -84,8 +124,6 @@ export const fetchTokenInfo = async (
     const contract = new web3.eth.Contract(erc20Abi, tokenAddress)
 
     // request eth_getTokenDetails to get the token details result.metadata.symbol, result.metadata.name, result.metadata.decimals, result.totalSupply
-
-
 
     const [name, symbol, decimals, totalSupply, balanceRaw] = await Promise.all(
       [
