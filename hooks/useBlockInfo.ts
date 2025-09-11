@@ -4,36 +4,62 @@ import {
   getGasPrice
 } from "@/helpers/rpc-calls"
 import { formatCurrency } from "@/lib/utils/number"
-import { fromHex, fromWeiToEther, secondsToMilliseconds } from "@/utils/number"
+import {
+  fromHex,
+  toHex,
+  fromWeiToEther,
+  secondsToMilliseconds
+} from "@/utils/number"
 import { fetchCGTokenData } from "@/utils/price"
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
+import { useAppStore } from "@/stores/app"
 
-export const useBlockInfo = () => {
+export const useBlockInfo = (options?: {
+  forceEnable?: boolean
+  includeGas?: boolean
+}) => {
+  const { debugMode } = useAppStore()
+  const enableBlocks = options?.forceEnable ?? debugMode
+  const enableGas = options?.includeGas ?? debugMode
+
   const qBlockNumber = useQuery({
     queryKey: ["blockNumber"],
     queryFn: getLatestBlockNumber,
+    enabled: enableBlocks,
     refetchInterval: secondsToMilliseconds(30)
   })
 
   const qBlockData = useQuery({
     queryKey: ["blockData", qBlockNumber.data],
     queryFn: () => getBlockByNumber(qBlockNumber.data ?? "latest"),
-    enabled: !!qBlockNumber.data
+    enabled: enableBlocks && !!qBlockNumber.data
   })
 
-  const prevTsRef = useRef<number | null>(null)
+  const qPreviousBlockData = useQuery({
+    queryKey: [
+      "blockData",
+      qBlockNumber.data ? fromHex(qBlockNumber.data) - 1 : null
+    ],
+    queryFn: () =>
+      getBlockByNumber(
+        qBlockNumber.data ? toHex(fromHex(qBlockNumber.data) - 1) : "latest"
+      ),
+    enabled: enableBlocks && !!qBlockNumber.data,
+    refetchInterval: false
+  })
+
   const [blockTime, setBlockTime] = useState(0)
 
   useEffect(() => {
-    if (qBlockData.data?.timestamp) {
+    if (qBlockData.data?.timestamp && qPreviousBlockData.data?.timestamp) {
       const currentTs = parseInt(qBlockData.data.timestamp)
-      if (prevTsRef.current !== null) {
-        setBlockTime(currentTs - prevTsRef.current)
+      const prevTs = parseInt(qPreviousBlockData.data.timestamp)
+      if (!Number.isNaN(currentTs) && !Number.isNaN(prevTs)) {
+        setBlockTime(currentTs - prevTs)
       }
-      prevTsRef.current = currentTs
     }
-  }, [qBlockData.data?.timestamp])
+  }, [qBlockData.data?.timestamp, qPreviousBlockData.data?.timestamp])
 
   const qHeliosPrice = useQuery({
     queryKey: ["tokenData", ["hls"]],
@@ -43,7 +69,8 @@ export const useBlockInfo = () => {
 
   const qGasPrice = useQuery({
     queryKey: ["gasPrice"],
-    queryFn: getGasPrice
+    queryFn: getGasPrice,
+    enabled: enableGas
   })
 
   const gasPriceInETH = qGasPrice.data ? fromWeiToEther(qGasPrice.data) : "0"
@@ -57,7 +84,14 @@ export const useBlockInfo = () => {
     gasPrice: gasPriceInETH,
     gasPriceUSD: formatCurrency(gasPriceInUSD),
     isLoading:
-      qBlockNumber.isLoading || qBlockData.isLoading || qGasPrice.isLoading,
-    error: qBlockNumber.error || qBlockData.error || qGasPrice.error
+      qBlockNumber.isLoading ||
+      qBlockData.isLoading ||
+      qPreviousBlockData.isLoading ||
+      qGasPrice.isLoading,
+    error:
+      qBlockNumber.error ||
+      qBlockData.error ||
+      qPreviousBlockData.error ||
+      qGasPrice.error
   }
 }

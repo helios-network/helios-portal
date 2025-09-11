@@ -15,7 +15,10 @@ import { Weights } from "./(components)/weights"
 import { formatNumber } from "@/lib/utils/number"
 
 export default function Page() {
-  const { lastBlockNumber, blockTime, gasPriceUSD } = useBlockInfo()
+  const { lastBlockNumber, blockTime, gasPriceUSD } = useBlockInfo({
+    forceEnable: true,
+    includeGas: true
+  })
 
   return (
     <>
