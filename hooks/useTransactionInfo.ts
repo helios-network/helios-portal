@@ -23,7 +23,8 @@ export const useTransactionInfo = (size = 3) => {
           const token = tx.ParsedInfo.contractAddress
             ? await getTokenByAddress(
                 tx.ParsedInfo.contractAddress,
-                HELIOS_NETWORK_ID
+                HELIOS_NETWORK_ID,
+                { updateBalance: false }
               )
             : null
 

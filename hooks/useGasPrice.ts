@@ -18,6 +18,7 @@ export function useGasPrice() {
   } = useQuery({
     queryKey: ["gasPrice"],
     queryFn: getGasPrice,
+    enabled: debugMode,
     refetchInterval: 30000 // Refetch every 30 seconds
   })
 

@@ -23,7 +23,8 @@ export const useAssetsInfo = () => {
         data.map(async (asset) => {
           const enriched = await getTokenByAddress(
             asset.contractAddress,
-            HELIOS_NETWORK_ID
+            HELIOS_NETWORK_ID,
+            { updateBalance: false }
           )
           if (!enriched) return null
 
