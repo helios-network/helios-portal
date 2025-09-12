@@ -35,7 +35,7 @@ export const ModalStake = ({
   const router = useRouter()
   const [amount, setAmount] = useState("0")
   const [selectedAsset, setSelectedAsset] = useState("")
-  const { assets } = useAssetsInfo()
+  const { assets } = useAssetsInfo({ updateBalance: open })
   const { delegate, isLoading, feedback, resetFeedback } = useDelegate()
   const formattedMinDelegation = parseFloat(ethers.formatEther(minDelegation))
 
