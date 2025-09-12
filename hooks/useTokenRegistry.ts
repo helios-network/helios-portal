@@ -110,6 +110,26 @@ export const useTokenRegistry = () => {
           originBlockchain: originBlockchain
         }
 
+        if (opts.updateBalance && userAddress) {
+          try {
+            const info = await fetchTokenBalanceOnly(
+              tokenAddress,
+              chainId,
+              userAddress,
+              newToken.functionnal.decimals
+            )
+            newToken.balance.amount = info.readableBalance
+            newToken.balance.totalPrice =
+              info.readableBalance * newToken.price.usd
+          } catch (e) {
+            console.error(
+              "Failed to update balance for token:",
+              tokenAddress,
+              e
+            )
+          }
+        }
+
         setTokens((prev) => [...prev, newToken])
         return newToken
       } catch (err) {

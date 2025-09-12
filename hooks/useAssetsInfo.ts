@@ -4,7 +4,10 @@ import { useQuery } from "@tanstack/react-query"
 import { useTokenRegistry } from "./useTokenRegistry"
 import { HELIOS_NETWORK_ID } from "@/config/app"
 
-export const useAssetsInfo = () => {
+type UseAssetsInfoOptions = { updateBalance?: boolean }
+
+export const useAssetsInfo = (options: UseAssetsInfoOptions = {}) => {
+  const { updateBalance = false } = options
   const { getTokenByAddress } = useTokenRegistry()
 
   const qAssets = useQuery({
@@ -14,7 +17,12 @@ export const useAssetsInfo = () => {
   })
 
   const qFilteredAssets = useQuery({
-    queryKey: ["filteredAssets", qAssets.data, qAssets.dataUpdatedAt],
+    queryKey: [
+      "filteredAssets",
+      qAssets.data,
+      qAssets.dataUpdatedAt,
+      updateBalance
+    ],
     enabled: !!qAssets.data,
     queryFn: async () => {
       const data = qAssets.data || []
@@ -24,7 +32,7 @@ export const useAssetsInfo = () => {
           const enriched = await getTokenByAddress(
             asset.contractAddress,
             HELIOS_NETWORK_ID,
-            { updateBalance: false }
+            { updateBalance }
           )
           if (!enriched) return null
 
