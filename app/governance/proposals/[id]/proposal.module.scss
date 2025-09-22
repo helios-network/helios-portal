@@ -6,6 +6,10 @@
   margin-top: 1rem;
 }
 
+.powerSection {
+  margin-bottom: var(--size-6);
+}
+
 .layout {
   display: grid;
   grid-template-columns: 1fr 400px;

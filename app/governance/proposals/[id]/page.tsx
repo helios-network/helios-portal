@@ -8,6 +8,7 @@ import { DelegationWrapper } from "./delegation-wrapper"
 import { Icon } from "@/components/icon"
 import { Link } from "@/components/link"
 import styles from "./proposal.module.scss"
+import { Power } from "../../(components)/power"
 
 interface TallyResult {
   yes_count: string
@@ -89,6 +90,9 @@ export default async function ProposalDetail({
     <>
       <BackSection isVisible={true} />
       <div className={styles.container}>
+        <div className={styles.powerSection}>
+          <Power />
+        </div>
         <div className={styles.layout}>
           {/* Left side - Proposal Details */}
           <div className={styles.rightPanel}>
@@ -115,8 +119,8 @@ export default async function ProposalDetail({
                       proposal.status === "EXECUTED"
                         ? "mdi:check-circle-outline"
                         : proposal.status === "REJECTED"
-                        ? "mdi:close-circle-outline"
-                        : "mdi:clock-outline"
+                          ? "mdi:close-circle-outline"
+                          : "mdi:clock-outline"
                     }
                     width={18}
                     height={18}
@@ -174,9 +178,6 @@ export default async function ProposalDetail({
                   </span>
                 </div>
               </div>
-              {/* Delegation Information - Show voting power first */}
-              <DelegationWrapper />
-              {/* Enhanced Voting Section */}
               <div className={styles.votingSectionWrapper}>
                 <VotingSection
                   proposalId={proposal.id}

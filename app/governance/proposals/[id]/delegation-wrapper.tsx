@@ -17,6 +17,7 @@ export function DelegationWrapper() {
       delegations={delegations}
       isLoading={isLoading}
       error={error}
+      hideTitle
     />
   )
 }
