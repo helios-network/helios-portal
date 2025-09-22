@@ -9,6 +9,7 @@ import { Icon } from "@/components/icon"
 import { Link } from "@/components/link"
 import styles from "./proposal.module.scss"
 import { Power } from "../../(components)/power"
+import { Heading } from "@/components/heading"
 
 interface TallyResult {
   yes_count: string
@@ -98,15 +99,7 @@ export default async function ProposalDetail({
           <div className={styles.rightPanel}>
             <div className={styles.card}>
               <div className={styles.header}>
-                <div className={styles.headerTitle}>
-                  <Icon
-                    icon="mdi:file-document-outline"
-                    width={28}
-                    height={28}
-                    className={styles.headerIcon}
-                  />
-                  <h1 className={styles.title}>{proposal.title}</h1>
-                </div>
+                <Heading icon="hugeicons:file-01" title={proposal.title} />
                 <span
                   className={
                     styles.statusBadge +
