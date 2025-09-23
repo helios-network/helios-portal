@@ -1,9 +1,13 @@
 "use client"
 
 import { useAccount } from "wagmi"
-import styles from "./VoteResults.module.scss"
+import s from "./VoteResults.module.scss"
 import { Icon } from "@/components/icon"
 import { Heading } from "@/components/heading"
+import { Card } from "@/components/card"
+import { Blocks } from "@/components/blocks"
+import { Badge } from "@/components/badge"
+import { truncateAddress } from "@/lib/utils"
 
 export interface VoteResult {
   voter: string
@@ -20,6 +24,13 @@ interface VoteResultsProps {
   voters: VoteResult[]
 }
 
+const formatNumber = (numStr: string, maxFraction = 2) => {
+  const num = Number.parseFloat(numStr)
+  return Number.isFinite(num)
+    ? num.toLocaleString(undefined, { maximumFractionDigits: maxFraction })
+    : "0"
+}
+
 export function VoteResults({
   forVotes,
   againstVotes,
@@ -28,113 +39,80 @@ export function VoteResults({
   endDate,
   voters
 }: VoteResultsProps) {
-  const totalVotes =
-    Number.parseFloat(forVotes) + Number.parseFloat(againstVotes)
-  const forPercentage =
-    totalVotes === 0 ? 0 : (Number.parseFloat(forVotes) / totalVotes) * 100
-  const againstPercentage =
-    totalVotes === 0 ? 0 : (Number.parseFloat(againstVotes) / totalVotes) * 100
-  const abstainPercentage = 100 - forPercentage - againstPercentage
+  const totalVotes = Number.parseFloat(forVotes) + Number.parseFloat(againstVotes)
+  const forPercentage = totalVotes === 0 ? 0 : (Number.parseFloat(forVotes) / totalVotes) * 100
+  const againstPercentage = totalVotes === 0 ? 0 : (Number.parseFloat(againstVotes) / totalVotes) * 100
+  const abstainPercentage = Math.max(0, 100 - forPercentage - againstPercentage)
 
   const { isConnected } = useAccount() // eslint-disable-line @typescript-eslint/no-unused-vars
 
   return (
-    <div className={styles.card}>
-      <h2 className={styles.title}>
-        <Heading icon="hugeicons:chart-02" title={"Proposal Votes"} />
-      </h2>
+    <Card className={s.voteResults} auto>
+      <Heading icon="hugeicons:chart-01" title="Proposal Votes" />
 
-      <div className={styles.content}>
-        <div className={styles.voteHeader}>
-          <span className={styles.forVotes}>
-            <Icon icon="mdi:thumb-up-outline" width={16} height={16} /> FOR{" "}
-            {forVotes} shares
-          </span>
-          <div className={styles.voteDivider} />
-          <span className={styles.againstVotes}>
-            <Icon icon="mdi:thumb-down-outline" width={16} height={16} />{" "}
-            AGAINST {againstVotes} shares
-          </span>
-        </div>
+      <p className={s.description}>Community voting breakdown for this proposal.</p>
 
-        <div className={styles.progressContainer}>
-          <div className={styles.progressBar}>
-            <div
-              className={styles.forBar}
-              style={{ width: `${forPercentage}%` }}
-            />
-            <div
-              className={styles.abstainBar}
-              style={{ width: `${abstainPercentage}%` }}
-            />
-            <div
-              className={styles.againstBar}
-              style={{ width: `${againstPercentage}%` }}
-            />
-          </div>
-        </div>
+      <Blocks
+        items={[
+          {
+            title: "For",
+            value: `${formatNumber(forVotes)} shares`,
+            bottom: `${forPercentage.toFixed(1)}%`,
+            color: "success"
+          },
+          {
+            title: "Against",
+            value: `${formatNumber(againstVotes)} shares`,
+            bottom: `${againstPercentage.toFixed(1)}%`,
+            color: "danger"
+          }
+        ]}
+      />
 
-        {/* <div className={styles.quorum}>Quorum {quorum} HLS</div> */}
-
-        <div
-          className={`${styles.statusBadge} ${styles[status.toLowerCase()]}`}
-        >
-          <Icon
-            icon={
-              status === "EXECUTED"
-                ? "mdi:check-circle-outline"
-                : "mdi:close-circle-outline"
-            }
-            width={16}
-            height={16}
-          />
-          <span>{status}</span>
-          <span className={styles.separator}>·</span>
-          <span className={styles.endDate}>End {endDate}</span>
-        </div>
-
-        <div className={styles.votersSection}>
-          {/* <div className={styles.votersHeader}>
-            <button className={styles.votersButton}>Voters</button>
-            <button className={styles.votersButton}>Hasn&apos;t voted</button>
-          </div> */}
-
-          <div className={styles.votersList}>
-            {voters.map((voter) => (
-              <div key={voter.voter} className={styles.voterItem}>
-                <div className={styles.voterInfo}>
-                  <div className={styles.avatar}>
-                    <Icon
-                      icon="mdi:account-circle-outline"
-                      width={24}
-                      height={24}
-                    />
-                  </div>
-                  <span className={styles.voterAddress}>{voter.voter}</span>
-                  <span
-                    className={`${styles.voteType} ${voter.voteType === "voted for"
-                      ? styles.votedFor
-                      : styles.votedAgainst
-                      }`}
-                  >
-                    <Icon
-                      icon={
-                        voter.voteType === "voted for"
-                          ? "mdi:thumb-up-outline"
-                          : "mdi:thumb-down-outline"
-                      }
-                      width={14}
-                      height={14}
-                    />
-                    {voter.voteType}
-                  </span>
-                </div>
-                <span className={styles.voteAmount}>{voter.amount} HLS</span>
-              </div>
-            ))}
-          </div>
+      <div className={s.progressContainer}>
+        <div className={s.progressBar}>
+          <div className={s.forBar} style={{ width: `${forPercentage}%` }} />
+          <div className={s.abstainBar} style={{ width: `${abstainPercentage}%` }} />
+          <div className={s.againstBar} style={{ width: `${againstPercentage}%` }} />
         </div>
       </div>
-    </div>
+
+      <div className={s.meta}>
+        <Badge status={status === "EXECUTED" ? "success" : "danger"}>{status}</Badge>
+        <span className={s.metaDivider}>·</span>
+        <span className={s.endDate}>End {endDate}</span>
+      </div>
+
+      <div className={s.votersSection}>
+        <div className={s.votersHeader}>
+          <div className={s.votersTitle}>
+            <Icon icon="mdi:account-multiple-outline" width={18} height={18} />
+            Voters ({voters.length})
+          </div>
+        </div>
+
+        <div className={s.votersList}>
+          {voters.map((voter) => (
+            <div key={voter.voter} className={s.voterItem}>
+              <div className={s.voterInfo}>
+                <div className={s.avatar}>
+                  <Icon icon="mdi:account-circle-outline" width={24} height={24} />
+                </div>
+                <span className={s.voterAddress}>{truncateAddress(voter.voter, 6, 6)}</span>
+                <span className={`${s.voteType} ${voter.voteType === "voted for" ? s.votedFor : s.votedAgainst}`}>
+                  <Icon
+                    icon={voter.voteType === "voted for" ? "mdi:thumb-up-outline" : "mdi:thumb-down-outline"}
+                    width={14}
+                    height={14}
+                  />
+                  {voter.voteType}
+                </span>
+              </div>
+              <span className={s.voteAmount}>{formatNumber(voter.amount)} HLS</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Card>
   )
 }
