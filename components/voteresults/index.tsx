@@ -3,6 +3,7 @@
 import { useAccount } from "wagmi"
 import styles from "./VoteResults.module.scss"
 import { Icon } from "@/components/icon"
+import { Heading } from "@/components/heading"
 
 export interface VoteResult {
   voter: string
@@ -40,7 +41,7 @@ export function VoteResults({
   return (
     <div className={styles.card}>
       <h2 className={styles.title}>
-        <Icon icon="mdi:chart-bar" width={20} height={20} /> Proposal Votes
+        <Heading icon="hugeicons:chart-02" title={"Proposal Votes"} />
       </h2>
 
       <div className={styles.content}>
@@ -111,11 +112,10 @@ export function VoteResults({
                   </div>
                   <span className={styles.voterAddress}>{voter.voter}</span>
                   <span
-                    className={`${styles.voteType} ${
-                      voter.voteType === "voted for"
-                        ? styles.votedFor
-                        : styles.votedAgainst
-                    }`}
+                    className={`${styles.voteType} ${voter.voteType === "voted for"
+                      ? styles.votedFor
+                      : styles.votedAgainst
+                      }`}
                   >
                     <Icon
                       icon={
