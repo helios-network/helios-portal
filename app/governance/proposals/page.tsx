@@ -4,7 +4,7 @@ import BackSection from "@/components/back"
 import { Heading } from "@/components/heading"
 import { truncateAddress } from "@/lib/utils"
 import { useRouter } from "next/navigation"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useAccount } from "wagmi"
 import { ModalProposal } from "../(components)/proposal/modal"
 import styles from "./page.module.scss"
@@ -43,8 +43,9 @@ interface ProposalData {
 
 const AllProposals: React.FC = () => {
   const router = useRouter()
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize] = useState(20)
+  const [allLoadedProposals, setAllLoadedProposals] = useState<any[]>([]) // Store all loaded proposals
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [hasInitialLoad, setHasInitialLoad] = useState(false)
   const { isConnected } = useAccount()
   const [isCreateLoading, setIsCreateLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
@@ -57,22 +58,52 @@ const AllProposals: React.FC = () => {
     refetchOnWindowFocus: false
   })
 
-  // Get proposals for current page
-  const { data: rawProposals = [], isLoading, error } = useQuery({
-    queryKey: ["proposals", currentPage, pageSize],
-    queryFn: () => getProposalsByPageAndSize(toHex(currentPage), toHex(pageSize)),
-    enabled: !!currentPage && !!pageSize,
-    staleTime: 30000, // 30 seconds
+  // Initial load: Get first 20 proposals
+  const { data: initialProposals = [], isLoading: isInitialLoading, error: initialError } = useQuery({
+    queryKey: ["initialProposals"],
+    queryFn: () => getProposalsByPageAndSize(toHex(0), toHex(20)), // Page 0, size 20
+    staleTime: 30000,
     refetchOnWindowFocus: false
   })
 
-  // Calculate total pages
-  const totalPages = Math.ceil((totalProposals || 0) / pageSize)
-  const hasNextPage = currentPage < totalPages
-  const hasPreviousPage = currentPage > 1
+  // Load more proposals (5 at a time)
+  const [loadMorePage, setLoadMorePage] = useState(1)
+  const { data: moreProposals = [], isLoading: isLoadingMoreData, error: loadMoreError } = useQuery({
+    queryKey: ["moreProposals", loadMorePage],
+    queryFn: () => getProposalsByPageAndSize(toHex(loadMorePage), toHex(5)), // Page 1+, size 5
+    enabled: loadMorePage > 1 && isLoadingMore,
+    staleTime: 30000,
+    refetchOnWindowFocus: false
+  })
 
-  // Transform raw proposals data
-  const proposals: ProposalData[] = (rawProposals || []).map((item: any) => {
+  // Handle initial load
+  useEffect(() => {
+    if (initialProposals !== undefined && !hasInitialLoad) {
+      setAllLoadedProposals(initialProposals)
+      setHasInitialLoad(true)
+    }
+  }, [initialProposals, hasInitialLoad])
+
+  // Handle load more
+  useEffect(() => {
+    if (moreProposals && moreProposals.length > 0 && isLoadingMore) {
+      setAllLoadedProposals(prev => [...prev, ...moreProposals])
+      setIsLoadingMore(false)
+    } else if (moreProposals && moreProposals.length === 0 && isLoadingMore) {
+      // No more proposals to load
+      setIsLoadingMore(false)
+    }
+  }, [moreProposals, isLoadingMore])
+
+  // Check if we can load more
+  const canLoadMore = allLoadedProposals.length < (totalProposals || 0)
+
+  // Combined loading and error states
+  const isLoading = isInitialLoading
+  const error = initialError || loadMoreError
+
+  // Transform all loaded proposals data
+  const allProposals: ProposalData[] = (allLoadedProposals || []).map((item: any) => {
     const yes = BigInt(item.currentTallyResult?.yes_count || "0")
     const no = BigInt(item.currentTallyResult?.no_count || "0")
     const abstain = BigInt(item.currentTallyResult?.abstain_count || "0")
@@ -148,6 +179,17 @@ const AllProposals: React.FC = () => {
     }
   })
 
+  // Use all loaded proposals for display
+  const proposals = allProposals
+
+  // Handle load more
+  const handleLoadMore = () => {
+    if (!isLoadingMore && !isLoadingMoreData && canLoadMore && hasInitialLoad) {
+      setIsLoadingMore(true)
+      setLoadMorePage(prev => prev + 1)
+    }
+  }
+
   const handleCreateProposal = () => {
     setIsCreateLoading(true)
     setTimeout(() => {
@@ -156,119 +198,7 @@ const AllProposals: React.FC = () => {
     }, 200)
   }
 
-  // Handle page change
-  const handlePageChange = (page: number) => {
-    if (page < 1 || page > totalPages || page === currentPage || isLoading) return
-    setCurrentPage(page)
-  }
 
-  // Handle previous page
-  const handlePrevious = () => {
-    if (hasPreviousPage) {
-      handlePageChange(currentPage - 1)
-    }
-  }
-
-  // Handle next page
-  const handleNext = () => {
-    if (hasNextPage) {
-      handlePageChange(currentPage + 1)
-    }
-  }
-
-  // Pagination component
-  const Pagination = () => {
-    const getPageNumbers = () => {
-      const pages = []
-      const maxVisiblePages = 5
-
-      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
-      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
-
-      // Adjust start if we're near the end
-      if (endPage - startPage + 1 < maxVisiblePages) {
-        startPage = Math.max(1, endPage - maxVisiblePages + 1)
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i)
-      }
-
-      return pages
-    }
-
-    const pageNumbers = getPageNumbers()
-    const showFirstPage = pageNumbers.length > 0 && pageNumbers[0] > 1
-    const showLastPage = pageNumbers.length > 0 && pageNumbers[pageNumbers.length - 1] < totalPages
-    const showFirstEllipsis = showFirstPage && pageNumbers[0] > 2
-    const showLastEllipsis = showLastPage && pageNumbers[pageNumbers.length - 1] < totalPages - 1
-
-    return (
-      <div className={styles["pagination"]}>
-        <button
-          className={`${styles["pagination-btn"]} ${!hasPreviousPage ? styles.disabled : ""
-            }`}
-          onClick={handlePrevious}
-          disabled={!hasPreviousPage || isLoading}
-        >
-          Previous
-        </button>
-
-        <div className={styles["page-numbers"]}>
-          {showFirstPage && (
-            <>
-              <button
-                className={styles["page-btn"]}
-                onClick={() => handlePageChange(1)}
-                disabled={isLoading}
-              >
-                1
-              </button>
-              {showFirstEllipsis && (
-                <span className={styles["ellipsis"]}>...</span>
-              )}
-            </>
-          )}
-
-          {pageNumbers.map((page) => (
-            <button
-              key={page}
-              className={`${styles["page-btn"]} ${page === currentPage ? styles.active : ""
-                }`}
-              onClick={() => handlePageChange(page)}
-              disabled={isLoading}
-            >
-              {page}
-            </button>
-          ))}
-
-          {showLastPage && (
-            <>
-              {showLastEllipsis && (
-                <span className={styles["ellipsis"]}>...</span>
-              )}
-              <button
-                className={styles["page-btn"]}
-                onClick={() => handlePageChange(totalPages)}
-                disabled={isLoading}
-              >
-                {totalPages}
-              </button>
-            </>
-          )}
-        </div>
-
-        <button
-          className={`${styles["pagination-btn"]} ${!hasNextPage ? styles.disabled : ""
-            }`}
-          onClick={handleNext}
-          disabled={!hasNextPage || isLoading}
-        >
-          Next
-        </button>
-      </div>
-    )
-  }
 
   // Show loading state on initial load
   if (isLoading && proposals.length === 0) {
@@ -388,15 +318,12 @@ const AllProposals: React.FC = () => {
           </div>
         )}
 
-        {/* Proposal count and pagination info */}
+        {/* Proposal count info */}
         {proposals.length > 0 && (
           <div className={styles["proposal-stats"]}>
             <div className={styles["stats-info"]}>
               <span className={styles["total-count"]}>
-                {totalProposals} proposal{totalProposals !== 1 ? "s" : ""} total
-              </span>
-              <span className={styles["page-info"]}>
-                Page {currentPage} of {totalPages}
+                Showing {proposals.length} of {totalProposals} proposal{totalProposals !== 1 ? "s" : ""}
               </span>
             </div>
           </div>
@@ -547,10 +474,20 @@ const AllProposals: React.FC = () => {
               <p>Loading proposals...</p>
             </div>
           )}
-        </div>
 
-        {/* Pagination Controls */}
-        {proposals.length > 0 && !isLoading && <Pagination />}
+          {/* Load More Button - inside the proposal list */}
+          {canLoadMore && hasInitialLoad && (
+            <div className={styles["load-more-container"]}>
+              <button
+                className={styles["load-more-btn"]}
+                onClick={handleLoadMore}
+                disabled={isLoadingMore || isLoadingMoreData}
+              >
+                {(isLoadingMore || isLoadingMoreData) ? "Loading..." : "Load more"}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       <ModalProposal open={showModal} onClose={() => setShowModal(false)} />
     </>
