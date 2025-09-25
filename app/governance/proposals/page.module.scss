@@ -682,7 +682,7 @@
   background: #ffffff; /* same as rows */
   
   /* Align headers to match columns */
-  & > :nth-child(2) { text-align: center; }
+  & > :nth-child(2) { text-align: left; }
   & > :nth-child(3) { text-align: right; }
 }
 
