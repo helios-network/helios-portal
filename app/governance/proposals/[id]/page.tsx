@@ -106,7 +106,15 @@ export default async function ProposalDetail({
                 <VotingSection
                   proposalId={proposal.id}
                   status={proposal.status}
-                  votingEndTime={proposal.votingEndTime}
+                  votingEndTime={new Date(proposal.votingEndTime).toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false
+                  })}
                   title={proposal.title}
                   description={proposal.summary}
                   proposer={proposal.proposer} // Show full address as proposer name

@@ -205,8 +205,13 @@ export function VotingSection({
     <div className={styles.votingSection}>
       {/* Proposal Info Line */}
       <div className={styles.proposalInfo}>
-        <div className={styles.proposalTitle}>
-          {title || `Proposal #${proposalId}`}
+        <div className={styles.titleSection}>
+          <div className={styles.proposalTitle}>
+            {title || "Untitled Proposal"}
+          </div>
+          <div className={styles.proposalId}>
+            #{proposalId}
+          </div>
         </div>
         <Badge
           status={getStatusConfig().variant}
@@ -258,17 +263,18 @@ export function VotingSection({
                 </p>
               </div>
               <div className={styles.info}>
+                <h3>Participation</h3>
+                <p>{participation}</p>
+              </div>
+              <div className={styles.info}>
                 <h3>Submitted On</h3>
                 <p>{submittedDate}</p>
               </div>
               <div className={styles.info}>
                 <h3>Voting Ends On</h3>
-                <p>{new Date(votingEndTime).toLocaleString()}</p>
+                <p>{votingEndTime}</p>
               </div>
-              <div className={styles.info}>
-                <h3>Participation</h3>
-                <p>{participation}</p>
-              </div>
+
             </div>
 
             {hasVoted && (

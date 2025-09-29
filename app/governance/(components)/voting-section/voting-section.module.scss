@@ -40,11 +40,38 @@
   }
 }
 
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: var(--size-3);
+  flex: 1;
+  
+  @include max(600px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--size-2);
+  }
+}
+
 .proposalTitle {
   font-size: var(--size-5);
   font-weight: 600;
   color: var(--text-primary);
-  flex: 1;
+}
+
+.proposalId {
+  font-size: var(--size-3);
+  font-weight: 500;
+  color: var(--text-secondary);
+  background-color: var(--background-medium);
+  padding: 4px 8px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--background-high);
+  
+  @include max(600px) {
+    font-size: 12px;
+    padding: 2px 6px;
+  }
 }
 
 .statusBadge {
@@ -91,7 +118,7 @@
 
 .metadataGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 2fr 1.5fr;
   gap: var(--size-4);
   margin-top: var(--size-10); // Add space between Description and metadata grid
   
