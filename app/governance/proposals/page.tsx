@@ -61,39 +61,63 @@ const AllProposals: React.FC = () => {
   // Initial load: Get first 20 proposals
   const { data: initialProposals = [], isLoading: isInitialLoading, error: initialError } = useQuery({
     queryKey: ["initialProposals"],
-    queryFn: () => getProposalsByPageAndSize(toHex(0), toHex(20)), // Page 0, size 20
+    queryFn: () => getProposalsByPageAndSize(toHex(1), toHex(10)), // Page 0, size 20
     staleTime: 30000,
     refetchOnWindowFocus: false
   })
 
+  console.log("Initial Proposals:", initialProposals);
+
   // Load more proposals (5 at a time)
-  const [loadMorePage, setLoadMorePage] = useState(1)
+  const [loadMorePage, setLoadMorePage] = useState(2)
   const { data: moreProposals = [], isLoading: isLoadingMoreData, error: loadMoreError } = useQuery({
     queryKey: ["moreProposals", loadMorePage],
-    queryFn: () => getProposalsByPageAndSize(toHex(loadMorePage), toHex(5)), // Page 1+, size 5
-    enabled: loadMorePage > 1 && isLoadingMore,
+    queryFn: () => {
+      console.log("Query executing for page:", loadMorePage);
+      return getProposalsByPageAndSize(toHex(loadMorePage), toHex(5));
+    },
+    enabled: isLoadingMore,
     staleTime: 30000,
     refetchOnWindowFocus: false
   })
+
+  console.log("Query state:", {
+    loadMorePage,
+    isLoadingMore,
+    enabled: isLoadingMore,
+    isLoadingMoreData,
+    moreProposalsLength: moreProposals?.length
+  });
 
   // Handle initial load
   useEffect(() => {
-    if (initialProposals !== undefined && !hasInitialLoad) {
+    if (initialProposals && initialProposals.length > 0 && !hasInitialLoad) {
       setAllLoadedProposals(initialProposals)
       setHasInitialLoad(true)
+    } else if (initialProposals && initialProposals.length === 0 && !isInitialLoading && !hasInitialLoad) {
+      // Handle case where there are genuinely no proposals
+      setAllLoadedProposals([])
+      setHasInitialLoad(true)
     }
-  }, [initialProposals, hasInitialLoad])
+  }, [initialProposals, hasInitialLoad, isInitialLoading])
 
   // Handle load more
   useEffect(() => {
-    if (moreProposals && moreProposals.length > 0 && isLoadingMore) {
-      setAllLoadedProposals(prev => [...prev, ...moreProposals])
-      setIsLoadingMore(false)
-    } else if (moreProposals && moreProposals.length === 0 && isLoadingMore) {
-      // No more proposals to load
-      setIsLoadingMore(false)
+    console.log("Load more effect:", { moreProposals: moreProposals?.length, isLoadingMore, loadMorePage, isLoadingMoreData });
+
+    // Only process when we have data and the query is not loading
+    if (!isLoadingMoreData) {
+      if (moreProposals && moreProposals.length > 0) {
+        console.log("Adding more proposals:", moreProposals.length);
+        setAllLoadedProposals(prev => [...prev, ...moreProposals])
+        setIsLoadingMore(false)
+      } else if (moreProposals && moreProposals.length === 0) {
+        // No more proposals to load
+        console.log("No more proposals to load");
+        setIsLoadingMore(false)
+      }
     }
-  }, [moreProposals, isLoadingMore])
+  }, [moreProposals, isLoadingMoreData, loadMorePage])
 
   // Check if we can load more
   const canLoadMore = allLoadedProposals.length < (totalProposals || 0)
@@ -136,7 +160,7 @@ const AllProposals: React.FC = () => {
 
     const proposer: string = item.proposer || ""
     const isHeliosOrg =
-      proposer.toLowerCase() === "0x69e073B013b209bb083d644CE05e706F17cfDE14".toLowerCase()
+      proposer.toLowerCase() === "0x3ddB715dB3E32140b731aF55a7780C94019e5075".toLowerCase()
 
     return {
       id: item.id.toString(),
@@ -182,11 +206,34 @@ const AllProposals: React.FC = () => {
   // Use all loaded proposals for display
   const proposals = allProposals
 
+  console.log("Debug State:", {
+    proposalsLength: proposals.length,
+    isLoading,
+    hasInitialLoad,
+    allLoadedProposalsLength: allLoadedProposals.length,
+    isInitialLoading
+  });
+
   // Handle load more
   const handleLoadMore = () => {
+    console.log("Load more clicked:", {
+      isLoadingMore,
+      isLoadingMoreData,
+      canLoadMore,
+      hasInitialLoad,
+      loadMorePage,
+      allLoadedProposalsLength: allLoadedProposals.length,
+      totalProposals
+    });
     if (!isLoadingMore && !isLoadingMoreData && canLoadMore && hasInitialLoad) {
+      console.log("Setting loading more to true, incrementing page");
       setIsLoadingMore(true)
-      setLoadMorePage(prev => prev + 1)
+      setLoadMorePage(prev => {
+        console.log("Page changing from", prev, "to", prev + 1);
+        return prev + 1;
+      })
+    } else {
+      console.log("Load more blocked by conditions");
     }
   }
 
@@ -338,7 +385,7 @@ const AllProposals: React.FC = () => {
         )}
 
         <div className={styles["proposal-list"]}>
-          {proposals.length === 0 && !isLoading ? (
+          {proposals.length === 0 && !isLoading && hasInitialLoad ? (
             // Empty state when no proposals exist
             <div className={styles["empty-state"]}>
               <h3>No proposals found</h3>
@@ -346,6 +393,11 @@ const AllProposals: React.FC = () => {
                 There are currently no proposals to display.{" "}
                 {isConnected && "Create the first proposal to get started!"}
               </p>
+            </div>
+          ) : proposals.length === 0 && (isLoading || !hasInitialLoad) ? (
+            // Loading state when waiting for initial load to complete
+            <div className={styles.loader}>
+              <p>Loading proposals...</p>
             </div>
           ) : (
             // Show proposals when they exist
