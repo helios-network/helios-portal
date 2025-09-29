@@ -2,7 +2,6 @@
 
 import BackSection from "@/components/back"
 import { Heading } from "@/components/heading"
-import { truncateAddress } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import React, { useState, useEffect } from "react"
 import { useAccount } from "wagmi"
