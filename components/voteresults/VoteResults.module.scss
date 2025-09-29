@@ -1,48 +1,71 @@
+@use "styles/mixins" as *;
+
 .voteResults {
-  --card-padding: var(--size-7);
+  @include block($padding: var(--size-6));
+  gap: var(--size-4);
+  background-color: var(--background-lowest);
+  flex: 1;
+  text-align: center;
+
+  h3 {
+    font-size: var(--size-4);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--size-3);
+  }
+
+  & > * {
+    width: 100%;
+  }
 }
 
 .description {
-  line-height: 1.5;
+  font-size: var(--size-3-5);
   color: var(--text-secondary);
-  margin-top: calc(var(--card-padding) * -0.25);
   margin-bottom: var(--size-4);
+  text-align: center;
 }
 
-.progressContainer {
-  margin-top: var(--size-3);
+.legend {
+  padding-left: 0;
+  margin-bottom: var(--size-5);
 }
 
-.progressBar {
-  height: 8px;
-  width: 100%;
-  background: var(--background-medium);
-  border-radius: 4px;
-  overflow: hidden;
-  display: flex;
+.pie {
+  width: calc(200px + 50 * (100vw - 320px) / 1080);
+  max-width: 280px;
+  margin: 0 auto var(--size-4);
+}
 
-  .forBar {
-    background: var(--success-medium);
-    transition: width 0.3s ease;
+.progress {
+  margin-bottom: var(--size-4);
+  text-align: left;
+
+  &Title {
+    font-size: var(--size-4);
+    font-weight: 600;
+    margin-bottom: var(--size-3);
+    color: var(--text-primary);
   }
 
-  .abstainBar {
-    background: var(--text-tertiary);
-    transition: width 0.3s ease;
-  }
-
-  .againstBar {
-    background: var(--danger-medium);
-    transition: width 0.3s ease;
+  &Bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--size-3);
+    color: var(--text-secondary);
+    margin-top: var(--size-2);
   }
 }
 
 .meta {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: var(--size-2);
-  margin-top: var(--size-4);
+  margin-bottom: var(--size-4);
   color: var(--text-tertiary);
+  font-size: var(--size-3-5);
 }
 
 .metaDivider {
@@ -53,8 +76,13 @@
   color: var(--text-tertiary);
 }
 
+.statusBadge {
+  font-size: var(--size-3) !important;
+  padding: 0.5em 1em !important;
+}
+
 .votersSection {
-  margin-top: var(--size-5);
+  text-align: left;
 }
 
 .votersHeader {
@@ -69,55 +97,83 @@
   align-items: center;
   gap: var(--size-2);
   color: var(--text-secondary);
+  font-size: var(--size-4);
+  font-weight: 600;
 }
 
 .votersList {
   display: flex;
   flex-direction: column;
-  gap: var(--size-3);
+  gap: var(--size-2);
 }
 
 .voterItem {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: var(--size-3);
+  border-radius: var(--radius-m);
+  background: var(--background-lower);
+  border: 1px solid var(--border-light);
 }
 
 .voterInfo {
   display: flex;
   align-items: center;
-  gap: var(--size-2);
+  gap: var(--size-3);
 }
 
 .avatar {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--background-medium);
+  color: var(--text-tertiary);
 }
 
 .voterAddress {
   font-size: var(--size-3-5);
+  font-weight: 500;
   color: var(--text-primary);
 }
 
 .voteType {
-  font-size: var(--size-3-5);
+  font-size: var(--size-3);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--size-1);
+  padding: var(--size-1) var(--size-2);
+  border-radius: var(--radius-s);
+  background: var(--background-medium);
 
   &.votedFor {
     color: var(--success-medium);
+    background: var(--success-light);
   }
 
   &.votedAgainst {
     color: var(--danger-medium);
+    background: var(--danger-light);
+  }
+
+  &.votedAbstain {
+    color: var(--text-secondary);
+    background: var(--background-medium);
+  }
+
+  &.votedVeto {
+    color: var(--warning-medium);
+    background: var(--warning-light);
   }
 }
 
 .voteAmount {
   font-size: var(--size-3-5);
   color: var(--text-primary);
+  font-weight: 600;
 }

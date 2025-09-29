@@ -1,7 +1,13 @@
 "use client"
 
+import { Badge } from "@/components/badge"
+import { Button } from "@/components/button"
 import { Icon } from "@/components/icon"
+import { Link } from "@/components/link"
+import { Modal } from "@/components/modal"
+import { Message } from "@/components/message"
 import { useVote } from "@/hooks/useVote"
+import clsx from "clsx"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { useAccount } from "wagmi"
@@ -11,6 +17,12 @@ interface VotingSectionProps {
   proposalId: number
   status: string
   votingEndTime: string
+  description?: string
+  proposer?: string
+  proposerAddress?: string
+  submittedDate?: string
+  participation?: string
+  title?: string
 }
 
 // Vote options enum matching your smart contract
@@ -21,22 +33,95 @@ enum VoteOption {
   NO_WITH_VOTE = 4
 }
 
+// Status configuration for badges
+const STATUS_CONFIG = {
+  EXECUTED: {
+    variant: "success" as const,
+    icon: "hugeicons:check-circle",
+    label: "Executed"
+  },
+  REJECTED: {
+    variant: "danger" as const,
+    icon: "hugeicons:close-circle",
+    label: "Rejected"
+  },
+  VOTING_PERIOD: {
+    variant: "primary" as const,
+    icon: "hugeicons:clock-03",
+    label: "Active"
+  },
+  DEPOSIT_PERIOD: {
+    variant: "warning" as const,
+    icon: "hugeicons:clock-03",
+    label: "Pending"
+  },
+  PASSED: {
+    variant: "success" as const,
+    icon: "hugeicons:check-circle",
+    label: "Passed"
+  },
+  FAILED: {
+    variant: "danger" as const,
+    icon: "hugeicons:close-circle",
+    label: "Failed"
+  }
+} as const
+
+const voteOptions = [
+  {
+    name: "yes",
+    value: VoteOption.YES,
+    icon: "hugeicons:thumbs-up",
+    color: "#10b981",
+    description: "Vote in favor of this proposal."
+  },
+  {
+    name: "no",
+    value: VoteOption.NO,
+    icon: "hugeicons:thumbs-down",
+    color: "#ef4444",
+    description: "Vote against this proposal."
+  },
+  {
+    name: "abstain",
+    value: VoteOption.ABSTAIN,
+    icon: "hugeicons:pause",
+    color: "#828db3",
+    description: "Formally abstain from voting."
+  },
+  {
+    name: "veto",
+    value: VoteOption.NO_WITH_VOTE,
+    icon: "hugeicons:information-circle",
+    color: "#f97315",
+    description: "Strong opposition that can block the proposal."
+  }
+]
+
 export function VotingSection({
   proposalId,
   status,
-  votingEndTime
+  votingEndTime,
+  title,
+  description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Est, velit, labore dolore alias sequi nam ullam saepe facere iusto quas voluptatem et doloribus aliquam tempore.",
+  proposer = "Helios Guardian",
+  proposerAddress,
+  submittedDate = "Apr 17, 2025",
+  participation = "45.67%"
 }: VotingSectionProps) {
   const { address, isConnected } = useAccount()
   const { vote, feedback, resetFeedback, isLoading } = useVote()
   const [selectedVote, setSelectedVote] = useState<VoteOption | null>(null)
   const [voteMetadata, setVoteMetadata] = useState("")
   const [hasVoted, setHasVoted] = useState(false)
+  const [showModal, setShowModal] = useState(false)
 
   const submitVote = async () => {
     if (!address || selectedVote === null) return
 
     try {
       await vote(proposalId, selectedVote, voteMetadata)
+      setShowModal(false)
     } catch (error) {
       console.error("Error submitting vote:", error)
     }
@@ -69,35 +154,69 @@ export function VotingSection({
 
   const canVote =
     status === "VOTING_PERIOD" && new Date() < new Date(votingEndTime)
-  // const canVote = status === "REJECTED"
 
-  const getStatusMessage = () => {
-    if (status === "DEPOSIT_PERIOD") return "Voting has not started yet"
-    if (status === "VOTING_PERIOD" && new Date() >= new Date(votingEndTime))
-      return "Voting period has ended"
-    if (status === "EXECUTED") return "Proposal has been executed"
-    if (status === "REJECTED") return "Proposal was rejected"
+  const getStatusInfo = () => {
+    if (status === "DEPOSIT_PERIOD") {
+      return {
+        message: "Voting has not started yet",
+        variant: "warning" as const,
+        icon: "hugeicons:clock-03",
+        title: "Pending"
+      }
+    }
+    if (status === "VOTING_PERIOD" && new Date() >= new Date(votingEndTime)) {
+      return {
+        message: "The voting period for this proposal has ended",
+        variant: "warning" as const,
+        icon: "hugeicons:clock-03",
+        title: "Voting Ended"
+      }
+    }
+    if (status === "EXECUTED") {
+      return {
+        message: "This proposal has been successfully executed",
+        variant: "success" as const,
+        icon: "hugeicons:check-circle",
+        title: "Executed"
+      }
+    }
+    if (status === "REJECTED") {
+      return {
+        message: "This proposal was rejected by the community",
+        variant: "danger" as const,
+        icon: "hugeicons:close-circle",
+        title: "Rejected"
+      }
+    }
     return null
   }
 
-  const statusMessage = getStatusMessage()
+  const statusInfo = getStatusInfo()
+
+  const getStatusConfig = () => {
+    return STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] || {
+      variant: "secondary" as const,
+      icon: "hugeicons:information-circle",
+      label: status.replace('_', ' ')
+    }
+  }
 
   return (
     <div className={styles.votingSection}>
-      <h3 className={styles.sectionTitle}>
-        <Icon icon="mdi:vote-outline" width={20} height={20} /> Cast Your Vote
-      </h3>
-      {statusMessage && (
-        <div className={styles.statusMessage}>
-          <Icon
-            icon="mdi:alert-circle-outline"
-            width={18}
-            height={18}
-            className={styles.statusIcon}
-          />
-          <p>{statusMessage}</p>
+      {/* Proposal Info Line */}
+      <div className={styles.proposalInfo}>
+        <div className={styles.proposalTitle}>
+          {title || `Proposal #${proposalId}`}
         </div>
-      )}
+        <Badge
+          status={getStatusConfig().variant}
+          icon={getStatusConfig().icon}
+          className={styles.statusBadge}
+        >
+          {getStatusConfig().label}
+        </Badge>
+      </div>
+
       {!isConnected ? (
         <div className={styles.walletPrompt}>
           <div className={styles.promptContent}>
@@ -117,162 +236,143 @@ export function VotingSection({
           </div>
         </div>
       ) : (
-        <div className={styles.connectedWallet}>
-          <div className={styles.walletInfo}>
-            <Icon
-              icon="mdi:wallet-outline"
-              width={18}
-              height={18}
-              className={styles.walletIndicator}
-            />
-            <span>Connected:</span>
-            <span className={`${styles.address} ${styles.displayAddress1}`}>
-              {address}
-            </span>
-            <span className={`${styles.address} ${styles.displayAddress2}`}>
-              {address?.slice(0, 6)}...{address?.slice(-4)}
-            </span>
-          </div>
-          {canVote && (
-            <>
-              {hasVoted && (
-                <div className={styles.voteConfirmation}>
-                  <Icon
-                    icon="mdi:check-circle"
-                    width={18}
-                    height={18}
-                    className={styles.confirmationIcon}
-                  />
-                  <span>Your vote has been successfully submitted!</span>
-                </div>
-              )}
-              <form
-                className={styles.voteForm}
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  submitVote()
-                }}
+        <div className={styles.content}>
+          <div className={styles.left}>
+            <div className={clsx(styles.info, styles.max)}>
+              <h3>Description</h3>
+              <p>{description}</p>
+            </div>
+
+            <div className={styles.metadataGrid}>
+              <div className={styles.info}>
+                <h3>Proposer</h3>
+                <p>
+                  {proposerAddress ? (
+                    <Link href={`https://explorer.helioschainlabs.org/address/${proposerAddress}`} className={styles.proposerLink}>
+                      <span>{proposerAddress}</span>
+                      <Icon icon="hugeicons:link-circle-02" />
+                    </Link>
+                  ) : (
+                    proposer
+                  )}
+                </p>
+              </div>
+              <div className={styles.info}>
+                <h3>Submitted On</h3>
+                <p>{submittedDate}</p>
+              </div>
+              <div className={styles.info}>
+                <h3>Voting Ends On</h3>
+                <p>{new Date(votingEndTime).toLocaleString()}</p>
+              </div>
+              <div className={styles.info}>
+                <h3>Participation</h3>
+                <p>{participation}</p>
+              </div>
+            </div>
+
+            {hasVoted && (
+              <div className={styles.voteConfirmation}>
+                <Icon
+                  icon="mdi:check-circle"
+                  width={18}
+                  height={18}
+                  className={styles.confirmationIcon}
+                />
+                <span>Your vote has been successfully submitted!</span>
+              </div>
+            )}
+
+            {canVote && (
+              <Button
+                icon="hugeicons:add-to-list"
+                onClick={() => setShowModal(true)}
+                className={styles.voteButton}
               >
-                <div className={styles.voteOptions}>
-                  <label className={styles.voteOption}>
-                    <input
-                      type="radio"
-                      name="voteOption"
-                      value={VoteOption.YES}
-                      checked={selectedVote === VoteOption.YES}
-                      onChange={() => setSelectedVote(VoteOption.YES)}
-                      disabled={isLoading}
-                    />
-                    <span className={`${styles.optionLabel} ${styles.yes}`}>
-                      <Icon
-                        icon="mdi:thumb-up-outline"
-                        width={18}
-                        height={18}
-                        className={styles.optionIcon}
-                      />{" "}
-                      Vote Yes
-                    </span>
-                  </label>
-                  <label className={styles.voteOption}>
-                    <input
-                      type="radio"
-                      name="voteOption"
-                      value={VoteOption.NO}
-                      checked={selectedVote === VoteOption.NO}
-                      onChange={() => setSelectedVote(VoteOption.NO)}
-                      disabled={isLoading}
-                    />
-                    <span className={`${styles.optionLabel} ${styles.no}`}>
-                      <Icon
-                        icon="mdi:thumb-down-outline"
-                        width={18}
-                        height={18}
-                        className={styles.optionIcon}
-                      />{" "}
-                      Vote No
-                    </span>
-                  </label>
-                  <label className={styles.voteOption}>
-                    <input
-                      type="radio"
-                      name="voteOption"
-                      value={VoteOption.ABSTAIN}
-                      checked={selectedVote === VoteOption.ABSTAIN}
-                      onChange={() => setSelectedVote(VoteOption.ABSTAIN)}
-                      disabled={isLoading}
-                    />
-                    <span className={`${styles.optionLabel} ${styles.abstain}`}>
-                      <Icon
-                        icon="mdi:minus-circle-outline"
-                        width={18}
-                        height={18}
-                        className={styles.optionIcon}
-                      />{" "}
-                      Abstain
-                    </span>
-                  </label>
-                  <label className={styles.voteOption}>
-                    <input
-                      type="radio"
-                      name="voteOption"
-                      value={VoteOption.NO_WITH_VOTE}
-                      checked={selectedVote === VoteOption.NO_WITH_VOTE}
-                      onChange={() => setSelectedVote(VoteOption.NO_WITH_VOTE)}
-                      disabled={isLoading}
-                    />
-                    <span className={`${styles.optionLabel} ${styles.novote}`}>
-                      <Icon
-                        icon="mdi:cancel"
-                        width={18}
-                        height={18}
-                        className={styles.optionIcon}
-                      />{" "}
-                      No with Vote
-                    </span>
-                  </label>
-                </div>
-                <div className={styles.metadataSection}>
-                  <label
-                    htmlFor="voteMetadata"
-                    className={styles.metadataLabel}
+                {hasVoted ? "Change my vote" : "Cast Vote"}
+              </Button>
+            )}
+
+            <Modal
+              open={showModal}
+              onClose={() => setShowModal(false)}
+              title={hasVoted ? "Change my vote" : "Cast your vote"}
+              className={styles.modal}
+              responsiveBottom
+            >
+              <p>
+                {title || `Proposal #${proposalId}`}
+                <small>Voting ends {new Date(votingEndTime).toLocaleDateString()}</small>
+              </p>
+
+              <ul className={styles.voting}>
+                {voteOptions.map((voteOption) => (
+                  <li
+                    key={voteOption.name}
+                    className={clsx(selectedVote === voteOption.value && styles.active)}
+                    style={
+                      { "--color": voteOption.color } as React.CSSProperties
+                    }
+                    onClick={() => setSelectedVote(voteOption.value)}
                   >
-                    Vote Comment (Optional):
-                  </label>
-                  <textarea
-                    id="voteMetadata"
-                    className={styles.metadataInput}
-                    value={voteMetadata}
-                    onChange={(e) => setVoteMetadata(e.target.value)}
-                    placeholder="Add a comment about your vote..."
-                    rows={3}
-                    disabled={isLoading}
-                  />
-                </div>
-                <button
-                  className={styles.submitVoteButton}
-                  type="submit"
+                    <Icon icon={voteOption.icon} />
+                    <div className={styles.votingContent}>
+                      <strong>{voteOption.name}</strong>
+                      <span>{voteOption.description}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <div className={styles.power}>
+                <span>Your Voting Power:</span> <strong>12,500 votes</strong>
+              </div>
+
+              <div className={styles.metadataSection}>
+                <label
+                  htmlFor="voteMetadata"
+                  className={styles.metadataLabel}
+                >
+                  Vote Comment (Optional):
+                </label>
+                <textarea
+                  id="voteMetadata"
+                  className={styles.metadataInput}
+                  value={voteMetadata}
+                  onChange={(e) => setVoteMetadata(e.target.value)}
+                  placeholder="Add a comment about your vote..."
+                  rows={3}
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div className={styles.group}>
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className={styles.confirm}
+                  onClick={submitVote}
+                  icon="hugeicons:add-to-list"
                   disabled={selectedVote === null || isLoading}
                 >
-                  {isLoading ? (
-                    <span className={styles.loadingContent}>
-                      <span className={styles.spinner}></span> Submitting...
-                    </span>
-                  ) : hasVoted ? (
-                    <>
-                      <Icon icon="mdi:refresh" width={16} height={16} /> Vote
-                      Again
-                    </>
-                  ) : (
-                    <>
-                      <Icon icon="mdi:send" width={16} height={16} /> Submit
-                      Vote
-                    </>
-                  )}
-                </button>
-              </form>
-            </>
-          )}
+                  {isLoading ? "Submitting..." : "Submit Vote"}
+                </Button>
+              </div>
+            </Modal>
+          </div>
         </div>
+
+      )}
+      {statusInfo && (
+        <Message
+          variant={statusInfo.variant}
+          icon={statusInfo.icon}
+          title={statusInfo.title}
+          className={styles.statusMessage}
+        >
+          {statusInfo.message}
+        </Message>
       )}
     </div>
   )

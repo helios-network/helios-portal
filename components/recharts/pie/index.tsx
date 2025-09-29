@@ -13,6 +13,7 @@ interface RechartsPieProps {
     price: number
     color: string
     percentage: number
+    displayPercentage?: number
   }[]
   className?: string
 }
@@ -24,8 +25,7 @@ export const RechartsPie = ({ data, className }: RechartsPieProps) => {
       return (
         <RechartsTooltip>
           <strong>{data.name}</strong>
-          {data.value && <span>Amount: {data.value}</span>}
-          <span>${formatNumber(data.price)}</span>
+          {data.value !== undefined && <span>Votes: {formatNumber(data.value)}</span>}
           <span>{data.percentage.toFixed(2)}%</span>
         </RechartsTooltip>
       )
@@ -35,13 +35,13 @@ export const RechartsPie = ({ data, className }: RechartsPieProps) => {
 
   return (
     <div className={className}>
-      <ResponsiveContainer width="100%" aspect={1}>
+      <ResponsiveContainer width="100%" aspect={1.5}>
         <PieChart>
           <Pie
             data={data}
             cx="50%"
             cy="50%"
-            innerRadius="80%"
+            innerRadius="75%"
             outerRadius="100%"
             paddingAngle={0}
             dataKey="price"
@@ -64,6 +64,7 @@ interface RechartsPieLegendProps {
     price: number
     color: string
     percentage: number
+    displayPercentage?: number
   }[]
   className?: string
 }
@@ -80,7 +81,7 @@ export const RechartsPieLegend = ({
           <span className={s.name}>{item.name}</span>
           <span className={s.value}>{item.value}</span>
           <span className={s.percentage}>
-            ${formatNumber(item.price)} ({item.percentage.toFixed(2)}%)
+            {item.value !== undefined ? formatNumber(item.value) : '0'} votes ({item.percentage.toFixed(2)}%)
           </span>
         </div>
       ))}
