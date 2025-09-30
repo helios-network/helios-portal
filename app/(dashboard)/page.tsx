@@ -10,6 +10,7 @@ import { Recents } from "./(components)/recents"
 import { Stat } from "./(components)/stat"
 import { TVL } from "./(components)/tvl"
 import { Validators } from "./(components)/validators"
+import { Overview } from "./(components)/overview"
 import s from "./page.module.scss"
 import { Weights } from "./(components)/weights"
 import { formatNumber } from "@/lib/utils/number"
@@ -22,6 +23,7 @@ export default function Page() {
 
   return (
     <>
+      <Overview />
       <Grid className={s.top}>
         <Area area="a">
           <Portfolio />
