@@ -19,16 +19,10 @@ interface ChartProps {
 
 const CustomTooltip = ({ active, payload, prefix }: any) => {
     if (active && payload && payload.length) {
-        const value = payload[0].value
-        const formattedValue = value.toLocaleString('en-US', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 2
-        })
-
         return (
             <RechartsTooltip>
                 <strong>
-                    {prefix}{formattedValue}
+                    {prefix}{formatNumberWithNotation(payload[0].value)}
                 </strong>
                 <span>{payload[0].payload.date}</span>
             </RechartsTooltip>
