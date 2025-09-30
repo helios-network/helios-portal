@@ -341,29 +341,66 @@
 }
 
 .walletPrompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  padding: calc(var(--card-padding) * 1.5);
+  gap: var(--size-4);
+  background: var(--background-medium);
+  border: 2px dashed var(--background-high);
+  border-radius: var(--radius-m);
+  padding: var(--size-8);
+  margin-top: var(--size-4);
+  transition: all 0.3s ease;
+  
+  @include max(700px) {
+    padding: var(--size-6);
+  }
 
-  .promptContent {
-    max-width: 300px;
-    margin: 0 auto;
+  &:hover {
+    border-color: var(--primary-medium);
+    background: var(--background-low);
+    
+    .walletIcon {
+      color: var(--primary-medium);
+      transform: scale(1.1);
+    }
+    .promptTitle {
+      font-weight: 650;
+      transition: all 0.3s ease;
+    }
+    .promptText {
+      color: var(--text-primary);
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+  }
+
+  .walletIcon {
+    color: var(--text-secondary);
+    opacity: 0.6;
+    transition: all 0.3s ease;
   }
 
   .promptTitle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
     font-size: var(--size-5);
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin: 0;
     color: var(--text-primary);
   }
 
   .promptText {
     color: var(--text-secondary);
-    line-height: 1.5;
+    line-height: 1.6;
     margin: 0;
+    font-size: var(--size-4);
+    max-width: 400px;
+  }
+
+  .connectButton {
+    margin-top: var(--size-2);
+    min-width: 200px;
   }
 }
 

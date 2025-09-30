@@ -11,6 +11,7 @@ import clsx from "clsx"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { useAccount } from "wagmi"
+import { useAppKit } from "@reown/appkit/react"
 import styles from "./voting-section.module.scss"
 
 interface VotingSectionProps {
@@ -110,6 +111,7 @@ export function VotingSection({
   participation = "45.67%"
 }: VotingSectionProps) {
   const { address, isConnected } = useAccount()
+  const { open: openLoginModal } = useAppKit()
   const { vote, feedback, resetFeedback, isLoading } = useVote()
   const [selectedVote, setSelectedVote] = useState<VoteOption | null>(null)
   const [voteMetadata, setVoteMetadata] = useState("")
@@ -222,154 +224,157 @@ export function VotingSection({
         </Badge>
       </div>
 
-      {!isConnected ? (
-        <div className={styles.walletPrompt}>
-          <div className={styles.promptContent}>
-            <h4 className={styles.promptTitle}>
-              <Icon
-                icon="mdi:wallet-outline"
-                width={24}
-                height={24}
-                className={styles.promptIcon}
-              />
-              Connect Your Wallet
-            </h4>
-            <p className={styles.promptText}>
-              Please connect your wallet using the button in the header to
-              participate in governance voting.
-            </p>
+      <div className={styles.content}>
+        <div className={styles.left}>
+          <div className={clsx(styles.info, styles.max)}>
+            <h3>Description</h3>
+            <p>{description}</p>
           </div>
-        </div>
-      ) : (
-        <div className={styles.content}>
-          <div className={styles.left}>
-            <div className={clsx(styles.info, styles.max)}>
-              <h3>Description</h3>
-              <p>{description}</p>
-            </div>
 
-            <div className={styles.metadataGrid}>
-              <div className={styles.info}>
-                <h3>Proposer</h3>
-                <p>
-                  {proposerAddress ? (
-                    <Link href={`https://explorer.helioschainlabs.org/address/${proposerAddress}`} className={styles.proposerLink}>
-                      <span>{proposerAddress}</span>
-                      <Icon icon="hugeicons:link-circle-02" />
-                    </Link>
-                  ) : (
-                    proposer
-                  )}
-                </p>
-              </div>
-              <div className={styles.info}>
-                <h3>Participation</h3>
-                <p>{participation}</p>
-              </div>
-              <div className={styles.info}>
-                <h3>Submitted On</h3>
-                <p>{submittedDate}</p>
-              </div>
-              <div className={styles.info}>
-                <h3>Voting Ends On</h3>
-                <p>{votingEndTime}</p>
-              </div>
-
-            </div>
-
-            {hasVoted && (
-              <div className={styles.voteConfirmation}>
-                <Icon
-                  icon="mdi:check-circle"
-                  width={18}
-                  height={18}
-                  className={styles.confirmationIcon}
-                />
-                <span>Your vote has been successfully submitted!</span>
-              </div>
-            )}
-
-            {canVote && (
-              <Button
-                icon="hugeicons:add-to-list"
-                onClick={() => setShowModal(true)}
-                className={styles.voteButton}
-              >
-                {hasVoted ? "Change my vote" : "Cast Vote"}
-              </Button>
-            )}
-
-            <Modal
-              open={showModal}
-              onClose={() => setShowModal(false)}
-              title={hasVoted ? "Change my vote" : "Cast your vote"}
-              className={styles.modal}
-              responsiveBottom
-            >
+          <div className={styles.metadataGrid}>
+            <div className={styles.info}>
+              <h3>Proposer</h3>
               <p>
-                {title || `Proposal #${proposalId}`}
-                <small>Voting ends {new Date(votingEndTime).toLocaleDateString()}</small>
+                {proposerAddress ? (
+                  <Link href={`https://explorer.helioschainlabs.org/address/${proposerAddress}`} className={styles.proposerLink}>
+                    <span>{proposerAddress}</span>
+                    <Icon icon="hugeicons:link-circle-02" />
+                  </Link>
+                ) : (
+                  proposer
+                )}
               </p>
+            </div>
+            <div className={styles.info}>
+              <h3>Participation</h3>
+              <p>{participation}</p>
+            </div>
+            <div className={styles.info}>
+              <h3>Submitted On</h3>
+              <p>{submittedDate}</p>
+            </div>
+            <div className={styles.info}>
+              <h3>Voting Ends On</h3>
+              <p>{votingEndTime}</p>
+            </div>
 
-              <ul className={styles.voting}>
-                {voteOptions.map((voteOption) => (
-                  <li
-                    key={voteOption.name}
-                    className={clsx(selectedVote === voteOption.value && styles.active)}
-                    style={
-                      { "--color": voteOption.color } as React.CSSProperties
-                    }
-                    onClick={() => setSelectedVote(voteOption.value)}
-                  >
-                    <Icon icon={voteOption.icon} />
-                    <div className={styles.votingContent}>
-                      <strong>{voteOption.name}</strong>
-                      <span>{voteOption.description}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-
-              <div className={styles.power}>
-                <span>Your Voting Power:</span> <strong>12,500 votes</strong>
-              </div>
-
-              <div className={styles.metadataSection}>
-                <label
-                  htmlFor="voteMetadata"
-                  className={styles.metadataLabel}
-                >
-                  Vote Comment (Optional):
-                </label>
-                <textarea
-                  id="voteMetadata"
-                  className={styles.metadataInput}
-                  value={voteMetadata}
-                  onChange={(e) => setVoteMetadata(e.target.value)}
-                  placeholder="Add a comment about your vote..."
-                  rows={3}
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className={styles.group}>
-                <Button variant="secondary" onClick={() => setShowModal(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  className={styles.confirm}
-                  onClick={submitVote}
-                  icon="hugeicons:add-to-list"
-                  disabled={selectedVote === null || isLoading}
-                >
-                  {isLoading ? "Submitting..." : "Submit Vote"}
-                </Button>
-              </div>
-            </Modal>
           </div>
-        </div>
 
-      )}
+          {hasVoted && (
+            <div className={styles.voteConfirmation}>
+              <Icon
+                icon="mdi:check-circle"
+                width={18}
+                height={18}
+                className={styles.confirmationIcon}
+              />
+              <span>Your vote has been successfully submitted!</span>
+            </div>
+          )}
+
+          {!isConnected && canVote && (
+            <div className={styles.walletPrompt}>
+              <Icon
+                icon="hugeicons:wallet-01"
+                width={48}
+                height={48}
+                className={styles.walletIcon}
+              />
+              <h4 className={styles.promptTitle}>
+                Connect Your Wallet
+              </h4>
+              <p className={styles.promptText}>
+                To participate in governance voting, please connect your wallet.
+              </p>
+              <Button
+                iconRight="hugeicons:wallet-01"
+                onClick={() => openLoginModal()}
+                className={styles.connectButton}
+              >
+                Connect Wallet
+              </Button>
+            </div>
+          )}
+
+          {canVote && isConnected && (
+            <Button
+              icon="hugeicons:add-to-list"
+              onClick={() => setShowModal(true)}
+              className={styles.voteButton}
+            >
+              {hasVoted ? "Change my vote" : "Cast Vote"}
+            </Button>
+          )}
+
+          <Modal
+            open={showModal}
+            onClose={() => setShowModal(false)}
+            title={hasVoted ? "Change my vote" : "Cast your vote"}
+            className={styles.modal}
+            responsiveBottom
+          >
+            <p>
+              {title || `Proposal #${proposalId}`}
+              <small>Voting ends {new Date(votingEndTime).toLocaleDateString()}</small>
+            </p>
+
+            <ul className={styles.voting}>
+              {voteOptions.map((voteOption) => (
+                <li
+                  key={voteOption.name}
+                  className={clsx(selectedVote === voteOption.value && styles.active)}
+                  style={
+                    { "--color": voteOption.color } as React.CSSProperties
+                  }
+                  onClick={() => setSelectedVote(voteOption.value)}
+                >
+                  <Icon icon={voteOption.icon} />
+                  <div className={styles.votingContent}>
+                    <strong>{voteOption.name}</strong>
+                    <span>{voteOption.description}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            <div className={styles.power}>
+              <span>Your Voting Power:</span> <strong>12,500 votes</strong>
+            </div>
+
+            <div className={styles.metadataSection}>
+              <label
+                htmlFor="voteMetadata"
+                className={styles.metadataLabel}
+              >
+                Vote Comment (Optional):
+              </label>
+              <textarea
+                id="voteMetadata"
+                className={styles.metadataInput}
+                value={voteMetadata}
+                onChange={(e) => setVoteMetadata(e.target.value)}
+                placeholder="Add a comment about your vote..."
+                rows={3}
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className={styles.group}>
+              <Button variant="secondary" onClick={() => setShowModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                className={styles.confirm}
+                onClick={submitVote}
+                icon="hugeicons:add-to-list"
+                disabled={selectedVote === null || isLoading}
+              >
+                {isLoading ? "Submitting..." : "Submit Vote"}
+              </Button>
+            </div>
+          </Modal>
+        </div>
+      </div>
       {statusInfo && (
         <Message
           variant={statusInfo.variant}
