@@ -2,6 +2,7 @@
 
 import { Area, AreaChart, ResponsiveContainer, Tooltip } from "recharts"
 import { useHomeData } from "@/hooks/useHomeData"
+import { useWhitelistedAssets } from "@/hooks/useWhitelistedAssets"
 import {
     formatNumberWithNotation,
     formatTokenAmount
@@ -64,6 +65,13 @@ export function Overview() {
     } = useHomeData({
         refreshInterval: 30000,
     })
+
+    const { assets } = useWhitelistedAssets()
+
+    // Sum all totalShares from whitelisted assets
+    const totalGovernanceVotes = assets.reduce((sum, asset) => {
+        return sum + BigInt(asset.totalShares || "0")
+    }, BigInt(0))
 
     const finalTotalTransactions = homeDataTotalTransactions
     const finalChainStats = homeDataChainStats
@@ -154,9 +162,9 @@ export function Overview() {
                         <div className={s.meta}>
                             Governance Votes:{" "}
                             <strong>
-                                {finalChainStats?.totalGovernanceVote
+                                {totalGovernanceVotes > 0
                                     ? formatTokenAmount(
-                                        finalChainStats.totalGovernanceVote,
+                                        totalGovernanceVotes.toString(),
                                         18,
                                         2,
                                     )
