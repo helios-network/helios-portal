@@ -1,18 +1,40 @@
 @use "styles/mixins" as *;
 
+.overview {
+  display: flex;
+  gap: var(--size-6);
+  margin-bottom: var(--size-6);
+
+  @include max(1023px) {
+    flex-direction: column;
+  }
+
+  @include max(600px) {
+    gap: var(--size-5);
+    margin-bottom: var(--size-5);
+  }
+
+  > * {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
 .top {
   grid-template-areas:
     "a a a a a a b b c c d d"
     "a a a a a a e e e e f f"
     "g g g h h h k k k k k k"
-    "i i i i i i j j j j j j";
+    "i i i i i i k k k k k k"
+    "j j j j j j k k k k k k";
 
   @include max(1550px) {
     grid-template-areas:
       "a a a a a a b b b c c c"
       "a a a a a a e e e e f f"
       "g g g h h h k k k k k k"
-      "i i i i i i j j j j j j";
+      "i i i i i i k k k k k k"
+      "j j j j j j k k k k k k";
 
     [data-area="d"] {
       display: none;
@@ -24,7 +46,8 @@
       "a a a a a a b b b c c c"
       "a a a a a a e e e e e e"
       "g g g h h h k k k k k k"
-      "i i i i i i j j j j j j";
+      "i i i i i i k k k k k k"
+      "j j j j j j k k k k k k";
 
     [data-area="f"] {
       display: none;
@@ -38,8 +61,8 @@
       "b b c c d d"
       "e e e e f f"
       "i i i i i i"
-      "k k k k k k"
       "j j j j j j"
+      "k k k k k k"
       "g g g h h h";
 
     [data-area="d"] {
@@ -58,8 +81,8 @@
       "d d d f f f"
       "e e e e e e"
       "i i i i i i"
-      "k k k k k k"
       "j j j j j j"
+      "k k k k k k"
       "g g g g g g"
       "h h h h h h";
   }

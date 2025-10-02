@@ -20,11 +20,12 @@
   --card-padding: var(--size-7);
   flex: 1;
   min-width: 0;
+  height: auto;
 }
 
 .content {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--size-6);
   flex: 1;
 
@@ -69,7 +70,7 @@
 
 .chart {
   flex: 1.5;
-  height: 100px;
+  height: 120px;
   background: var(--background-low);
   border: 10px solid var(--border-default);
   border-radius: var(--radius-xs);
@@ -77,6 +78,7 @@
   overflow: hidden;
   position: relative;
   min-width: 250px;
+  align-self: center;
 
   @include max(768px) {
     width: 100%;
@@ -86,4 +88,53 @@
   @include max(400px) {
     display: none;
   }
+}
+
+.networkWeights {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2);
+  margin-top: var(--size-3);
+  padding: var(--size-3);
+  background: var(--background-low);
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-default);
+}
+
+.networkWeightsTitle {
+  font-size: var(--size-3);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--size-1);
+}
+
+.assetWeight {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--size-2) 0;
+  border-bottom: 1px solid var(--border-default);
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:first-child {
+    padding-top: 0;
+  }
+}
+
+.assetSymbol {
+  font-size: var(--size-4);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.assetPercentage {
+  font-size: var(--size-4);
+  font-weight: 700;
+  color: var(--color-blue-500);
 }

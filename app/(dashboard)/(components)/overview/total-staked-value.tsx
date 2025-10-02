@@ -2,6 +2,7 @@
 
 import { Area, AreaChart, ResponsiveContainer, Tooltip } from "recharts"
 import { useHomeData } from "@/hooks/useHomeData"
+import { useWhitelistedAssets } from "@/hooks/useWhitelistedAssets"
 import {
     formatNumberWithNotation,
     formatTokenAmount
@@ -63,9 +64,9 @@ export function TotalStakedValue() {
         refreshInterval: 30000,
     })
 
-    const finalChainStats = homeDataChainStats
+    const { assets } = useWhitelistedAssets()
 
-    console.log("TVL", tvlChartData)
+    const finalChainStats = homeDataChainStats
 
     const dataTotal =
         tvlChartData.length > 0
@@ -88,11 +89,17 @@ export function TotalStakedValue() {
                 { date: "Dec", value: 0 },
             ]
 
+    // Sort assets by network percentage (highest first) and take top 3
+    const topAssets = [...assets]
+        .filter(asset => asset.networkPercentageSecurisation && parseFloat(asset.networkPercentageSecurisation) > 0)
+        .sort((a, b) => parseFloat(b.networkPercentageSecurisation) - parseFloat(a.networkPercentageSecurisation))
+        .slice(0, 3)
+
     return (
         <Card className={s.card}>
             <Heading
                 icon="hugeicons:coins-dollar"
-                title="Total Staked Value"
+                title="Total Value Locked (TVL)"
             />
             <div className={s.content}>
                 <div className={s.stats}>
@@ -102,15 +109,21 @@ export function TotalStakedValue() {
                             ? formatNumberWithNotation(Number(finalChainStats.tvlValue))
                             : formatNumberWithNotation(0)}
                     </div>
-                    <div className={s.meta}>
-                        Restaked Assets:{" "}
-                        <strong>
-                            {finalChainStats?.totalTokenVoting
-                                ? formatTokenAmount(finalChainStats.totalTokenVoting, 18, 2)
-                                : "0"}{" "}
-                            Tokens
-                        </strong>
-                    </div>
+
+                    {/* Network Weights - Show percentage of each asset securing the network */}
+                    {topAssets.length > 0 && (
+                        <div className={s.networkWeights}>
+                            <div className={s.networkWeightsTitle}>Network Secured By:</div>
+                            {topAssets.map((asset, index) => (
+                                <div key={asset.denom} className={s.assetWeight}>
+                                    <span className={s.assetSymbol}>{asset.symbol}</span>
+                                    <span className={s.assetPercentage}>
+                                        {parseFloat(asset.networkPercentageSecurisation).toFixed(2)}%
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
                 <div className={s.chart}>
                     <Chart data={dataTotal} gradientId="tvlGradient" prefix="$" />
