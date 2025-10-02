@@ -121,7 +121,7 @@ export function Overview() {
             <Card className={s.card}>
                 <Heading
                     icon="hugeicons:coins-dollar"
-                    title="Total Value Locked"
+                    title="Total Staked Value"
                 />
                 <div className={s.content}>
                     <div className={s.stats}>
