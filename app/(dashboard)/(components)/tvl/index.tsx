@@ -136,8 +136,8 @@ export const TVL = () => {
         <div className={s.overviewStats}>
           <div className={s.overviewValue}>
             $
-            {chainStats?.tvlValue
-              ? formatNumberWithNotation(Number(chainStats.tvlValue))
+            {totalTVL
+              ? formatNumberWithNotation(Number(totalTVL))
               : formatNumberWithNotation(0)}
           </div>
           <div className={s.overviewMeta}>
