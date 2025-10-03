@@ -6,6 +6,27 @@
   overflow: hidden;
 }
 
+.gridContainer {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 2rem;
+  align-items: start;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.historyColumn {
+  margin-top: 1rem;
+  background-color: #f5f7ff;
+  border-radius: 2rem;
+  min-height: 800px;
+  @media (max-width: 1024px) {
+    order: -1;
+  }
+}
+
 .dashboardTitle {
   font-size: 1.75rem;
   font-weight: 700;

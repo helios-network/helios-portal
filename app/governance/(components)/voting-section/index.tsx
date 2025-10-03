@@ -12,6 +12,7 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { useAccount } from "wagmi"
 import { useAppKit } from "@reown/appkit/react"
+import { useVotingHistoryContext } from "@/context/VotingHistoryContext"
 import styles from "./voting-section.module.scss"
 
 interface VotingSectionProps {
@@ -113,6 +114,7 @@ export function VotingSection({
   const { address, isConnected } = useAccount()
   const { open: openLoginModal } = useAppKit()
   const { vote, feedback, resetFeedback, isLoading } = useVote()
+  const { addVote } = useVotingHistoryContext()
   const [selectedVote, setSelectedVote] = useState<VoteOption | null>(null)
   const [voteMetadata, setVoteMetadata] = useState("")
   const [hasVoted, setHasVoted] = useState(false)
@@ -123,6 +125,32 @@ export function VotingSection({
 
     try {
       await vote(proposalId, selectedVote, voteMetadata)
+
+      // Map vote option to vote name
+      const voteNameMap: Record<VoteOption, "yes" | "no" | "abstain" | "veto"> = {
+        [VoteOption.YES]: "yes",
+        [VoteOption.NO]: "no",
+        [VoteOption.ABSTAIN]: "abstain",
+        [VoteOption.NO_WITH_VOTE]: "veto"
+      }
+
+      // Determine status based on current proposal status
+      let proposalStatus: "active" | "passed" | "rejected" = "active"
+      if (status === "PASSED") proposalStatus = "passed"
+      else if (status === "REJECTED" || status === "FAILED") proposalStatus = "rejected"
+      else if (status === "VOTING_PERIOD") proposalStatus = "active"
+
+      // Add vote to history
+      addVote({
+        proposalId,
+        proposalTitle: title || `Proposal #${proposalId}`,
+        vote: voteNameMap[selectedVote],
+        voteOption: selectedVote,
+        timestamp: Date.now(),
+        status: proposalStatus,
+        metadata: voteMetadata || undefined
+      })
+
       setShowModal(false)
     } catch (error) {
       console.error("Error submitting vote:", error)

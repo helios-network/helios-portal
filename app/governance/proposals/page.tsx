@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation"
 import React, { useState, useEffect } from "react"
 import { useAccount } from "wagmi"
 import { ModalProposal } from "../(components)/proposal/modal"
+import { VotingHistory } from "./(components)/voting-history"
+import { VotingHistoryProvider } from "@/context/VotingHistoryContext"
 import styles from "./page.module.scss"
 import { useQuery } from "@tanstack/react-query"
 import { getProposalsByPageAndSize, getProposalTotalCount } from "@/helpers/rpc-calls"
@@ -326,218 +328,224 @@ const AllProposals: React.FC = () => {
 
   return (
     <>
-      <div className={styles["all-proposals"]}>
-        <div className={styles.proposalContainer}>
-          <Heading
-            icon="material-symbols:library-books-outline"
-            title="All Proposals"
-            className={styles.sectionTitle}
-          />
-          {isConnected && (
-            <button
-              className={styles["create-proposal"]}
-              onClick={handleCreateProposal}
-              disabled={isCreateLoading}
-            >
-              {isCreateLoading ? (
-                <>
-                  <span className={styles.myloader}></span>Loading…
-                </>
-              ) : (
-                "Create Proposal"
-              )}
-            </button>
-          )}
-        </div>
-
-        {/* Show error banner if there's an error but we have existing data */}
-        {error && proposals.length > 0 && (
-          <div className={styles["error-banner"]}>
-            <p>{error.message}</p>
-            <button
-              className={styles["retry-button-small"]}
-              onClick={() => window.location.reload()}
-              disabled={isLoading}
-            >
-              Retry
-            </button>
-          </div>
-        )}
-
-        {/* Proposal count info */}
-        {proposals.length > 0 && (
-          <div className={styles["proposal-stats"]}>
-            <div className={styles["stats-info"]}>
-              <span className={styles["total-count"]}>
-                Showing {proposals.length} of {totalProposals} proposal{totalProposals !== 1 ? "s" : ""}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {proposals.length > 0 && (
-          <div className={styles.tableHeader}>
-            <div>Proposal</div>
-            <div>Votes</div>
-            <div>Total votes</div>
-          </div>
-        )}
-
-        <div className={styles["proposal-list"]}>
-          {proposals.length === 0 && !isLoading && hasInitialLoad ? (
-            // Empty state when no proposals exist
-            <div className={styles["empty-state"]}>
-              <h3>No proposals found</h3>
-              <p>
-                There are currently no proposals to display.{" "}
-                {isConnected && "Create the first proposal to get started!"}
-              </p>
-            </div>
-          ) : proposals.length === 0 && (isLoading || !hasInitialLoad) ? (
-            // Loading state when waiting for initial load to complete
-            <div className={styles.loader}>
-              <p>Loading proposals...</p>
-            </div>
-          ) : (
-            // Show proposals when they exist
-            proposals.map((proposal) => (
-              <div
-                key={proposal.id}
-                className={styles["proposal-card"]}
-                onClick={() =>
-                  router.push(`/governance/proposals/${proposal.id}`)
-                }
-              >
-                <div className={styles["card-content"]}>
-                  {/* Left: Proposal & meta */}
-                  <div className={styles.leftCol}>
-                    <h3 className={styles["proposal-title"]}>{proposal.title}</h3>
-                    <div className={styles.metaRow}>
-                      <Badge
-                        status={
-                          STATUS_CONFIG[
-                            (proposal.result === "PASSED"
-                              ? "passed"
-                              : proposal.result === "REJECTED"
-                                ? "rejected"
-                                : "active") as "active" | "passed" | "rejected"
-                          ].color
-                        }
-                        icon={
-                          STATUS_CONFIG[
-                            (proposal.result === "PASSED"
-                              ? "passed"
-                              : proposal.result === "REJECTED"
-                                ? "rejected"
-                                : "active") as "active" | "passed" | "rejected"
-                          ].icon
-                        }
-                      >
-                        {proposal.result === "PASSED"
-                          ? "Passed"
-                          : proposal.result === "REJECTED"
-                            ? "Rejected"
-                            : "Active"}
-                      </Badge>
-                      {proposal.isHeliosOrg && (
-                        <Badge status="primary">Helios Organization</Badge>
-                      )}
-                      <span className={styles.endDateInline}>
-                        {proposal.submitDate}
-                      </span>
-                    </div>
-                    <div className={styles["proposer-info"]}>
-                      {/* Hide proposer address entirely; only show org badge near status above */}
-                      {/* Intentionally left blank to keep layout spacing consistent */}
-                    </div>
-                  </div>
-
-                  {/* Center: Votes (centered) */}
-                  <div className={styles.centerCol}>
-                    <div className={styles.centerWrap}>
-                      <div className={styles["vote-stats"]}>
-                        <span
-                          className={styles["vote-for-text"]}
-                          title={`For (${proposal.voteForPercent})`}
-                        >
-                          <span>{proposal.yesShort}</span>
-                          <span className={styles["dot"]} aria-hidden="true">•</span>
-                        </span>
-                        <span
-                          className={styles["vote-abstain-text"]}
-                          title={`Abstain (${proposal.voteAbstainPercent})`}
-                        >
-                          <span>{proposal.abstainShort}</span>
-                          <span className={styles["dot"]} aria-hidden>•</span>
-                        </span>
-                        <span
-                          className={styles["vote-against-text"]}
-                          title={`Against (${proposal.voteAgainstPercent})`}
-                        >
-                          <span>{proposal.noShort}</span>
-                          <span className={styles["dot"]} aria-hidden>•</span>
-                        </span>
-                        <span
-                          className={styles["vote-no-veto-text"]}
-                          title={`No with veto (${proposal.voteNoWithVetoPercent})`}
-                        >
-                          <span>{proposal.noWithVetoShort}</span>
-                        </span>
-                      </div>
-                      <div className={styles["vote-bar"]}>
-                        <div
-                          className={styles["vote-for"]}
-                          style={{ width: proposal.voteForPercent }}
-                          title={`For (${proposal.voteForPercent})`}
-                        />
-                        <div
-                          className={styles["vote-abstain"]}
-                          style={{ width: proposal.voteAbstainPercent }}
-                          title={`Abstain (${proposal.voteAbstainPercent})`}
-                        />
-                        <div
-                          className={styles["vote-against"]}
-                          style={{ width: proposal.voteAgainstPercent }}
-                          title={`Against (${proposal.voteAgainstPercent})`}
-                        />
-                        <div
-                          className={styles["vote-no-veto"]}
-                          style={{ width: proposal.voteNoWithVetoPercent }}
-                          title={`No with veto (${proposal.voteNoWithVetoPercent})`}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right: Total */}
-                  <div className={styles.rightCol}>
-                    <div className={styles.totalNumber}>{proposal.totalVotesFormatted}</div>
-                    <div className={styles.totalAddresses}>{proposal.totalAddresses || 0} addresses</div>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-
-          {/* Loading indicator for page changes */}
-          {isLoading && proposals.length > 0 && (
-            <div className={styles.loader}>
-              <p>Loading proposals...</p>
-            </div>
-          )}
-
-          {/* Load More Button - inside the proposal list */}
-          {canLoadMore && hasInitialLoad && (
-            <div className={styles["load-more-container"]}>
+      <div className={styles.gridContainer}>
+        <div className={styles["all-proposals"]}>
+          <div className={styles.proposalContainer}>
+            <Heading
+              icon="material-symbols:library-books-outline"
+              title="All Proposals"
+              className={styles.sectionTitle}
+            />
+            {isConnected && (
               <button
-                className={styles["load-more-btn"]}
-                onClick={handleLoadMore}
-                disabled={isLoadingMore || isLoadingMoreData}
+                className={styles["create-proposal"]}
+                onClick={handleCreateProposal}
+                disabled={isCreateLoading}
               >
-                {(isLoadingMore || isLoadingMoreData) ? "Loading..." : "Load more"}
+                {isCreateLoading ? (
+                  <>
+                    <span className={styles.myloader}></span>Loading…
+                  </>
+                ) : (
+                  "Create Proposal"
+                )}
+              </button>
+            )}
+          </div>
+
+          {/* Show error banner if there's an error but we have existing data */}
+          {error && proposals.length > 0 && (
+            <div className={styles["error-banner"]}>
+              <p>{error.message}</p>
+              <button
+                className={styles["retry-button-small"]}
+                onClick={() => window.location.reload()}
+                disabled={isLoading}
+              >
+                Retry
               </button>
             </div>
           )}
+
+          {/* Proposal count info */}
+          {proposals.length > 0 && (
+            <div className={styles["proposal-stats"]}>
+              <div className={styles["stats-info"]}>
+                <span className={styles["total-count"]}>
+                  Showing {proposals.length} of {totalProposals} proposal{totalProposals !== 1 ? "s" : ""}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {proposals.length > 0 && (
+            <div className={styles.tableHeader}>
+              <div>Proposal</div>
+              <div>Votes</div>
+              <div>Total votes</div>
+            </div>
+          )}
+
+          <div className={styles["proposal-list"]}>
+            {proposals.length === 0 && !isLoading && hasInitialLoad ? (
+              // Empty state when no proposals exist
+              <div className={styles["empty-state"]}>
+                <h3>No proposals found</h3>
+                <p>
+                  There are currently no proposals to display.{" "}
+                  {isConnected && "Create the first proposal to get started!"}
+                </p>
+              </div>
+            ) : proposals.length === 0 && (isLoading || !hasInitialLoad) ? (
+              // Loading state when waiting for initial load to complete
+              <div className={styles.loader}>
+                <p>Loading proposals...</p>
+              </div>
+            ) : (
+              // Show proposals when they exist
+              proposals.map((proposal) => (
+                <div
+                  key={proposal.id}
+                  className={styles["proposal-card"]}
+                  onClick={() =>
+                    router.push(`/governance/proposals/${proposal.id}`)
+                  }
+                >
+                  <div className={styles["card-content"]}>
+                    {/* Left: Proposal & meta */}
+                    <div className={styles.leftCol}>
+                      <h3 className={styles["proposal-title"]}>{proposal.title}</h3>
+                      <div className={styles.metaRow}>
+                        <Badge
+                          status={
+                            STATUS_CONFIG[
+                              (proposal.result === "PASSED"
+                                ? "passed"
+                                : proposal.result === "REJECTED"
+                                  ? "rejected"
+                                  : "active") as "active" | "passed" | "rejected"
+                            ].color
+                          }
+                          icon={
+                            STATUS_CONFIG[
+                              (proposal.result === "PASSED"
+                                ? "passed"
+                                : proposal.result === "REJECTED"
+                                  ? "rejected"
+                                  : "active") as "active" | "passed" | "rejected"
+                            ].icon
+                          }
+                        >
+                          {proposal.result === "PASSED"
+                            ? "Passed"
+                            : proposal.result === "REJECTED"
+                              ? "Rejected"
+                              : "Active"}
+                        </Badge>
+                        {proposal.isHeliosOrg && (
+                          <Badge status="primary">Helios Organization</Badge>
+                        )}
+                        <span className={styles.endDateInline}>
+                          {proposal.submitDate}
+                        </span>
+                      </div>
+                      <div className={styles["proposer-info"]}>
+                        {/* Hide proposer address entirely; only show org badge near status above */}
+                        {/* Intentionally left blank to keep layout spacing consistent */}
+                      </div>
+                    </div>
+
+                    {/* Center: Votes (centered) */}
+                    <div className={styles.centerCol}>
+                      <div className={styles.centerWrap}>
+                        <div className={styles["vote-stats"]}>
+                          <span
+                            className={styles["vote-for-text"]}
+                            title={`For (${proposal.voteForPercent})`}
+                          >
+                            <span>{proposal.yesShort}</span>
+                            <span className={styles["dot"]} aria-hidden="true">•</span>
+                          </span>
+                          <span
+                            className={styles["vote-abstain-text"]}
+                            title={`Abstain (${proposal.voteAbstainPercent})`}
+                          >
+                            <span>{proposal.abstainShort}</span>
+                            <span className={styles["dot"]} aria-hidden>•</span>
+                          </span>
+                          <span
+                            className={styles["vote-against-text"]}
+                            title={`Against (${proposal.voteAgainstPercent})`}
+                          >
+                            <span>{proposal.noShort}</span>
+                            <span className={styles["dot"]} aria-hidden>•</span>
+                          </span>
+                          <span
+                            className={styles["vote-no-veto-text"]}
+                            title={`No with veto (${proposal.voteNoWithVetoPercent})`}
+                          >
+                            <span>{proposal.noWithVetoShort}</span>
+                          </span>
+                        </div>
+                        <div className={styles["vote-bar"]}>
+                          <div
+                            className={styles["vote-for"]}
+                            style={{ width: proposal.voteForPercent }}
+                            title={`For (${proposal.voteForPercent})`}
+                          />
+                          <div
+                            className={styles["vote-abstain"]}
+                            style={{ width: proposal.voteAbstainPercent }}
+                            title={`Abstain (${proposal.voteAbstainPercent})`}
+                          />
+                          <div
+                            className={styles["vote-against"]}
+                            style={{ width: proposal.voteAgainstPercent }}
+                            title={`Against (${proposal.voteAgainstPercent})`}
+                          />
+                          <div
+                            className={styles["vote-no-veto"]}
+                            style={{ width: proposal.voteNoWithVetoPercent }}
+                            title={`No with veto (${proposal.voteNoWithVetoPercent})`}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right: Total */}
+                    <div className={styles.rightCol}>
+                      <div className={styles.totalNumber}>{proposal.totalVotesFormatted}</div>
+                      <div className={styles.totalAddresses}>{proposal.totalAddresses || 0} addresses</div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+
+            {/* Loading indicator for page changes */}
+            {isLoading && proposals.length > 0 && (
+              <div className={styles.loader}>
+                <p>Loading proposals...</p>
+              </div>
+            )}
+
+            {/* Load More Button - inside the proposal list */}
+            {canLoadMore && hasInitialLoad && (
+              <div className={styles["load-more-container"]}>
+                <button
+                  className={styles["load-more-btn"]}
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore || isLoadingMoreData}
+                >
+                  {(isLoadingMore || isLoadingMoreData) ? "Loading..." : "Load more"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.historyColumn}>
+          <VotingHistory />
         </div>
       </div>
       <ModalProposal open={showModal} onClose={() => setShowModal(false)} />
@@ -547,10 +555,12 @@ const AllProposals: React.FC = () => {
 
 const ProposalDashboard: React.FC = () => {
   return (
-    <div className={styles.dashboard}>
-      <BackSection isVisible={false} />
-      <AllProposals />
-    </div>
+    <VotingHistoryProvider>
+      <div className={styles.dashboard}>
+        <BackSection isVisible={false} />
+        <AllProposals />
+      </div>
+    </VotingHistoryProvider>
   )
 }
 

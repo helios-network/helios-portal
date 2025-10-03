@@ -3,6 +3,7 @@ import { VoteResult, VoteResults } from "@/components/voteresults"
 import { request } from "@/helpers/request"
 import { notFound } from "next/navigation"
 import { VotingSection } from "../../(components)/voting-section"
+import { VotingHistoryProvider } from "@/context/VotingHistoryContext"
 import styles from "./proposal.module.scss"
 import { Power } from "../../(components)/power"
 import { Heading } from "@/components/heading"
@@ -88,7 +89,7 @@ export default async function ProposalDetail({
   const quorum = "4,000,000" // Replace with actual quorum data
 
   return (
-    <>
+    <VotingHistoryProvider>
       <BackSection isVisible={true} />
       <div className={styles.container}>
         <div className={styles.powerSection}>
@@ -155,6 +156,6 @@ export default async function ProposalDetail({
           </div>
         </div>
       </div>
-    </>
+    </VotingHistoryProvider>
   )
 }
