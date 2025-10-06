@@ -7,6 +7,7 @@ import React, { useState, useEffect } from "react"
 import { useAccount } from "wagmi"
 import { ModalProposal } from "../(components)/proposal/modal"
 import { VotingHistory } from "./(components)/voting-history"
+import { Statistics } from "../(components)/statistics"
 import { VotingHistoryProvider } from "@/context/VotingHistoryContext"
 import styles from "./page.module.scss"
 import { useQuery } from "@tanstack/react-query"
@@ -367,16 +368,7 @@ const AllProposals: React.FC = () => {
             </div>
           )}
 
-          {/* Proposal count info */}
-          {proposals.length > 0 && (
-            <div className={styles["proposal-stats"]}>
-              <div className={styles["stats-info"]}>
-                <span className={styles["total-count"]}>
-                  Showing {proposals.length} of {totalProposals} proposal{totalProposals !== 1 ? "s" : ""}
-                </span>
-              </div>
-            </div>
-          )}
+
 
           {proposals.length > 0 && (
             <div className={styles.tableHeader}>
@@ -545,6 +537,7 @@ const AllProposals: React.FC = () => {
         </div>
 
         <div className={styles.historyColumn}>
+          <Statistics totalProposals={totalProposals} />
           <VotingHistory />
         </div>
       </div>

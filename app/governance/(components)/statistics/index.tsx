@@ -4,11 +4,15 @@ import { Heading } from "@/components/heading"
 import { RechartsBar } from "@/components/recharts/bar"
 import s from "./statistics.module.scss"
 
-export const Statistics = () => {
+interface StatisticsProps {
+  totalProposals?: number
+}
+
+export const Statistics = ({ totalProposals = 0 }: StatisticsProps) => {
   const blocks = [
     {
       title: "Total Proposals",
-      value: "25",
+      value: totalProposals.toString(),
       bottom: "Since network launch"
     },
     {

@@ -19,9 +19,10 @@
 
 .historyColumn {
   margin-top: 1rem;
-  background-color: #f5f7ff;
-  border-radius: 2rem;
-  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  
   @media (max-width: 1024px) {
     order: -1;
   }
