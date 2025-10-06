@@ -6,6 +6,7 @@
   gap: 1rem;
   height: fit-content;
   position: sticky;
+  background-color: #f5f7ff;
   top: 1rem;
 }
 
@@ -19,13 +20,14 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.25rem;
+  margin-top: 1.25rem;
 }
 
 .item {
   padding: 1rem;
   border-radius: 0.75rem;
-  background: var(--bg-muted);
+  background: var(--background-lowest);
   cursor: pointer;
   transition: all 0.2s;
 
