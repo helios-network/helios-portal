@@ -3,7 +3,7 @@
 import BackSection from "@/components/back"
 import { Heading } from "@/components/heading"
 import { useRouter } from "next/navigation"
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { useAccount } from "wagmi"
 import { ModalProposal } from "../(components)/proposal/modal"
 import { VotingHistory } from "./(components)/voting-history"
@@ -45,9 +45,8 @@ interface ProposalData {
 
 const AllProposals: React.FC = () => {
   const router = useRouter()
-  const [allLoadedProposals, setAllLoadedProposals] = useState<any[]>([]) // Store all loaded proposals
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
-  const [hasInitialLoad, setHasInitialLoad] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize] = useState(10)
   const { isConnected } = useAccount()
   const [isCreateLoading, setIsCreateLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
@@ -60,74 +59,37 @@ const AllProposals: React.FC = () => {
     refetchOnWindowFocus: false
   })
 
-  // Initial load: Get first 20 proposals
-  const { data: initialProposals = [], isLoading: isInitialLoading, error: initialError } = useQuery({
-    queryKey: ["initialProposals"],
-    queryFn: () => getProposalsByPageAndSize(toHex(1), toHex(10)), // Page 0, size 20
-    staleTime: 30000,
-    refetchOnWindowFocus: false
-  })
+  // Load proposals with pagination - fetch all pages up to current page
+  const { data: allLoadedProposals = [], isLoading: isInitialLoading, error: initialError } = useQuery({
+    queryKey: ["allProposals", currentPage],
+    queryFn: async () => {
+      console.log("Fetching proposals up to page:", currentPage);
 
-  console.log("Initial Proposals:", initialProposals);
-
-  // Load more proposals (5 at a time)
-  const [loadMorePage, setLoadMorePage] = useState(2)
-  const { data: moreProposals = [], isLoading: isLoadingMoreData, error: loadMoreError } = useQuery({
-    queryKey: ["moreProposals", loadMorePage],
-    queryFn: () => {
-      console.log("Query executing for page:", loadMorePage);
-      return getProposalsByPageAndSize(toHex(loadMorePage), toHex(5));
-    },
-    enabled: isLoadingMore,
-    staleTime: 30000,
-    refetchOnWindowFocus: false
-  })
-
-  console.log("Query state:", {
-    loadMorePage,
-    isLoadingMore,
-    enabled: isLoadingMore,
-    isLoadingMoreData,
-    moreProposalsLength: moreProposals?.length
-  });
-
-  // Handle initial load
-  useEffect(() => {
-    if (initialProposals && initialProposals.length > 0 && !hasInitialLoad) {
-      setAllLoadedProposals(initialProposals)
-      setHasInitialLoad(true)
-    } else if (initialProposals && initialProposals.length === 0 && !isInitialLoading && !hasInitialLoad) {
-      // Handle case where there are genuinely no proposals
-      setAllLoadedProposals([])
-      setHasInitialLoad(true)
-    }
-  }, [initialProposals, hasInitialLoad, isInitialLoading])
-
-  // Handle load more
-  useEffect(() => {
-    console.log("Load more effect:", { moreProposals: moreProposals?.length, isLoadingMore, loadMorePage, isLoadingMoreData });
-
-    // Only process when we intentionally triggered a load (isLoadingMore is true)
-    // and the query has finished loading
-    if (isLoadingMore && !isLoadingMoreData) {
-      if (moreProposals && moreProposals.length > 0) {
-        console.log("Adding more proposals:", moreProposals.length);
-        setAllLoadedProposals(prev => [...prev, ...moreProposals])
-        setIsLoadingMore(false)
-      } else if (moreProposals && moreProposals.length === 0) {
-        // No more proposals to load
-        console.log("No more proposals to load");
-        setIsLoadingMore(false)
+      // Fetch all pages from 1 to currentPage
+      const promises = []
+      for (let page = 1; page <= currentPage; page++) {
+        promises.push(getProposalsByPageAndSize(toHex(page), toHex(pageSize)))
       }
-    }
-  }, [moreProposals, isLoadingMoreData, loadMorePage, isLoadingMore])
+
+      const results = await Promise.all(promises)
+      // Flatten all results into a single array
+      const allProposals = results.flat()
+      console.log("Total proposals loaded:", allProposals.length);
+      return allProposals
+    },
+    staleTime: 30000,
+    refetchOnWindowFocus: false,
+    placeholderData: (previousData) => previousData // Keep previous data while loading
+  })
+
+  console.log("All Loaded Proposals:", allLoadedProposals?.length);
 
   // Check if we can load more
   const canLoadMore = allLoadedProposals.length < (totalProposals || 0)
 
   // Combined loading and error states
-  const isLoading = isInitialLoading
-  const error = initialError || loadMoreError
+  const isLoading = isInitialLoading && currentPage === 1
+  const error = initialError
 
   // Transform all loaded proposals data
   const allProposals: ProposalData[] = (allLoadedProposals || []).map((item: any) => {
@@ -212,31 +174,26 @@ const AllProposals: React.FC = () => {
   console.log("Debug State:", {
     proposalsLength: proposals.length,
     isLoading,
-    hasInitialLoad,
     allLoadedProposalsLength: allLoadedProposals.length,
-    isInitialLoading
+    isInitialLoading,
+    currentPage
   });
 
-  // Handle load more
+  // Handle load more - simply increment the page
   const handleLoadMore = () => {
     console.log("Load more clicked:", {
-      isLoadingMore,
-      isLoadingMoreData,
       canLoadMore,
-      hasInitialLoad,
-      loadMorePage,
+      currentPage,
       allLoadedProposalsLength: allLoadedProposals.length,
-      totalProposals
+      totalProposals,
+      isInitialLoading
     });
-    if (!isLoadingMore && !isLoadingMoreData && canLoadMore && hasInitialLoad) {
-      console.log("Setting loading more to true, incrementing page");
-      setIsLoadingMore(true)
-      setLoadMorePage(prev => {
-        console.log("Page changing from", prev, "to", prev + 1);
-        return prev + 1;
-      })
+
+    if (canLoadMore && !isInitialLoading) {
+      console.log("Incrementing page from", currentPage, "to", currentPage + 1);
+      setCurrentPage(prev => prev + 1)
     } else {
-      console.log("Load more blocked by conditions");
+      console.log("Load more blocked - canLoadMore:", canLoadMore, "isLoading:", isInitialLoading);
     }
   }
 
@@ -380,7 +337,7 @@ const AllProposals: React.FC = () => {
           )}
 
           <div className={styles["proposal-list"]}>
-            {proposals.length === 0 && !isLoading && hasInitialLoad ? (
+            {proposals.length === 0 && !isLoading ? (
               // Empty state when no proposals exist
               <div className={styles["empty-state"]}>
                 <h3>No proposals found</h3>
@@ -389,7 +346,7 @@ const AllProposals: React.FC = () => {
                   {isConnected && "Create the first proposal to get started!"}
                 </p>
               </div>
-            ) : proposals.length === 0 && (isLoading || !hasInitialLoad) ? (
+            ) : proposals.length === 0 && isLoading ? (
               // Loading state when waiting for initial load to complete
               <div className={styles.loader}>
                 <p>Loading proposals...</p>
@@ -516,21 +473,21 @@ const AllProposals: React.FC = () => {
             )}
 
             {/* Loading indicator for page changes */}
-            {isLoading && proposals.length > 0 && (
+            {isInitialLoading && proposals.length > 0 && (
               <div className={styles.loader}>
-                <p>Loading proposals...</p>
+                <p>Loading more proposals...</p>
               </div>
             )}
 
             {/* Load More Button - inside the proposal list */}
-            {canLoadMore && hasInitialLoad && (
+            {canLoadMore && (
               <div className={styles["load-more-container"]}>
                 <button
                   className={styles["load-more-btn"]}
                   onClick={handleLoadMore}
-                  disabled={isLoadingMore || isLoadingMoreData}
+                  disabled={isInitialLoading}
                 >
-                  {(isLoadingMore || isLoadingMoreData) ? "Loading..." : "Load more"}
+                  {isInitialLoading ? "Loading..." : "Load more"}
                 </button>
               </div>
             )}
