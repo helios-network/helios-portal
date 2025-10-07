@@ -1,0 +1,194 @@
+@use "styles/mixins" as *;
+
+.recents {
+  height: fit-content;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 64px;
+  height: 64px;
+  color: var(--text-tertiary);
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 0.5rem 0;
+}
+
+.emptySubtext {
+  font-size: 0.875rem;
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.etf {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--background-lower);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-l);
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--border-medium);
+    background: var(--background-low);
+  }
+
+  @include max(600px) {
+    padding: 1rem;
+  }
+}
+
+.etfInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex: 1;
+}
+
+.etfIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--background-low);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-m);
+  flex-shrink: 0;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: var(--primary-medium);
+  }
+
+  @include max(600px) {
+    width: 40px;
+    height: 40px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.etfDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.etfName {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+
+  @include max(600px) {
+    font-size: 0.9rem;
+  }
+}
+
+.symbol {
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+
+  @include max(600px) {
+    font-size: 0.8rem;
+  }
+}
+
+.etfMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+}
+
+.tokens {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.time {
+  &::before {
+    content: "•";
+    margin-right: 0.75rem;
+  }
+}
+
+.tokensList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.tokenBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  background: var(--background-low);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-s);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary-medium);
+  white-space: nowrap;
+}
+
+.etfActions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+
+  @include max(600px) {
+    justify-content: stretch;
+
+    button {
+      flex: 1;
+    }
+  }
+}

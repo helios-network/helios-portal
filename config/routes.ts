@@ -4,7 +4,8 @@ export const routes = {
   validators: "/validators",
   delegations: "/delegations",
   governance: "/governance",
-  tokenDeployer: "/token-deployer"
+  tokenDeployer: "/token-deployer",
+  etfCreator: "/etf-creator"
 }
 
 export default routes

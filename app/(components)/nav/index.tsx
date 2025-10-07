@@ -47,6 +47,11 @@ export const Nav = () => {
       icon: "hugeicons:coins-01",
       label: "Token Deployer",
       href: routes.tokenDeployer
+    },
+    {
+      icon: "hugeicons:package",
+      label: "ETF Creator",
+      href: routes.etfCreator
     }
   ]
 

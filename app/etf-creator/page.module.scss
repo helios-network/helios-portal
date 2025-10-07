@@ -1,0 +1,29 @@
+@use "styles/mixins" as *;
+
+.etfCreator {
+  --grid-columns: 2;
+  align-items: flex-start;
+  grid-template-rows: auto auto auto;
+  grid-template-areas:
+    "a b"
+    "a c"
+    "d e";
+
+  @include max(1300px) {
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "a a"
+      "b c"
+      "d e";
+  }
+
+  @include max(1150px) {
+    grid-template-rows: auto auto auto auto auto;
+    grid-template-areas:
+      "a a"
+      "b b"
+      "c c"
+      "d d"
+      "e e";
+  }
+}
