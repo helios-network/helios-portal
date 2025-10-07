@@ -76,7 +76,7 @@ const Chart = ({ data, gradientId, prefix }: ChartProps) => {
 
 export const TVL = () => {
   const { assets, totalHolders, totalTVL } = useAssetsInfo()
-  const { chainStats, tvlChartData } = useHomeData({
+  const { tvlChartData } = useHomeData({
     refreshInterval: 30000
   })
   const { assets: whitelistedAssets } = useWhitelistedAssets()

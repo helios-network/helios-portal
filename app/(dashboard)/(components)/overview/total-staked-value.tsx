@@ -4,8 +4,7 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip } from "recharts"
 import { useHomeData } from "@/hooks/useHomeData"
 import { useWhitelistedAssets } from "@/hooks/useWhitelistedAssets"
 import {
-    formatNumberWithNotation,
-    formatTokenAmount
+    formatNumberWithNotation
 } from "@/helpers/format"
 import { Card } from "@/components/card"
 import { Heading } from "@/components/heading"
@@ -114,7 +113,7 @@ export function TotalStakedValue() {
                     {topAssets.length > 0 && (
                         <div className={s.networkWeights}>
                             <div className={s.networkWeightsTitle}>Network Secured By:</div>
-                            {topAssets.map((asset, index) => (
+                            {topAssets.map((asset) => (
                                 <div key={asset.denom} className={s.assetWeight}>
                                     <span className={s.assetSymbol}>{asset.symbol}</span>
                                     <span className={s.assetPercentage}>
