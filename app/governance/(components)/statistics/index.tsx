@@ -27,12 +27,6 @@ export const Statistics = ({ totalProposals = 0 }: StatisticsProps) => {
       bottom: "72% success rate",
       color: "success"
     },
-    {
-      title: "Average Participation",
-      value: "68%",
-      bottom: "Of total voting power",
-      color: "warning"
-    }
   ]
 
   const proposalTypes = [

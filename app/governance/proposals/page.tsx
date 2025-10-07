@@ -107,8 +107,9 @@ const AllProposals: React.FC = () => {
   useEffect(() => {
     console.log("Load more effect:", { moreProposals: moreProposals?.length, isLoadingMore, loadMorePage, isLoadingMoreData });
 
-    // Only process when we have data and the query is not loading
-    if (!isLoadingMoreData) {
+    // Only process when we intentionally triggered a load (isLoadingMore is true)
+    // and the query has finished loading
+    if (isLoadingMore && !isLoadingMoreData) {
       if (moreProposals && moreProposals.length > 0) {
         console.log("Adding more proposals:", moreProposals.length);
         setAllLoadedProposals(prev => [...prev, ...moreProposals])
@@ -119,7 +120,7 @@ const AllProposals: React.FC = () => {
         setIsLoadingMore(false)
       }
     }
-  }, [moreProposals, isLoadingMoreData, loadMorePage])
+  }, [moreProposals, isLoadingMoreData, loadMorePage, isLoadingMore])
 
   // Check if we can load more
   const canLoadMore = allLoadedProposals.length < (totalProposals || 0)
