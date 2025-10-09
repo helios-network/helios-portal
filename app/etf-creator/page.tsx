@@ -1,4 +1,3 @@
-import { Area, Grid } from "@/components/grid"
 import { ETFCreatorInterface } from "./(components)/interface"
 import { ETFCreatorRecents } from "./(components)/recents"
 import { ETFCreationSteps } from "./(components)/steps"
@@ -10,23 +9,17 @@ import s from "./page.module.scss"
 export default function Page() {
     return (
         <RecentETFsProvider>
-            <Grid className={s.etfCreator}>
-                <Area area="a">
+            <div className={s.etfCreator}>
+                <div className={s.leftColumn}>
                     <ETFCreatorInterface />
-                </Area>
-                <Area area="b">
-                    <ETFCreationSteps />
-                </Area>
-                <Area area="c">
-                    <ETFCreatorRecents />
-                </Area>
-                <Area area="d">
                     <ETFBestPractices />
-                </Area>
-                <Area area="e">
+                </div>
+                <div className={s.rightColumn}>
+                    <ETFCreationSteps />
+                    <ETFCreatorRecents />
                     <ETFImportantNotes />
-                </Area>
-            </Grid>
+                </div>
+            </div>
         </RecentETFsProvider>
     )
 }
