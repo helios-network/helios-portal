@@ -3,7 +3,7 @@
 .voteResults {
   @include block($padding: var(--size-6));
   gap: var(--size-4);
-  background-color: var(--background-lowest);
+  background-color: var(--background-lower);
   flex: 1;
   text-align: center;
 

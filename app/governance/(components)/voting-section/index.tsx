@@ -1,12 +1,14 @@
 "use client"
 
 import { Badge } from "@/components/badge"
+import { Blocks } from "@/components/blocks"
 import { Button } from "@/components/button"
 import { Icon } from "@/components/icon"
 import { Link } from "@/components/link"
 import { Modal } from "@/components/modal"
 import { Message } from "@/components/message"
 import { useVote } from "@/hooks/useVote"
+import { useUserVote, getVoteOptionName, getVoteOptionColor } from "@/hooks/useUserVote"
 import clsx from "clsx"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -115,6 +117,7 @@ export function VotingSection({
   const { open: openLoginModal } = useAppKit()
   const { vote, feedback, resetFeedback, isLoading } = useVote()
   const { addVote } = useVotingHistoryContext()
+  const { data: userVote, refetch: refetchUserVote } = useUserVote(proposalId)
   const [selectedVote, setSelectedVote] = useState<VoteOption | null>(null)
   const [voteMetadata, setVoteMetadata] = useState("")
   const [hasVoted, setHasVoted] = useState(false)
@@ -150,6 +153,9 @@ export function VotingSection({
         status: proposalStatus,
         metadata: voteMetadata || undefined
       })
+
+      // Refetch user vote to update the display
+      await refetchUserVote()
 
       setShowModal(false)
     } catch (error) {
@@ -288,6 +294,55 @@ export function VotingSection({
 
           </div>
 
+          {/* User Vote Status */}
+          {isConnected && userVote && userVote.options && userVote.options.length > 0 && (
+            <div className={styles.userVoteStatus}>
+              <div className={styles.voteStatusHeader}>
+                <Icon
+                  icon="hugeicons:check-circle"
+                  width={20}
+                  height={20}
+                  className={styles.voteStatusIcon}
+                />
+                <h3>Your Current Voting Status</h3>
+              </div>
+
+              <Blocks
+                items={userVote.options.map((option) => {
+                  const optionName = getVoteOptionName(option.option)
+                  const weightPercent = (parseFloat(option.weight) * 100).toFixed(2)
+                  const voteColor = getVoteOptionColor(option.option)
+
+                  return {
+                    title: optionName,
+                    value: (
+                      <div className={styles.voteValueWrapper}>
+                        <span
+                          className={styles.voteOptionDot}
+                          style={{ backgroundColor: voteColor }}
+                        />
+                        <span>{weightPercent}%</span>
+                      </div>
+                    ),
+                    bottom: `Weight: ${option.weight}`,
+                    color: option.option === 1 ? "success" : option.option === 3 ? "danger" : "primary"
+                  }
+                })}
+                className={styles.voteBlocks}
+              />
+
+              {userVote.metadata && (
+                <div className={styles.voteMetadataDisplay}>
+                  <div className={styles.metadataHeader}>
+                    <Icon icon="hugeicons:message-01" width={16} height={16} />
+                    <span className={styles.voteMetadataLabel}>Your Comment</span>
+                  </div>
+                  <p className={styles.voteMetadataText}>{userVote.metadata}</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {hasVoted && (
             <div className={styles.voteConfirmation}>
               <Icon
@@ -330,14 +385,14 @@ export function VotingSection({
               onClick={() => setShowModal(true)}
               className={styles.voteButton}
             >
-              {hasVoted ? "Change my vote" : "Cast Vote"}
+              {(hasVoted || userVote) ? "Change my vote" : "Cast Vote"}
             </Button>
           )}
 
           <Modal
             open={showModal}
             onClose={() => setShowModal(false)}
-            title={hasVoted ? "Change my vote" : "Cast your vote"}
+            title={(hasVoted || userVote) ? "Change my vote" : "Cast your vote"}
             className={styles.modal}
             responsiveBottom
           >

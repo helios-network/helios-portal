@@ -420,3 +420,87 @@
     color: var(--success-medium);
   }
 }
+
+.userVoteStatus {
+  @include block($padding: var(--size-5));
+  background: var(--background-medium);
+  border: 1px solid var(--background-high);
+  border-radius: var(--radius-m);
+  margin-top: var(--size-4);
+  
+  @include max(700px) {
+    padding: var(--size-4);
+  }
+}
+
+.voteStatusHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  margin-bottom: var(--size-4);
+  
+  h3 {
+    font-size: var(--size-4-5);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  
+  .voteStatusIcon {
+    color: var(--success-medium);
+  }
+}
+
+.voteBlocks {
+  margin-bottom: var(--size-3);
+}
+
+.voteValueWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  font-size: var(--size-5);
+  font-weight: 700;
+}
+
+.voteOptionDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px var(--background-medium);
+}
+
+.voteMetadataDisplay {
+  margin-top: var(--size-3);
+  padding: var(--size-4);
+  background: var(--background-lowest);
+  border-radius: var(--radius-s);
+  border: 1px solid var(--background-high);
+  
+  .metadataHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--size-2);
+    margin-bottom: var(--size-2);
+    
+    svg {
+      color: var(--primary-medium);
+    }
+  }
+  
+  .voteMetadataLabel {
+    font-size: var(--size-3-5);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  
+  .voteMetadataText {
+    font-size: var(--size-3-5);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+}
