@@ -1,7 +1,7 @@
 @use "styles/mixins" as *;
 
 .list {
-  --card-padding: var(--size-6);
+  --card-padding: var(--size-7);
 }
 
 .filters {
@@ -74,7 +74,7 @@
 }
 
 .vote {
-  @include block($padding: var(--size-6));
+  @include block($padding: var(--size-5));
   padding: 0;
 
   &.showed {
@@ -180,7 +180,7 @@
   }
 
   & > * {
-    @include block($padding: var(--size-6));
+    @include block($padding: var(--size-5));
     gap: calc(var(--padding) * 0.35);
     background-color: var(--background-lowest);
     flex: 1;
@@ -298,7 +298,7 @@
   gap: var(--gap);
 
   & > * {
-    @include block($padding: var(--size-6));
+    @include block($padding: var(--size-5));
     width: calc(50% - var(--gap) / 2);
     cursor: pointer;
     position: relative;
