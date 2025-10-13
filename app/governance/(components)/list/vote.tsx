@@ -1,3 +1,5 @@
+"use client"
+
 import { Badge } from "@/components/badge"
 import { Button } from "@/components/button"
 import { Icon } from "@/components/icon"
@@ -7,8 +9,11 @@ import { Progress } from "@/components/progress"
 import { RechartsPie, RechartsPieLegend } from "@/components/recharts/pie"
 import { STATUS_CONFIG, VOTE_CONFIG } from "@/config/vote"
 import { VoteProps, VoteVote } from "@/types/faker"
+import { useProposalDelegations } from "@/hooks/useProposalDelegations"
+import { formatNumber } from "@/lib/utils/number"
 import clsx from "clsx"
-import { useState } from "react"
+import { useState, useMemo } from "react"
+import { ethers } from "ethers"
 import s from "./list.module.scss"
 
 export const Vote = ({ item }: { item: VoteProps }) => {
@@ -17,6 +22,19 @@ export const Vote = ({ item }: { item: VoteProps }) => {
   const [showContent, setShowContent] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [vote, setVote] = useState<VoteVote>(item.vote)
+  const { delegations } = useProposalDelegations()
+
+  // Calculate voting power from delegations
+  const votingPower = useMemo(() => {
+    if (!delegations || delegations.length === 0) {
+      return 0
+    }
+
+    // Total voting power from shares
+    return delegations.reduce((sum, d) => {
+      return sum + parseFloat(ethers.formatUnits(d.shares, 18))
+    }, 0)
+  }, [delegations])
   const votes = [
     {
       name: "yes",
@@ -151,7 +169,7 @@ export const Vote = ({ item }: { item: VoteProps }) => {
                 ))}
               </ul>
               <div className={s.power}>
-                <span>Your Voting Power:</span> <strong>12,500 votes</strong>
+                <span>Your Voting Power:</span> <strong>{formatNumber(votingPower, 2)} votes</strong>
               </div>
               <div className={s.group}>
                 <Button variant="secondary" onClick={() => setShowModal(false)}>

@@ -9,12 +9,15 @@ import { Modal } from "@/components/modal"
 import { Message } from "@/components/message"
 import { useVote } from "@/hooks/useVote"
 import { useUserVote, getVoteOptionName, getVoteOptionColor } from "@/hooks/useUserVote"
+import { useProposalDelegations } from "@/hooks/useProposalDelegations"
+import { formatNumber } from "@/lib/utils/number"
 import clsx from "clsx"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { toast } from "sonner"
 import { useAccount } from "wagmi"
 import { useAppKit } from "@reown/appkit/react"
 import { useVotingHistoryContext } from "@/context/VotingHistoryContext"
+import { ethers } from "ethers"
 import styles from "./voting-section.module.scss"
 
 interface VotingSectionProps {
@@ -118,10 +121,23 @@ export function VotingSection({
   const { vote, feedback, resetFeedback, isLoading } = useVote()
   const { addVote } = useVotingHistoryContext()
   const { data: userVote, refetch: refetchUserVote } = useUserVote(proposalId)
+  const { delegations } = useProposalDelegations()
   const [selectedVote, setSelectedVote] = useState<VoteOption | null>(null)
   const [voteMetadata, setVoteMetadata] = useState("")
   const [hasVoted, setHasVoted] = useState(false)
   const [showModal, setShowModal] = useState(false)
+
+  // Calculate voting power from delegations
+  const votingPower = useMemo(() => {
+    if (!delegations || delegations.length === 0) {
+      return 0
+    }
+
+    // Total voting power from shares
+    return delegations.reduce((sum, d) => {
+      return sum + parseFloat(ethers.formatUnits(d.shares, 18))
+    }, 0)
+  }, [delegations])
 
   const submitVote = async () => {
     if (!address || selectedVote === null) return
@@ -421,7 +437,7 @@ export function VotingSection({
             </ul>
 
             <div className={styles.power}>
-              <span>Your Voting Power:</span> <strong>12,500 votes</strong>
+              <span>Your Voting Power:</span> <strong>{formatNumber(votingPower, 2)} votes</strong>
             </div>
 
             <div className={styles.metadataSection}>
