@@ -20,6 +20,16 @@ import { useVotingHistoryContext } from "@/context/VotingHistoryContext"
 import { ethers } from "ethers"
 import styles from "./voting-section.module.scss"
 
+interface Deposit {
+  denom: string
+  amount: string
+}
+
+interface ProposalDetail {
+  denoms: string[]
+  type: string
+}
+
 interface VotingSectionProps {
   proposalId: number
   status: string
@@ -30,6 +40,8 @@ interface VotingSectionProps {
   submittedDate?: string
   participation?: string
   title?: string
+  totalDeposit?: Deposit[]
+  details?: ProposalDetail[]
 }
 
 // Vote options enum matching your smart contract
@@ -105,6 +117,58 @@ const voteOptions = [
   }
 ]
 
+// Helper function to format deposit amounts
+const formatDepositAmount = (amount: string, decimals: number = 18): string => {
+  try {
+    const bn = BigInt(amount)
+    const divisor = BigInt(10 ** decimals)
+    const formatted = (Number(bn) / Number(divisor)).toFixed(2)
+    return formatNumber(parseFloat(formatted), 2)
+  } catch {
+    return amount
+  }
+}
+
+// Helper function to parse and format JSON strings from denoms
+const parseDetailData = (jsonString: string): Record<string, any> | null => {
+  try {
+    return JSON.parse(jsonString)
+  } catch {
+    return null
+  }
+}
+
+// Helper function to format field names (camelCase to Title Case)
+const formatFieldName = (field: string): string => {
+  return field
+    .replace(/^@/, '')
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, l => l.toUpperCase())
+    .trim()
+}
+
+// Helper function to format field values
+const formatFieldValue = (value: any): string => {
+  if (typeof value === 'string') {
+    // Remove leading slash if present
+    const cleaned = value.startsWith('/') ? value.substring(1) : value
+    return cleaned
+  }
+  if (typeof value === 'number') {
+    return value.toLocaleString('en-US')
+  }
+  if (typeof value === 'boolean') {
+    return value ? 'Yes' : 'No'
+  }
+  return String(value)
+}
+
+// Helper function to format type value (remove leading slash)
+const formatTypeValue = (type: string): string => {
+  return type?.startsWith('/') ? type.substring(1) : type
+}
+
 export function VotingSection({
   proposalId,
   status,
@@ -114,7 +178,9 @@ export function VotingSection({
   proposer = "Helios Guardian",
   proposerAddress,
   submittedDate = "Apr 17, 2025",
-  participation = "45.67%"
+  participation = "45.67%",
+  totalDeposit,
+  details
 }: VotingSectionProps) {
   const { address, isConnected } = useAccount()
   const { open: openLoginModal } = useAppKit()
@@ -280,6 +346,69 @@ export function VotingSection({
             <h3>Description</h3>
             <p>{description}</p>
           </div>
+
+          {/* Total Deposit Section */}
+          {totalDeposit && totalDeposit.length > 0 && (
+            <div className={styles.info}>
+              <h3>Total Deposit</h3>
+              <div className={styles.depositList}>
+                {totalDeposit.map((deposit, index) => (
+                  <div key={index} className={styles.depositItem}>
+                    <span className={styles.depositAmount}>
+                      {formatDepositAmount(deposit.amount)}
+                    </span>
+                    <span className={styles.depositDenom}>{deposit.denom}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Proposal Details Section */}
+          {details && details.length > 0 && (
+            <div className={styles.info}>
+              <h3>Proposal Details</h3>
+              <div className={styles.detailsList}>
+                {details.map((detail, index) => (
+                  <div key={index} className={styles.detailItem}>
+                    <div className={styles.detailType}>
+                      <span className={styles.detailTypeLabel}>Type:</span>
+                      <span className={styles.detailTypeValue}>{formatTypeValue(detail.type)}</span>
+                    </div>
+                    {detail.denoms && detail.denoms.length > 0 && (
+                      <div className={styles.detailDenoms}>
+                        {detail.denoms.map((denom, denomIndex) => {
+                          const parsedData = parseDetailData(denom)
+                          return (
+                            <div key={denomIndex} className={styles.dataTable}>
+                              {parsedData ? (
+                                <table className={styles.detailTable}>
+                                  <tbody>
+                                    {Object.entries(parsedData).map(([key, value]) => (
+                                      <tr key={key} className={styles.tableRow}>
+                                        <td className={styles.tableKey}>
+                                          {formatFieldName(key)}
+                                        </td>
+                                        <td className={styles.tableValue}>
+                                          {formatFieldValue(value)}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              ) : (
+                                <div className={styles.rawDenom}>{denom}</div>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className={styles.metadataGrid}>
             <div className={styles.info}>

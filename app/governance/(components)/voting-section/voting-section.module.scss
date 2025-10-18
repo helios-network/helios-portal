@@ -504,3 +504,136 @@
     white-space: pre-wrap;
   }
 }
+
+.depositList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2-5);
+}
+
+.depositItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--size-3-5) var(--size-4);
+  background: var(--background-medium);
+  border-radius: var(--radius-s);
+  border: 1px solid var(--background-high);
+  
+  .depositAmount {
+    font-size: var(--size-4-5);
+    font-weight: 600;
+    color: var(--primary-medium);
+  }
+  
+  .depositDenom {
+    font-size: var(--size-3-5);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+}
+
+.detailsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-3-5);
+}
+
+.detailItem {
+  padding: var(--size-4);
+  background: var(--background-medium);
+  border-radius: var(--radius-s);
+  border: 1px solid var(--background-high);
+  
+  .detailType {
+    display: flex;
+    align-items: center;
+    gap: var(--size-2);
+    margin-bottom: var(--size-3-5);
+    
+    .detailTypeLabel {
+      font-size: var(--size-3-5);
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    
+    .detailTypeValue {
+      font-size: var(--size-3-5);
+      color: var(--primary-medium);
+      font-weight: 500;
+    }
+  }
+  
+  .detailDenoms {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-2-5);
+  }
+  
+  .dataTable {
+    background: var(--background-lowest);
+    border-radius: var(--radius-s);
+    border: 1px solid var(--background-high);
+    overflow: hidden;
+  }
+  
+  .detailTable {
+    width: 100%;
+    border-collapse: collapse;
+    
+    .tableRow {
+      border-bottom: 1px solid var(--background-high);
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      .tableKey {
+        padding: var(--size-3-5) var(--size-4);
+        font-size: var(--size-3-5);
+        font-weight: 600;
+        color: var(--text-secondary);
+        background: var(--background-low);
+        text-align: left;
+        width: 35%;
+        vertical-align: top;
+        
+        @include max(600px) {
+          width: 40%;
+          font-size: var(--size-3);
+          padding: var(--size-3) var(--size-3);
+        }
+      }
+      
+      .tableValue {
+        padding: var(--size-3-5) var(--size-4);
+        font-size: var(--size-3-5);
+        color: var(--text-primary);
+        word-break: break-all;
+        font-family: monospace;
+        text-align: left;
+        
+        @include max(600px) {
+          font-size: var(--size-3);
+          padding: var(--size-3) var(--size-3);
+        }
+      }
+    }
+  }
+  
+  .rawDenom {
+    padding: var(--size-3-5) var(--size-4);
+    font-size: var(--size-3-5);
+    color: var(--text-secondary);
+    word-break: break-all;
+    font-family: monospace;
+    line-height: 1.4;
+    
+    @include max(600px) {
+      font-size: var(--size-3);
+      padding: var(--size-3) var(--size-3);
+    }
+  }
+}

@@ -15,6 +15,16 @@ interface TallyResult {
   no_with_veto_count: string
 }
 
+interface Deposit {
+  denom: string
+  amount: string
+}
+
+interface ProposalDetail {
+  denoms: string[]
+  type: string
+}
+
 interface ProposalData {
   id: number
   proposer: string
@@ -25,6 +35,8 @@ interface ProposalData {
   votingEndTime: string
   finalTallyResult: TallyResult
   currentTallyResult: TallyResult
+  totalDeposit?: Deposit[]
+  details?: ProposalDetail[]
 }
 
 async function fetchProposalDetail(id: string): Promise<ProposalData | null> {
@@ -44,7 +56,9 @@ async function fetchProposalDetail(id: string): Promise<ProposalData | null> {
       votingStartTime,
       votingEndTime,
       finalTallyResult,
-      currentTallyResult
+      currentTallyResult,
+      totalDeposit,
+      details
     } = result
 
     return {
@@ -56,7 +70,9 @@ async function fetchProposalDetail(id: string): Promise<ProposalData | null> {
       votingStartTime,
       votingEndTime,
       finalTallyResult,
-      currentTallyResult
+      currentTallyResult,
+      totalDeposit,
+      details
     }
   } catch (err) {
     console.error("Error fetching proposal:", err)
@@ -130,6 +146,8 @@ export default async function ProposalDetail({
                     hour12: false
                   })}
                   participation="45.67%" // You can calculate this from actual data
+                  totalDeposit={proposal.totalDeposit}
+                  details={proposal.details}
                 />
               </div>
             </div>
