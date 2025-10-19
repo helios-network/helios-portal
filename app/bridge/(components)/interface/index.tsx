@@ -328,7 +328,8 @@ export const Interface = () => {
     !form.address ||
     form.from?.chainId === form.to?.chainId ||
     !heliosInOrOut ||
-    chainIsPaused
+    chainIsPaused ||
+    (tokenInfo.data && tokenInfo.data.symbol === "HLS" && form.to?.chainId !== HELIOS_NETWORK_ID) // temporary disable bridge of HLS to other chains
 
   return (
     <>
