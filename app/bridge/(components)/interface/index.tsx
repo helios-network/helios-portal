@@ -320,6 +320,7 @@ export const Interface = () => {
     form.from?.chainId === HELIOS_NETWORK_ID ||
     form.to?.chainId === HELIOS_NETWORK_ID
   const chainIsPaused = form.to?.paused || form.from?.paused || false
+  const assetDisabled = tokenInfo.data && tokenInfo.data.symbol === "HLS" && form.to?.chainId !== HELIOS_NETWORK_ID
   const isDisabled =
     form.inProgress ||
     !tokenInfo.data ||
@@ -329,7 +330,7 @@ export const Interface = () => {
     form.from?.chainId === form.to?.chainId ||
     !heliosInOrOut ||
     chainIsPaused ||
-    (tokenInfo.data && tokenInfo.data.symbol === "HLS" && form.to?.chainId !== HELIOS_NETWORK_ID) // temporary disable bridge of HLS to other chains
+    assetDisabled
 
   return (
     <>
@@ -579,6 +580,11 @@ export const Interface = () => {
               <Message title="Chain paused" variant={"warning"}>
                 The destination chain is currently paused. Please try again
                 later.
+              </Message>
+            )}
+            {assetDisabled && (
+              <Message title="Asset disabled" variant={"warning"}>
+                The asset is currently disabled. Please try again later.
               </Message>
             )}
             <div
