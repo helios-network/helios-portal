@@ -584,7 +584,7 @@ export const Interface = () => {
             )}
             {assetDisabled && (
               <Message title="Asset disabled" variant={"warning"}>
-                The asset is currently disabled. Please try again later.
+                The asset {tokenInfo.data?.symbol} is currently disabled. Please try again later.
               </Message>
             )}
             <div
