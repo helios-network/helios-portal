@@ -319,7 +319,7 @@ export const Interface = () => {
   const heliosInOrOut =
     form.from?.chainId === HELIOS_NETWORK_ID ||
     form.to?.chainId === HELIOS_NETWORK_ID
-  const chainIsPaused = form.to?.paused || false
+  const chainIsPaused = form.to?.paused || form.from?.paused || false
   const isDisabled =
     form.inProgress ||
     !tokenInfo.data ||
