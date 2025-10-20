@@ -192,6 +192,7 @@ export function VotingSection({
   const [voteMetadata, setVoteMetadata] = useState("")
   const [hasVoted, setHasVoted] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [showJsonView, setShowJsonView] = useState(false)
 
   // Calculate voting power from delegations
   const votingPower = useMemo(() => {
@@ -367,46 +368,66 @@ export function VotingSection({
           {/* Proposal Details Section */}
           {details && details.length > 0 && (
             <div className={styles.info}>
-              <h3>Proposal Details</h3>
-              <div className={styles.detailsList}>
-                {details.map((detail, index) => (
-                  <div key={index} className={styles.detailItem}>
-                    <div className={styles.detailType}>
-                      <span className={styles.detailTypeLabel}>Type:</span>
-                      <span className={styles.detailTypeValue}>{formatTypeValue(detail.type)}</span>
-                    </div>
-                    {detail.denoms && detail.denoms.length > 0 && (
-                      <div className={styles.detailDenoms}>
-                        {detail.denoms.map((denom, denomIndex) => {
-                          const parsedData = parseDetailData(denom)
-                          return (
-                            <div key={denomIndex} className={styles.dataTable}>
-                              {parsedData ? (
-                                <table className={styles.detailTable}>
-                                  <tbody>
-                                    {Object.entries(parsedData).map(([key, value]) => (
-                                      <tr key={key} className={styles.tableRow}>
-                                        <td className={styles.tableKey}>
-                                          {formatFieldName(key)}
-                                        </td>
-                                        <td className={styles.tableValue}>
-                                          {formatFieldValue(value)}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              ) : (
-                                <div className={styles.rawDenom}>{denom}</div>
-                              )}
-                            </div>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-                ))}
+              <div className={styles.detailsHeaderTop}>
+                <h3>Proposal Details</h3>
+                <Button
+                  onClick={() => setShowJsonView(!showJsonView)}
+                  className={styles.toggleButton}
+                  size="xsmall"
+                  iconLeft={showJsonView ? "hugeicons:file-01" : "hugeicons:code"}
+                >
+                  {showJsonView ? "Show Details" : "Show JSON"}
+                </Button>
               </div>
+
+              {showJsonView ? (
+                <div className={styles.jsonView}>
+                  <div className={styles.jsonHeader}>
+                    <span className={styles.jsonLabel}>Raw JSON Format</span>
+                  </div>
+                  <pre className={styles.jsonCode}>{JSON.stringify(details, null, 2).replace(/^\[\n\s*/, '').replace(/\n\s*\]$/, '')}</pre>
+                </div>
+              ) : (
+                <div className={styles.detailsList}>
+                  {details.map((detail, index) => (
+                    <div key={index} className={styles.detailItem}>
+                      <div className={styles.detailType}>
+                        <span className={styles.detailTypeLabel}>Type:</span>
+                        <span className={styles.detailTypeValue}>{formatTypeValue(detail.type)}</span>
+                      </div>
+                      {detail.denoms && detail.denoms.length > 0 && (
+                        <div className={styles.detailDenoms}>
+                          {detail.denoms.map((denom, denomIndex) => {
+                            const parsedData = parseDetailData(denom)
+                            return (
+                              <div key={denomIndex} className={styles.dataTable}>
+                                {parsedData ? (
+                                  <table className={styles.detailTable}>
+                                    <tbody>
+                                      {Object.entries(parsedData).map(([key, value]) => (
+                                        <tr key={key} className={styles.tableRow}>
+                                          <td className={styles.tableKey}>
+                                            {formatFieldName(key)}
+                                          </td>
+                                          <td className={styles.tableValue}>
+                                            {formatFieldValue(value)}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                ) : (
+                                  <div className={styles.rawDenom}>{denom}</div>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

@@ -637,3 +637,121 @@
     }
   }
 }
+
+.detailsHeaderTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--size-4);
+  margin-bottom: var(--size-4);
+  flex-wrap: wrap;
+  
+  h3 {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.toggleButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-2);
+  flex-shrink: 0;
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.jsonView {
+  background: linear-gradient(135deg, var(--background-medium) 0%, var(--background-low) 100%);
+  border: 1px solid var(--background-high);
+  border-radius: var(--radius-m);
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(var(--dark-rgb), 0.05);
+}
+
+.jsonHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--size-3);
+  padding: var(--size-4) var(--size-4);
+  border-bottom: 1px solid var(--background-high);
+  background-color: var(--background-higher);
+}
+
+.jsonLabel {
+  font-size: var(--size-3-5);
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  
+  &::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--primary-medium);
+  }
+}
+
+.jsonCode {
+  margin: 0;
+  padding: var(--size-4);
+  font-size: var(--size-3-5);
+  color: var(--text-secondary);
+  font-family: 'Courier New', monospace;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+  max-height: 500px;
+  overflow-y: auto;
+  
+  /* Scrollbar styling */
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: var(--background-low);
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--background-high);
+    border-radius: var(--radius-s);
+    
+    &:hover {
+      background: var(--text-secondary);
+    }
+  }
+  
+  @include max(600px) {
+    font-size: var(--size-3);
+    padding: var(--size-3);
+    max-height: 400px;
+  }
+}
+
+.detailsHeaderTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--size-3);
+  
+  h3 {
+    margin: 0;
+  }
+}
+
+.toggleButton {
+  white-space: normal;
+  flex-wrap: wrap;
+  --btn-size: var(--size-3);
+}
