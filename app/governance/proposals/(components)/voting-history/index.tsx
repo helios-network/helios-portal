@@ -35,7 +35,6 @@ export const VotingHistory = () => {
 
             {votingHistory.length === 0 ? (
                 <div className={s.empty}>
-                    <div className={s.emptyIcon}>📊</div>
                     <p className={s.emptyText}>No voting history yet</p>
                     <p className={s.emptySubtext}>
                         Your votes on proposals will appear here

@@ -465,7 +465,7 @@ const AllProposals: React.FC = () => {
                     {/* Right: Total */}
                     <div className={styles.rightCol}>
                       <div className={styles.totalNumber}>{proposal.totalVotesFormatted}</div>
-                      <div className={styles.totalAddresses}>{proposal.totalAddresses || 0} addresses</div>
+                      {/* <div className={styles.totalAddresses}>{proposal.totalAddresses || 0} addresses</div> */}
                     </div>
                   </div>
                 </div>

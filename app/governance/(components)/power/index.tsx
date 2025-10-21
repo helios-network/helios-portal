@@ -89,10 +89,10 @@ export const Power = () => {
     }
   ]
 
-  const list = [
-    { label: "Proposals", value: "—" },
-    { label: "Votes Cast", value: "—" }
-  ]
+  // const list = [
+  //   { label: "Proposals", value: "—" },
+  //   { label: "Votes Cast", value: "—" }
+  // ]
 
   const handleCopy = () => {
     if (!address) return
@@ -136,14 +136,14 @@ export const Power = () => {
             />
           </div>
         </div>
-        <ul className={s.right}>
+        {/* <ul className={s.right}>
           {list.map((item, index) => (
             <li key={index}>
               <div className={s.label}>{item.label}</div>
               <div className={s.value}>{item.value}</div>
             </li>
           ))}
-        </ul>
+        </ul> */}
       </div>
     </Card>
   )

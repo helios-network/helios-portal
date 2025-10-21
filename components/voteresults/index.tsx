@@ -125,7 +125,7 @@ export function VoteResults({
         <Progress value={quorumProgress} max={100} />
         <div className={s.progressBottom}>
           <span>{quorumProgress.toFixed(1)}% of quorum</span>
-          <span>{formatNumber(totalVotes.toString())} / {quorum}</span>
+          {/* <span>{formatNumber(totalVotes.toString())} / {quorum}</span> */}
         </div>
       </div>
 
