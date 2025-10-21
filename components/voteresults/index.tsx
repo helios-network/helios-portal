@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/badge"
 import { Icon } from "@/components/icon"
-import { Progress } from "@/components/progress"
+// import { Progress } from "@/components/progress"
 import { RechartsPie, RechartsPieLegend } from "@/components/recharts/pie"
 import { truncateAddress } from "@/lib/utils"
 import { useAccount } from "wagmi"
@@ -20,7 +20,6 @@ interface VoteResultsProps {
   againstVotes: string
   abstainVotes?: string
   vetoVotes?: string
-  quorum: string
   status: "EXECUTED" | "DEFEATED" | "VOTING_PERIOD"
   endDate: string
   voters: VoteResult[]
@@ -38,7 +37,6 @@ export function VoteResults({
   againstVotes,
   abstainVotes = "0",
   vetoVotes = "0",
-  quorum,
   status,
   endDate,
   voters
@@ -109,8 +107,8 @@ export function VoteResults({
   ]
 
   // Calculate quorum progress
-  const quorumNum = Number.parseFloat(quorum.replace(/,/g, ''))
-  const quorumProgress = totalVotes > 0 ? Math.min((totalVotes / quorumNum) * 100, 100) : 0
+  // const quorumNum = Number.parseFloat(quorum.replace(/,/g, ''))
+  // const quorumProgress = totalVotes > 0 ? Math.min((totalVotes / quorumNum) * 100, 100) : 0
 
   return (
     <div className={s.voteResults}>
@@ -120,14 +118,16 @@ export function VoteResults({
       <RechartsPie data={votes} className={s.pie} />
       <RechartsPieLegend data={votes} className={s.legend} />
 
-      <div className={s.progress} data-color="primary">
+      <div className={s.divider} />
+
+      {/* <div className={s.progress} data-color="primary">
         <h3 className={s.progressTitle}>Quorum progress</h3>
         <Progress value={quorumProgress} max={100} />
         <div className={s.progressBottom}>
           <span>{quorumProgress.toFixed(1)}% of quorum</span>
-          {/* <span>{formatNumber(totalVotes.toString())} / {quorum}</span> */}
+          <span>{formatNumber(totalVotes.toString())} / {quorum}</span>
         </div>
-      </div>
+      </div> */}
 
       <div className={s.meta}>
         <Badge

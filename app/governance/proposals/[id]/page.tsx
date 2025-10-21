@@ -102,7 +102,7 @@ export default async function ProposalDetail({
   const againstVotes = (Number(noVotes) / 1e18).toFixed(2)
   const abstainVotesFormatted = (Number(abstainVotes) / 1e18).toFixed(2)
   const vetoVotesFormatted = (Number(vetoVotes) / 1e18).toFixed(2)
-  const quorum = "4,000,000" // Replace with actual quorum data
+  // const quorum = "4,000,000" // Replace with actual quorum data
 
   return (
     <VotingHistoryProvider>
@@ -159,7 +159,6 @@ export default async function ProposalDetail({
               againstVotes={againstVotes}
               abstainVotes={abstainVotesFormatted}
               vetoVotes={vetoVotesFormatted}
-              quorum={quorum}
               status={proposal.status as "EXECUTED" | "DEFEATED"}
               endDate={new Date(proposal.votingEndTime).toLocaleDateString(
                 "en-US",

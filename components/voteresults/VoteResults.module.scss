@@ -38,6 +38,13 @@
   margin: 0 auto var(--size-4);
 }
 
+.divider {
+  height: 2px;
+  background-color: var(--background-higher);
+  border-radius: var(--radius-rounded);
+  width: 100%;
+}
+
 .progress {
   margin-bottom: var(--size-4);
   text-align: left;
