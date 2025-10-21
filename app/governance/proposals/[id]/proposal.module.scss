@@ -20,6 +20,10 @@
     grid-template-columns: 1fr;
     gap: 16px;
   }
+  
+  @media (max-width: 480px) {
+    gap: 12px;
+  }
 }
 
 .leftPanel {
@@ -47,6 +51,16 @@
   border-radius: 2rem;
   padding: 2rem;
   min-height: 50vh;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
 }
 
 .header {
@@ -61,10 +75,25 @@
   display: flex;
   align-items: center;
   gap: var(--size-3);
+  
+  @media (max-width: 480px) {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--size-2);
+  }
+  
+  @media (max-width: 375px) {
+    flex-wrap: nowrap;
+    width: 100%;
+  }
 }
 
 .headerIcon {
   color: var(--primary-medium);
+  
+  @media (max-width: 375px) {
+    flex-shrink: 0;
+  }
 }
 
 .title {
@@ -255,6 +284,22 @@
     line-height: 1.4;
     margin: 0 0 var(--size-3) 0;
     color: var(--text-primary);
+    
+    @media (max-width: 480px) {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--size-2);
+    }
+    
+    @media (max-width: 375px) {
+      flex-wrap: nowrap;
+      width: 100%;
+      
+      svg {
+        flex-shrink: 0;
+        margin-right: var(--size-2);
+      }
+    }
   }
   p {
     font-size: 15px;

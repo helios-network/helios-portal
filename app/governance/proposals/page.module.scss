@@ -41,6 +41,16 @@
   width: 100%;
   margin-bottom: 5px;
   flex-wrap: wrap;
+  
+  @media (max-width: 480px) {
+    gap: 0.5rem;
+  }
+  
+  @media (max-width: 375px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
 }
 
 .proposal-card {
@@ -127,8 +137,14 @@
 .captionVotes { display: none; }
 
 @media (max-width: 900px) {
-  .card-content { grid-template-columns: 1fr; }
-  .totalRight { margin-left: 0; }
+  .card-content { 
+    grid-template-columns: 1fr; 
+    padding: 0.75rem;
+  }
+  .totalRight { 
+    margin-left: 0; 
+    margin-top: 0.5rem;
+  }
 }
 
 .create-proposal {
@@ -147,6 +163,18 @@
 
   &:hover {
     background-color: #1552e6;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 7px 14px;
+    font-size: 0.9rem;
+  }
+  
+  @media (max-width: 375px) {
+    width: 100%;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    justify-content: center;
   }
 }
 
@@ -212,6 +240,21 @@
   background-color: #f5f7ff;
   border-radius: 2rem;
   padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 1rem 0.75rem;
+    border-radius: 1rem;
+  }
 }
 
 .proposal-item {
@@ -488,6 +531,17 @@
   margin-bottom: 1rem;
   width: fit-content !important;
   flex-direction: row !important;
+  
+  @media (max-width: 480px) {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  @media (max-width: 375px) {
+    font-size: 1.35rem;
+    margin-bottom: 0.5rem;
+    width: 100% !important;
+  }
 }
 
 .card {
@@ -674,6 +728,14 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+  
+  @media (max-width: 480px) {
+    margin-top: 0.5rem;
+  }
+  
+  @media (max-width: 375px) {
+    margin-top: 0.25rem;
+  }
 }
 
 .proposal-card {
@@ -691,6 +753,14 @@
 
   &:last-child {
     border-bottom: none;
+  }
+  
+  @media (max-width: 480px) {
+    margin-bottom: 0.25rem;
+  }
+  
+  @media (max-width: 375px) {
+    margin-bottom: 0.15rem;
   }
 }
 
@@ -716,8 +786,17 @@
   align-items: center;
 }
 
-.leftCol { display: flex; flex-direction: column; gap: 0.35rem; }
-.metaRow { display: flex; align-items: center; gap: 0.75rem; }
+.leftCol { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 0.35rem; 
+}
+.metaRow { 
+  display: flex; 
+  align-items: center; 
+  gap: 0.75rem; 
+  flex-wrap: wrap;
+}
 .endDateInline { font-size: 0.8rem; color: #6b7280; display: inline-flex; align-items: center; }
 
 .centerCol { display: flex; justify-content: center; }
@@ -810,9 +889,15 @@
   font-weight: 600;
   line-height: 1.35;
   margin: 0;
+  word-break: break-word;
 
   @media (min-width: 640px) {
     font-size: 1rem;
+  }
+  
+  @media (max-width: 375px) {
+    font-size: 0.85rem;
+    line-height: 1.3;
   }
 }
 
@@ -892,6 +977,15 @@
   > span:first-child {
     display: none; /* hide "Voting Results" label like screenshot */
   }
+  
+  @media (max-width: 480px) {
+    padding: 0.15rem 0;
+    width: 100%;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 0.1rem 0;
+  }
 }
 
 .vote-bar {
@@ -903,6 +997,16 @@
   display: flex;
   position: relative;
   margin: 6px 0; /* compact */
+  
+  @media (max-width: 480px) {
+    height: 6px;
+    margin: 4px 0;
+  }
+  
+  @media (max-width: 375px) {
+    height: 5px;
+    margin: 3px 0;
+  }
 }
 
 .vote-for {
@@ -934,6 +1038,12 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 0; /* tighter */
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
 }
 
 .vote-stats {
@@ -946,6 +1056,19 @@
   @media (min-width: 640px) {
     font-size: 0.85rem;
   }
+  
+  @media (max-width: 480px) {
+    gap: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  @media (max-width: 375px) {
+    gap: 0.35rem;
+    font-size: 0.7rem;
+    /* Keep in row layout like desktop */
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
 }
 
 .vote-for-text,
@@ -955,6 +1078,15 @@
   display: flex;
   flex-direction: row;
   gap: 6px; /* slightly tighter */
+  
+  @media (max-width: 480px) {
+    gap: 4px;
+  }
+  
+  @media (max-width: 375px) {
+    gap: 3px;
+    font-size: 0.7rem;
+  }
 }
 
 .vote-for-text { color: #22c55e; }
@@ -1012,9 +1144,10 @@
 // Responsive adjustments
 @media (max-width: 639px) {
   .vote-stats {
-    flex-direction: column;
-    gap: 0.25rem;
-    align-items: flex-start;
+    /* Keep in row layout like desktop */
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.35rem;
   }
 
   .proposal-header {
@@ -1136,9 +1269,78 @@
 
 @media (max-width: 900px) {
   .tableHeader { display: none; }
-  .card-content { grid-template-columns: 1fr; }
+  .card-content { 
+    grid-template-columns: 1fr; 
+    padding: 1rem;
+    gap: 1rem;
+  }
   .rightCol { text-align: left; }
   .centerWrap { max-width: none; }
+  .metaRow { 
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  .vote-section {
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-content {
+    padding: 0.75rem 0.5rem;
+  }
+  .proposal-title {
+    font-size: 14px;
+  }
+  .proposalContainer {
+    gap: 0.75rem;
+  }
+  .create-proposal {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  .metaRow {
+    gap: 0.35rem;
+  }
+  .vote-stats {
+    /* Keep in row layout like desktop */
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+}
+
+/* Additional styles for very small screens */
+@media (max-width: 375px) {
+  .card-content {
+    padding: 0.65rem 0.4rem;
+    gap: 0.5rem;
+  }
+  .metaRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  .leftCol {
+    gap: 0.25rem;
+  }
+  .vote-section {
+    margin-top: 0.35rem;
+  }
+  .vote-stats {
+    font-size: 0.7rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  .proposal-title {
+    font-size: 13px;
+    line-height: 1.3;
+  }
+  .all-proposals {
+    padding: 1.25rem 1rem;
+  }
 }
 
 // Load more button styles - matching proposal card styling

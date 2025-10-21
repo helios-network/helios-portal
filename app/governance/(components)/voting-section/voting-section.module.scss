@@ -22,6 +22,22 @@
   svg {
     color: var(--primary-medium);
   }
+  
+  @media (max-width: 480px) {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--size-2);
+  }
+  
+  @media (max-width: 375px) {
+    flex-wrap: nowrap;
+    width: 100%;
+    
+    svg {
+      flex-shrink: 0;
+      margin-right: var(--size-2);
+    }
+  }
 }
 
 .proposalInfo {
@@ -211,6 +227,11 @@
     cursor: pointer;
     position: relative;
 
+    @media (max-width: 480px) {
+      width: 100%;
+      padding: var(--size-4);
+    }
+
     &:hover {
       &::after {
         border-color: var(--color);
@@ -250,11 +271,19 @@
       svg {
         width: 3em;
         margin: auto;
+        
+        @media (max-width: 480px) {
+          width: 2.5em;
+        }
       }
 
       strong {
         font-size: var(--size-8); // Increased from var(--size-7) for better visibility
         color: var(--color);
+        
+        @media (max-width: 480px) {
+          font-size: var(--size-6);
+        }
       }
     }
 
@@ -590,6 +619,12 @@
         border-bottom: none;
       }
       
+      @include max(480px) {
+        display: flex;
+        flex-direction: column;
+        padding-bottom: var(--size-2);
+      }
+      
       .tableKey {
         padding: var(--size-3-5) var(--size-4);
         font-size: var(--size-3-5);
@@ -605,6 +640,11 @@
           font-size: var(--size-3);
           padding: var(--size-3) var(--size-3);
         }
+        
+        @include max(480px) {
+          width: 100%;
+          border-bottom: 1px dashed var(--background-high);
+        }
       }
       
       .tableValue {
@@ -618,6 +658,10 @@
         @include max(600px) {
           font-size: var(--size-3);
           padding: var(--size-3) var(--size-3);
+        }
+        
+        @include max(480px) {
+          padding-top: var(--size-2);
         }
       }
     }
