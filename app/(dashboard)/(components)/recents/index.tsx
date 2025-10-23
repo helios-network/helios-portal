@@ -11,6 +11,7 @@ export const Recents = () => {
 
   const filteredTransactions = transactions
     .filter((tx) => tx.type !== "UNKNOWN")
+    .filter((tx) => tx.status !== "failed")
     .slice(0, 3)
 
   return (
