@@ -45,7 +45,7 @@ interface ProposalData {
   totalAddresses: number
 }
 
-const HELIOS_ORG_ADDRESS = "0x3ddB715dB3E32140b731aF55a7780C94019e5075"
+const HELIOS_ORG_ADDRESS = "0x72a9b3509b19d9dbc2e0df71c4a6451e8a3dd705"
 
 // Status code mapping
 const STATUS_CODE_MAP: Record<string, string> = {
