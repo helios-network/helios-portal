@@ -8,9 +8,15 @@
   width: 100%;
 
   @include max($responsiveMobile) {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     font-size: var(--heading-size, var(--size-5));
+    gap: 0.5em;
+    flex-wrap: wrap;
+  }
+  
+  @media (max-width: 375px) {
+    gap: 0.4em;
   }
 }
 
@@ -60,6 +66,12 @@
 
   @include max($responsiveMobile) {
     font-size: var(--heading-icon, var(--size-11));
+    flex-shrink: 0;
+  }
+  
+  @media (max-width: 375px) {
+    font-size: var(--heading-icon, var(--size-10));
+    flex-shrink: 0;
   }
 
   svg {
@@ -75,7 +87,13 @@
   gap: 0.33em;
 
   @include max($responsiveMobile) {
-    margin-left: initial;
+    margin-left: auto;
     --btn-height: var(--button-small-height);
+  }
+  
+  @media (max-width: 375px) {
+    margin-top: 0.5em;
+    width: 100%;
+    justify-content: flex-start;
   }
 }
