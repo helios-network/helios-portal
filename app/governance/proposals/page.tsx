@@ -11,10 +11,12 @@ import { Statistics } from "../(components)/statistics"
 import { VotingHistoryProvider } from "@/context/VotingHistoryContext"
 import styles from "./page.module.scss"
 import { useQuery } from "@tanstack/react-query"
-import { getProposalsByPageAndSize, getProposalTotalCount } from "@/helpers/rpc-calls"
+import { getProposalTotalCount, getProposalsByPageAndSizeWithFilter } from "@/helpers/rpc-calls"
 import { toHex } from "@/utils/number"
 import { Badge } from "@/components/badge"
 import { STATUS_CONFIG } from "@/config/vote"
+import { Button } from "@/components/button"
+import { Input } from "@/components/input/input"
 
 interface ProposalData {
   id: string
@@ -43,6 +45,15 @@ interface ProposalData {
   totalAddresses: number
 }
 
+const HELIOS_ORG_ADDRESS = "0x3ddB715dB3E32140b731aF55a7780C94019e5075"
+
+// Status code mapping
+const STATUS_CODE_MAP: Record<string, string> = {
+  active: "2",
+  passed: "3",
+  rejected: "4"
+}
+
 const AllProposals: React.FC = () => {
   const router = useRouter()
   const [currentPage, setCurrentPage] = useState(1)
@@ -50,45 +61,94 @@ const AllProposals: React.FC = () => {
   const { isConnected } = useAccount()
   const [isCreateLoading, setIsCreateLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [status, setStatus] = useState<string>("all")
+  const [searchQuery, setSearchQuery] = useState<string>("")
+  const [proposerFilter, setProposerFilter] = useState<string>("all") // "all" or "helios"
+  const [filterKey, setFilterKey] = useState(0) // Track filter changes to force data reset
 
-  // Get total proposals count
+  // Handler to reset page when status filter changes
+  const handleStatusChange = (newStatus: string) => {
+    if (newStatus !== status) {
+      setStatus(newStatus)
+      setCurrentPage(1)
+      setFilterKey(prev => prev + 1)
+    }
+  }
+
+  // Handler to reset page when proposer filter changes
+  const handleProposerFilterChange = (newFilter: string) => {
+    if (newFilter !== proposerFilter) {
+      setProposerFilter(newFilter)
+      setCurrentPage(1)
+      setFilterKey(prev => prev + 1)
+    }
+  }
+
+  // Build filter string based on current filters
+  const buildFilterString = (): string => {
+    const filters: string[] = []
+
+    // Add status filter (only if not "all")
+    if (status !== "all" && STATUS_CODE_MAP[status]) {
+      filters.push(`status=${STATUS_CODE_MAP[status]}`)
+    }
+
+    // Add proposer filter for Helios org
+    if (proposerFilter === "helios") {
+      filters.push(`proposer=${HELIOS_ORG_ADDRESS}`)
+    }
+
+    return filters.length > 0 ? filters.join(" && ") : ""
+  }
+
+  // Get total proposals count - updates when filters change
   const { data: totalProposals = 0 } = useQuery({
-    queryKey: ["proposalTotalCount"],
-    queryFn: () => getProposalTotalCount(),
+    queryKey: ["proposalTotalCount", filterKey, status, proposerFilter],
+    queryFn: async () => {
+      const filterString = buildFilterString()
+
+      // If no filters, get all proposals count
+      if (!filterString) {
+        return getProposalTotalCount()
+      }
+
+      // For filtered results, fetch first page with large size to get approximate total
+      // Or use a dedicated filtered count API if available
+      const firstPage = await getProposalsByPageAndSizeWithFilter(toHex(1), toHex(1000), filterString)
+      return firstPage?.length ?? 0
+    },
     staleTime: 30000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: false
   })
 
   // Load proposals with pagination - fetch all pages up to current page
-  const { data: allLoadedProposals = [], isLoading: isInitialLoading, error: initialError } = useQuery({
-    queryKey: ["allProposals", currentPage],
+  const { data: allLoadedProposals = [], isLoading: isInitialLoading, error: initialError, isFetching } = useQuery({
+    queryKey: ["allProposals", filterKey, currentPage, status, proposerFilter],
     queryFn: async () => {
-      console.log("Fetching proposals up to page:", currentPage);
 
+      const filterString = buildFilterString()
       // Fetch all pages from 1 to currentPage
       const promises = []
       for (let page = 1; page <= currentPage; page++) {
-        promises.push(getProposalsByPageAndSize(toHex(page), toHex(pageSize)))
+        promises.push(getProposalsByPageAndSizeWithFilter(toHex(page), toHex(pageSize), filterString))
       }
 
       const results = await Promise.all(promises)
       // Flatten all results into a single array
       const allProposals = results.flat()
-      console.log("Total proposals loaded:", allProposals.length);
       return allProposals
     },
     staleTime: 30000,
-    refetchOnWindowFocus: false,
-    placeholderData: (previousData) => previousData // Keep previous data while loading
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: false
   })
-
-  console.log("All Loaded Proposals:", allLoadedProposals?.length);
 
   // Check if we can load more
   const canLoadMore = allLoadedProposals.length < (totalProposals || 0)
 
   // Combined loading and error states
-  const isLoading = isInitialLoading && currentPage === 1
+  const isLoading = isInitialLoading
   const error = initialError
 
   // Transform all loaded proposals data
@@ -168,32 +228,19 @@ const AllProposals: React.FC = () => {
     }
   })
 
-  // Use all loaded proposals for display
-  const proposals = allProposals
-
-  console.log("Debug State:", {
-    proposalsLength: proposals.length,
-    isLoading,
-    allLoadedProposalsLength: allLoadedProposals.length,
-    isInitialLoading,
-    currentPage
-  });
+  // Filter proposals by search query
+  const proposals = searchQuery.trim()
+    ? allProposals.filter(p =>
+      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.meta.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.id.includes(searchQuery)
+    )
+    : allProposals
 
   // Handle load more - simply increment the page
   const handleLoadMore = () => {
-    console.log("Load more clicked:", {
-      canLoadMore,
-      currentPage,
-      allLoadedProposalsLength: allLoadedProposals.length,
-      totalProposals,
-      isInitialLoading
-    });
-
-    if (canLoadMore && !isInitialLoading) {
-      console.log("Incrementing page from", currentPage, "to", currentPage + 1);
+    if (canLoadMore && !isFetching) {
       setCurrentPage(prev => prev + 1)
-    } else {
-      console.log("Load more blocked - canLoadMore:", canLoadMore, "isLoading:", isInitialLoading);
     }
   }
 
@@ -207,8 +254,8 @@ const AllProposals: React.FC = () => {
 
 
 
-  // Show loading state on initial load
-  if (isLoading && proposals.length === 0) {
+  // Show loading state ONLY on very first load when we have no data
+  if (isLoading) {
     return (
       <div className={styles["all-proposals"]}>
         <div className={styles.proposalContainer}>
@@ -242,7 +289,7 @@ const AllProposals: React.FC = () => {
     )
   }
 
-  // Show error state if there's an error and no data loaded
+  // Show error state if there's an error and no data available
   if (error && proposals.length === 0) {
     return (
       <div className={styles["all-proposals"]}>
@@ -312,6 +359,65 @@ const AllProposals: React.FC = () => {
             )}
           </div>
 
+          {/* Filters Section */}
+          <div className={styles.filtersContainer}>
+            <div className={styles.buttonGroup}>
+              <Button
+                size="small"
+                variant={status !== "all" ? "secondary" : undefined}
+                onClick={() => handleStatusChange("all")}
+              >
+                All
+              </Button>
+              <Button
+                size="small"
+                variant={status !== "active" ? "secondary" : undefined}
+                onClick={() => handleStatusChange("active")}
+              >
+                Active
+              </Button>
+              <Button
+                size="small"
+                variant={status !== "passed" ? "secondary" : undefined}
+                onClick={() => handleStatusChange("passed")}
+              >
+                Passed
+              </Button>
+              <Button
+                size="small"
+                variant={status !== "rejected" ? "secondary" : undefined}
+                onClick={() => handleStatusChange("rejected")}
+              >
+                Rejected
+              </Button>
+            </div>
+            <div className={styles.inputGroup}>
+              <div className={styles.proposerButtons}>
+                <Button
+                  size="small"
+                  variant={proposerFilter !== "all" ? "secondary" : undefined}
+                  onClick={() => handleProposerFilterChange("all")}
+                >
+                  All Proposals
+                </Button>
+                <Button
+                  size="small"
+                  variant={proposerFilter !== "helios" ? "secondary" : undefined}
+                  onClick={() => handleProposerFilterChange("helios")}
+                >
+                  Helios Proposals
+                </Button>
+              </div>
+              <Input
+                icon="hugeicons:search-01"
+                placeholder="Search a proposals..."
+                className={styles.search}
+                value={searchQuery}
+                onChange={(e: any) => setSearchQuery(e.target.value || "")}
+              />
+            </div>
+          </div>
+
           {/* Show error banner if there's an error but we have existing data */}
           {error && proposals.length > 0 && (
             <div className={styles["error-banner"]}>
@@ -326,8 +432,6 @@ const AllProposals: React.FC = () => {
             </div>
           )}
 
-
-
           {proposals.length > 0 && (
             <div className={styles.tableHeader}>
               <div>Proposal</div>
@@ -337,7 +441,7 @@ const AllProposals: React.FC = () => {
           )}
 
           <div className={styles["proposal-list"]}>
-            {proposals.length === 0 && !isLoading ? (
+            {proposals.length === 0 ? (
               // Empty state when no proposals exist
               <div className={styles["empty-state"]}>
                 <h3>No proposals found</h3>
@@ -346,16 +450,11 @@ const AllProposals: React.FC = () => {
                   {isConnected && "Create the first proposal to get started!"}
                 </p>
               </div>
-            ) : proposals.length === 0 && isLoading ? (
-              // Loading state when waiting for initial load to complete
-              <div className={styles.loader}>
-                <p>Loading proposals...</p>
-              </div>
             ) : (
-              // Show proposals when they exist
-              proposals.map((proposal) => (
+              // Show proposals when they exist - use index as key to avoid duplicates
+              proposals.map((proposal, index) => (
                 <div
-                  key={proposal.id}
+                  key={`proposal-${index}-${proposal.id}`}
                   className={styles["proposal-card"]}
                   onClick={() =>
                     router.push(`/governance/proposals/${proposal.id}`)
@@ -485,9 +584,9 @@ const AllProposals: React.FC = () => {
                 <button
                   className={styles["load-more-btn"]}
                   onClick={handleLoadMore}
-                  disabled={isInitialLoading}
+                  disabled={isFetching}
                 >
-                  {isInitialLoading ? "Loading..." : "Load more"}
+                  {isFetching ? "Loading..." : "Load more"}
                 </button>
               </div>
             )}
