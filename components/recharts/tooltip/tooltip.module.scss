@@ -3,8 +3,9 @@
 .tooltip {
   font-size: var(--size-3);
   background-color: var(--background-lowest);
+  border: 1px solid var(--border-primary);
   border-radius: 1em;
-  padding: 1.5em;
+  padding: 1em;
   display: flex;
   flex-direction: column;
   gap: var(--size-1);

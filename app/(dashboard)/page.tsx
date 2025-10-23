@@ -10,8 +10,8 @@ import { Recents } from "./(components)/recents"
 import { Stat } from "./(components)/stat"
 import { TVL } from "./(components)/tvl"
 import { Validators } from "./(components)/validators"
+import { TotalTransactions } from "./(components)/overview"
 import s from "./page.module.scss"
-import { Weights } from "./(components)/weights"
 import { formatNumber } from "@/lib/utils/number"
 
 export default function Page() {
@@ -71,13 +71,13 @@ export default function Page() {
           />
         </Area>
         <Area area="i">
-          <Recents />
+          <TotalTransactions />
         </Area>
         <Area area="j">
-          <TVL />
+          <Recents />
         </Area>
         <Area area="k">
-          <Weights />
+          <TVL />
         </Area>
       </Grid>
     </>
