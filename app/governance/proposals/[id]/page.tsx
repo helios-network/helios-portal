@@ -123,7 +123,7 @@ export default async function ProposalDetail({
                 <VotingSection
                   proposalId={proposal.id}
                   status={proposal.status}
-                  votingEndTime={new Date(proposal.votingEndTime).toLocaleString("en-US", {
+                  votingEndTime={new Date(proposal.votingEndTime).toLocaleString(undefined, {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
@@ -136,7 +136,7 @@ export default async function ProposalDetail({
                   description={proposal.summary}
                   proposer={proposal.proposer} // Show full address as proposer name
                   proposerAddress={proposal.proposer}
-                  submittedDate={new Date(proposal.votingStartTime).toLocaleString("en-US", {
+                  submittedDate={new Date(proposal.votingStartTime).toLocaleString(undefined, {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
