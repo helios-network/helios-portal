@@ -57,7 +57,7 @@ export const shouldDisableRefetch = () => authFailureDetected
 
 // Function to check if API key is configured for local development
 export const isApiKeyConfigured = (): boolean => {
-    return isLocalDevelopment && !!process.env.NEXT_PUBLIC_API_KEY
+    return !!process.env.NEXT_PUBLIC_API_KEY
 }
 
 // Function to get current API configuration info
