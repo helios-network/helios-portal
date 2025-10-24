@@ -142,7 +142,7 @@ const defaultHeaders: Record<string, string> = {
 }
 
 // Add API key header only for local development
-if (isLocalDevelopment && process.env.NEXT_PUBLIC_API_KEY) {
+if (process.env.NEXT_PUBLIC_API_KEY) {
     defaultHeaders["x-api-key"] = process.env.NEXT_PUBLIC_API_KEY
 }
 
