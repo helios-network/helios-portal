@@ -192,12 +192,12 @@ const AllProposals: React.FC = () => {
       meta: `By ${proposer}`,
       proposer,
       isHeliosOrg,
-      status: `Ends: ${new Date(item.votingEndTime).toLocaleString("en-US", {
+      status: `Ends: ${new Date(item.votingEndTime).toLocaleString(undefined, {
         year: "numeric",
         month: "short",
         day: "2-digit"
       })}`,
-      submitDate: new Date(item.submitTime).toLocaleDateString("en-US", {
+      submitDate: new Date(item.submitTime).toLocaleDateString(undefined, {
         year: "numeric",
         month: "short",
         day: "2-digit"
