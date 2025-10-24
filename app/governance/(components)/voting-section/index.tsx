@@ -19,6 +19,7 @@ import { useAppKit } from "@reown/appkit/react"
 import { useVotingHistoryContext } from "@/context/VotingHistoryContext"
 import { ethers } from "ethers"
 import styles from "./voting-section.module.scss"
+import moment from "moment"
 
 interface Deposit {
   denom: string
@@ -28,11 +29,11 @@ interface Deposit {
 interface VotingSectionProps {
   proposalId: number
   status: string
-  votingEndTime: string
+  votingEndTime: Date
   description?: string
   proposer?: string
   proposerAddress?: string
-  submittedDate?: string
+  submittedDate?: Date
   participation?: string
   title?: string
   totalDeposit?: Deposit[]
@@ -150,6 +151,18 @@ const formatFieldValue = (value: any): string => {
   return String(value)
 }
 
+const formatDate = (date: Date): string => {
+  return date.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  })
+}
+
 export function VotingSection({
   proposalId,
   status,
@@ -158,7 +171,7 @@ export function VotingSection({
   description = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Est, velit, labore dolore alias sequi nam ullam saepe facere iusto quas voluptatem et doloribus aliquam tempore.",
   proposer = "Helios Guardian",
   proposerAddress,
-  submittedDate = "Apr 17, 2025",
+  submittedDate = new Date("Apr 17, 2025"),
   participation = "45.67%",
   totalDeposit,
   details
@@ -253,7 +266,7 @@ export function VotingSection({
   }, [feedback, isLoading, resetFeedback])
 
   const canVote =
-    status === "VOTING_PERIOD" && new Date() < new Date(votingEndTime)
+    status === "VOTING_PERIOD" && moment().isBefore(votingEndTime)
 
   const getStatusInfo = () => {
     if (status === "DEPOSIT_PERIOD") {
@@ -264,7 +277,7 @@ export function VotingSection({
         title: "Pending"
       }
     }
-    if (status === "VOTING_PERIOD" && new Date() >= new Date(votingEndTime)) {
+    if (status === "VOTING_PERIOD" && moment().isAfter(votingEndTime)) {
       return {
         message: "The voting period for this proposal has ended",
         variant: "warning" as const,
@@ -455,11 +468,11 @@ export function VotingSection({
             </div>
             <div className={styles.info}>
               <h3>Submitted On</h3>
-              <p>{submittedDate}</p>
+              <p>{formatDate(submittedDate)}</p>
             </div>
             <div className={styles.info}>
               <h3>Voting Ends On</h3>
-              <p>{votingEndTime}</p>
+              <p>{formatDate(votingEndTime)}</p>
             </div>
 
           </div>

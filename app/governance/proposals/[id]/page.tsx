@@ -123,28 +123,12 @@ export default async function ProposalDetail({
                 <VotingSection
                   proposalId={proposal.id}
                   status={proposal.status}
-                  votingEndTime={new Date(proposal.votingEndTime).toLocaleString(undefined, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                    hour12: false
-                  })}
+                  votingEndTime={new Date(proposal.votingEndTime)}
                   title={proposal.title}
                   description={proposal.summary}
                   proposer={proposal.proposer} // Show full address as proposer name
                   proposerAddress={proposal.proposer}
-                  submittedDate={new Date(proposal.votingStartTime).toLocaleString(undefined, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                    hour12: false
-                  })}
+                  submittedDate={new Date(proposal.votingStartTime)}
                   participation="45.67%" // You can calculate this from actual data
                   totalDeposit={proposal.totalDeposit}
                   details={proposal.details}
