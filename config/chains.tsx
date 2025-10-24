@@ -1,6 +1,6 @@
 import type { Chain } from "@/types/Chains"
 import { CHAIN_COLORS, ChainId } from "./constants"
-import { mainnet } from "@reown/appkit/networks"
+import { mainnet, bsc } from "@reown/appkit/networks"
 import { heliosChain } from "./wagmi"
 
 export const CHAINS: Chain[] = [
@@ -23,13 +23,14 @@ export const CHAINS: Chain[] = [
     chainNb: heliosChain.id,
     color: CHAIN_COLORS.helios,
     iconName: "helios"
-  }
-  //   {
-  //     id: "bsc",
-  //     name: "BSC",
-  //     color: CHAIN_COLORS.bsc,
-  //     iconName: "token:binance-smart-chain"
-  //   },
+  },
+  {
+    id: "bsc",
+    name: "BSC Mainnet",
+    chainNb: bsc.id,
+    color: CHAIN_COLORS.bsc,
+    iconName: "token:binance-smart-chain"
+  },
   //   {
   //     id: "avalanche",
   //     name: "Avalanche",

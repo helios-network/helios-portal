@@ -27,6 +27,19 @@ export const CHAIN_CONFIG: Record<number, ChainConfig> = {
     rpcUrl: typeof window !== "undefined" ? getRpcUrl() : RPC_URL_DEFAULT,
     explorerUrl: EXPLORER_URL
   },
+  56: {
+    id: "bsc",
+    chainId: 56,
+    name: "BSC Mainnet",
+    color: CHAIN_COLORS.bsc,
+    iconName: "token:binance-smart-chain",
+    rpcUrl: "https://bsc-rpc.publicnode.com",
+    explorerUrl: "https://bscscan.com",
+    wrapperContract: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+    decimals: 18,
+    token: "BNB",
+    wrappedToken: "WBNB"
+  },
   11155111: {
     id: "sepolia",
     chainId: 11155111,
@@ -63,8 +76,8 @@ export const CHAIN_CONFIG: Record<number, ChainConfig> = {
     explorerUrl: "https://testnet.bscscan.com",
     wrapperContract: "0xc689bf5a007f44410676109f8aa8e3562da1c9ba",
     decimals: 18,
-    token: "BNB",
-    wrappedToken: "WBNB"
+    token: "tBNB",
+    wrappedToken: "WtBNB"
   },
   43113: {
     id: "avalanche-fuji",

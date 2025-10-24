@@ -7,13 +7,9 @@ export const useChains = () => {
     queryFn: getHyperionChains
   })
 
-  const disabledChains = [56]
-
-  const filteredChains = (qHyperionChains.data || []).filter((chain) => !disabledChains.includes(chain.hyperionId))
-
   return {
-    chains: filteredChains,
-    heliosChainIndex: filteredChains.findIndex(
+    chains: qHyperionChains.data || [],
+    heliosChainIndex: (qHyperionChains.data || []).findIndex(
       (chain) => chain.hyperionId === 0
     ),
     isLoading: qHyperionChains.isLoading

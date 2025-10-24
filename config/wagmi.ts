@@ -5,7 +5,8 @@ import {
   polygonAmoy,
   bscTestnet,
   avalancheFuji,
-  AppKitNetwork
+  AppKitNetwork,
+  bsc
 } from "@reown/appkit/networks"
 import { cookieStorage, createStorage } from "@wagmi/core"
 import { defineChain } from "viem"
@@ -72,6 +73,7 @@ export const toAppKitNetwork = (chain: any): AppKitNetwork => ({
 export const networks: AppKitNetwork[] = [
   toAppKitNetwork(heliosChain),
   toAppKitNetwork(mainnet),
+  toAppKitNetwork(bsc),
   toAppKitNetwork(sepolia),
   toAppKitNetwork(polygonAmoy),
   toAppKitNetwork(bscTestnet),
