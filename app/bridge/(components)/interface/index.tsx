@@ -109,7 +109,7 @@ export const Interface = () => {
   // const estimatedFees = (parseFloat(form.amount) / 100).toString()
   const estimatedFees = "0.5"
   const isDeposit = heliosChainIndex
-    ? form.to?.chainId === chains[heliosChainIndex].chainId
+    ? form.to?.chainId === chains[heliosChainIndex]?.chainId
     : false
 
   const displayedChains =
