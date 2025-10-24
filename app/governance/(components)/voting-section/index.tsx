@@ -25,11 +25,6 @@ interface Deposit {
   amount: string
 }
 
-interface ProposalDetail {
-  denoms: string[]
-  type: string
-}
-
 interface VotingSectionProps {
   proposalId: number
   status: string
@@ -41,7 +36,7 @@ interface VotingSectionProps {
   participation?: string
   title?: string
   totalDeposit?: Deposit[]
-  details?: ProposalDetail[]
+  details?: any[]
 }
 
 // Vote options enum matching your smart contract
@@ -129,15 +124,6 @@ const formatDepositAmount = (amount: string, decimals: number = 18): string => {
   }
 }
 
-// Helper function to parse and format JSON strings from denoms
-const parseDetailData = (jsonString: string): Record<string, any> | null => {
-  try {
-    return JSON.parse(jsonString)
-  } catch {
-    return null
-  }
-}
-
 // Helper function to format field names (camelCase to Title Case)
 const formatFieldName = (field: string): string => {
   return field
@@ -162,11 +148,6 @@ const formatFieldValue = (value: any): string => {
     return value ? 'Yes' : 'No'
   }
   return String(value)
-}
-
-// Helper function to format type value (remove leading slash)
-const formatTypeValue = (type: string): string => {
-  return type?.startsWith('/') ? type.substring(1) : type
 }
 
 export function VotingSection({
@@ -391,39 +372,62 @@ export function VotingSection({
                 <div className={styles.detailsList}>
                   {details.map((detail, index) => (
                     <div key={index} className={styles.detailItem}>
-                      <div className={styles.detailType}>
-                        <span className={styles.detailTypeLabel}>Type:</span>
-                        <span className={styles.detailTypeValue}>{formatTypeValue(detail.type)}</span>
-                      </div>
-                      {detail.denoms && detail.denoms.length > 0 && (
-                        <div className={styles.detailDenoms}>
-                          {detail.denoms.map((denom, denomIndex) => {
-                            const parsedData = parseDetailData(denom)
-                            return (
-                              <div key={denomIndex} className={styles.dataTable}>
-                                {parsedData ? (
-                                  <table className={styles.detailTable}>
-                                    <tbody>
-                                      {Object.entries(parsedData).map(([key, value]) => (
-                                        <tr key={key} className={styles.tableRow}>
-                                          <td className={styles.tableKey}>
-                                            {formatFieldName(key)}
-                                          </td>
-                                          <td className={styles.tableValue}>
-                                            {formatFieldValue(value)}
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                ) : (
-                                  <div className={styles.rawDenom}>{denom}</div>
-                                )}
-                              </div>
-                            )
-                          })}
+                      {detail['@type'] && (
+                        <div className={styles.detailType}>
+                          <span className={styles.detailTypeLabel}>Type:</span>
+                          <span className={styles.detailTypeValue}>{detail['@type']}</span>
                         </div>
                       )}
+                      {detail.title && (
+                        <div className={styles.detailType}>
+                          <span className={styles.detailTypeLabel}>Title:</span>
+                          <span className={styles.detailTypeValue}>{detail['title']}</span>
+                        </div>
+                      )}
+                      {detail.description && (
+                        <div className={styles.detailType}>
+                          <span className={styles.detailTypeLabel}>Description:</span>
+                          <span className={styles.detailTypeValue}>{detail.description}</span>
+                        </div>
+                      )}
+                      {detail.msg && Object.keys(detail.msg).length > 0 && (
+                        <div className={styles.detailDenoms}>
+                          <table className={styles.detailTable}>
+                            <tbody>
+                              {Object.entries(detail.msg).map(([key, value]) => (
+                                <tr key={key} className={styles.tableRow}>
+                                  <td className={styles.tableKey}>
+                                    {formatFieldName(key)}
+                                  </td>
+                                  <td className={styles.tableValue}>
+                                    {formatFieldValue(value)}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+
+                      {!detail.msg && Object.keys(detail).length > 0 && (
+                        <div className={styles.detailDenoms}>
+                          <table className={styles.detailTable}>
+                            <tbody>
+                              {Object.entries(detail).map(([key, value]) => (
+                                <tr key={key} className={styles.tableRow}>
+                                  <td className={styles.tableKey}>
+                                    {formatFieldName(key)}
+                                  </td>
+                                  <td className={styles.tableValue}>
+                                    {formatFieldValue(value)}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+
                     </div>
                   ))}
                 </div>
