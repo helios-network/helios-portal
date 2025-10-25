@@ -15,24 +15,36 @@ Helios Portal is the official entry point to the Helios Blockchain, providing us
 ## Getting Started
 
 ### Clone the Repository
-```sh
+
+```bash
 git clone https://github.com/helios-network/helios-portal.git
 cd helios-portal
 ```
 
-### 2Install Dependencies
-```sh
+### Install Dependencies
+
+```bash
 npm install  # or yarn install
 ```
 
-### 3Run the Development Server
-```sh
+### Run the Development Server
+
+```bash
 npm run dev  # or yarn dev
 ```
 
 ## Documentation
 
 For detailed setup instructions, API references, and user guides, refer to the official documentation on Helios Hub.
+
+
+## Usage Examples
+
+- **Bridging Assets**: Navigate to the 'Bridge' section and follow the on-screen instructions to move tokens between chains.
+- **Staking Tokens**: Open the 'Staking' tab, select a validator, and stake your tokens.
+- **Delegation**: Delegate your voting power to a validator for governance participation.
+- **Portfolio Tracking**: View your balances, staking rewards, and governance votes directly in the dashboard.
+
 
 ## Contributing
 
@@ -43,13 +55,19 @@ We welcome contributions! To contribute:
 4. Push the branch (`git push origin feature-name`).
 5. Open a pull request.
 
+**Tips for contributors:**
+
+- Add meaningful comments and explanations for any new features.
+- Update the README or documentation for any added functionality.
+- Ensure that code follows existing formatting and style guidelines.
+
 ## License
 
 This project is licensed under the MIT License.
 
 ## Contact
 
-For questions or support, join our community or reach out to the Helios team.
+For questions or support, join our community or reach out to the Helios team via [Helios Blockchain Linktree](https://linktr.ee/heliosblockchain).
 
 ---
 
