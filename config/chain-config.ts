@@ -100,6 +100,10 @@ export const CHAIN_CONFIG: Record<number, ChainConfig> = {
     iconName: "token:arbitrum",
     rpcUrl: "https://arbitrum-one-rpc.publicnode.com",
     explorerUrl: "https://arbiscan.io",
+    wrapperContract: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+    decimals: 18,
+    token: "ETH",
+    wrappedToken: "WETH"
   },
   8453: {
     id: "base",
@@ -109,6 +113,10 @@ export const CHAIN_CONFIG: Record<number, ChainConfig> = {
     iconName: "token:base",
     rpcUrl: "https://base-rpc.publicnode.com",
     explorerUrl: "https://basescan.org",
+    wrapperContract: "0x4200000000000000000000000000000000000006",
+    decimals: 18,
+    token: "BASE",
+    wrappedToken: "WBASE"
   },
   10: {
     id: "optimism",
@@ -118,6 +126,10 @@ export const CHAIN_CONFIG: Record<number, ChainConfig> = {
     iconName: "token:optimism",
     rpcUrl: "https://optimism-rpc.publicnode.com",
     explorerUrl: "https://optimistic.etherscan.io",
+    wrapperContract: "0x4200000000000000000000000000000000000006",
+    decimals: 18,
+    token: "ETH",
+    wrappedToken: "WETH"
   },
   137: {
     id: "polygon",
@@ -127,6 +139,10 @@ export const CHAIN_CONFIG: Record<number, ChainConfig> = {
     iconName: "token:polygon",
     rpcUrl: "https://polygon-bor-rpc.publicnode.com",
     explorerUrl: "https://polygonscan.com",
+    wrapperContract: "0x0000000000000000000000000000000000001010",
+    decimals: 18,
+    token: "POL",
+    wrappedToken: "WPOL"
   }
 }
 
