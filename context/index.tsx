@@ -4,7 +4,8 @@ import {
   heliosChain,
   projectId,
   toAppKitNetwork,
-  wagmiAdapter
+  wagmiAdapter,
+  networksWagmiOfHelios
 } from "@/config/wagmi"
 import {
   mainnet,
@@ -51,11 +52,7 @@ const modal = createAppKit({
   projectId,
   networks: [
     toAppKitNetwork(heliosChain),
-    toAppKitNetwork(mainnet),
-    toAppKitNetwork(sepolia),
-    toAppKitNetwork(polygonAmoy),
-    toAppKitNetwork(bscTestnet),
-    toAppKitNetwork(avalancheFuji)
+    ... networksWagmiOfHelios.filter((network) => network.id !== heliosChain.id)
   ],
   defaultNetwork: toAppKitNetwork(heliosChain),
   metadata: metadata,

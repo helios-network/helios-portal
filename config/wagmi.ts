@@ -74,7 +74,7 @@ export const toAppKitNetwork = (chain: any): AppKitNetwork => ({
   blockExplorers: { ...chain.blockExplorers }
 })
 
-export const networks: AppKitNetwork[] = [
+export const networksWagmiOfHelios: AppKitNetwork[] = [
   toAppKitNetwork(heliosChain),
   toAppKitNetwork(mainnet),
   toAppKitNetwork(bsc),
@@ -94,7 +94,7 @@ export const wagmiAdapter = new WagmiAdapter({
   }),
   ssr: true,
   projectId,
-  networks
+  networks: networksWagmiOfHelios
 })
 
 export const config = wagmiAdapter.wagmiConfig
