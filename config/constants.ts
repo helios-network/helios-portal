@@ -8,7 +8,9 @@ export const CHAIN_COLORS = {
   bsc: "#F0B90B",
   avalanche: "#E84142",
   solana: "#14F195",
-  arbitrum: "#28A0F0"
+  arbitrum: "#28A0F0",
+  base: "#1C1C1C",
+  optimism: "#FF0420"
 } as const
 
 export const TOKEN_COLORS = {

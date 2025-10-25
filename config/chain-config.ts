@@ -91,6 +91,42 @@ export const CHAIN_CONFIG: Record<number, ChainConfig> = {
     decimals: 18,
     token: "AVAX",
     wrappedToken: "WAVAX"
+  },
+  42161: {
+    id: "arbitrum",
+    chainId: 42161,
+    name: "Arbitrum",
+    color: CHAIN_COLORS.arbitrum,
+    iconName: "token:arbitrum",
+    rpcUrl: "https://arbitrum-one-rpc.publicnode.com",
+    explorerUrl: "https://arbiscan.io",
+  },
+  8453: {
+    id: "base",
+    chainId: 8453,
+    name: "Base",
+    color: CHAIN_COLORS.base,
+    iconName: "token:base",
+    rpcUrl: "https://base-rpc.publicnode.com",
+    explorerUrl: "https://basescan.org",
+  },
+  10: {
+    id: "optimism",
+    chainId: 10,
+    name: "Optimism",
+    color: CHAIN_COLORS.optimism,
+    iconName: "token:optimism",
+    rpcUrl: "https://optimism-rpc.publicnode.com",
+    explorerUrl: "https://optimistic.etherscan.io",
+  },
+  137: {
+    id: "polygon",
+    chainId: 137,
+    name: "Polygon",
+    color: CHAIN_COLORS.polygon,
+    iconName: "token:polygon",
+    rpcUrl: "https://polygon-bor-rpc.publicnode.com",
+    explorerUrl: "https://polygonscan.com",
   }
 }
 
