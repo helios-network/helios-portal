@@ -23,6 +23,10 @@ export const List = () => {
     validator.moniker.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const sortedValidators = filteredValidators.sort((a, b) => {
+    return b.status - a.status
+  })
+
   return (
     <>
       <Card auto>
@@ -45,10 +49,10 @@ export const List = () => {
         </div>
       </Card>
       <div className={s.list}>
-        {filteredValidators.map((validator, i) => (
+        {sortedValidators.map((validator, i) => (
           <Item key={"validators-" + i} {...validator} />
         ))}
-        {filteredValidators.length === 0 && !validatorsIsLoading && (
+        {sortedValidators.length === 0 && !validatorsIsLoading && (
           <Empty icon="hugeicons:sad-02" title="No validators found" />
         )}
         {validatorsIsLoading && (
