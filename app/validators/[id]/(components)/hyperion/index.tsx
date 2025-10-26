@@ -169,7 +169,7 @@ export const Hyperion = () => {
               </div>
               <div className={s.cell}>
                 <span className={s.transferCount}>
-                  {totalTransfersForChain}
+                  {totalTransfersForChain || 0}
                 </span>
               </div>
             </div>
