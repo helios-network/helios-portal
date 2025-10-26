@@ -352,7 +352,7 @@ export function VotingSection({
                     <span className={styles.depositAmount}>
                       {formatDepositAmount(deposit.amount)}
                     </span>
-                    <span className={styles.depositDenom}>{deposit.denom}</span>
+                    <span className={styles.depositDenom}>HLS</span>
                   </div>
                 ))}
               </div>
