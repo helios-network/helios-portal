@@ -27,6 +27,19 @@ export const CHAIN_CONFIG: Record<number, ChainConfig> = {
     rpcUrl: typeof window !== "undefined" ? getRpcUrl() : RPC_URL_DEFAULT,
     explorerUrl: EXPLORER_URL
   },
+  1: {
+    id: "ethereum",
+    chainId: 1,
+    name: "Ethereum",
+    color: CHAIN_COLORS.ethereum,
+    iconName: "token:ethereum",
+    rpcUrl: "https://ethereum-rpc.publicnode.com",
+    explorerUrl: "https://etherscan.io",
+    wrapperContract: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    decimals: 18,
+    token: "ETH",
+    wrappedToken: "WETH"
+  },
   56: {
     id: "bsc",
     chainId: 56,
