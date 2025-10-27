@@ -19,9 +19,9 @@ export const Transactions = ({ transactions }: TransactionsProps) => {
   return (
     <Table>
       <tbody>
-        {transactions.map((transaction) => (
+        {transactions.map((transaction, index) => (
           <TransactionsLine
-            key={"transactions-" + Math.random().toString(36).substring(2, 15)}
+            key={"transactions-" + index}
             {...transaction}
           />
         ))}
