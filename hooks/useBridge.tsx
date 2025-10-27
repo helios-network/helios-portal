@@ -58,7 +58,9 @@ export const useBridge = () => {
           : "pending",
       chainId: tx.chainId,
       chainName: chains.find((chain) => chain.chainId === tx.chainId)?.name,
-      chainLogo: chains.find((chain) => chain.chainId === tx.chainId)?.logo
+      chainLogo: chains.find((chain) => chain.chainId === tx.chainId)?.logo,
+      timeout: tx.timeout,
+      status_bridge_tx: tx.status,
     }
   }
 

@@ -3,6 +3,7 @@ import s from "./transactions.module.scss"
 import { TransactionLight } from "@/types/transaction"
 import { EXPLORER_URL } from "@/config/app"
 import Category from "./category"
+import * as Tooltip from '@radix-ui/react-tooltip';
 import { Button } from "../button"
 import { Symbol } from "@/components/symbol"
 import { ethers } from "ethers"
@@ -25,7 +26,23 @@ export const TransactionsLine = (transaction: TransactionLight) => {
   return (
     <TableRow>
       <TableCell>
-        <Category type={transaction.type} status={transaction.status} />
+        <Tooltip.Provider>
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <div>
+                <Category type={transaction.type} status={transaction.status} />
+              </div>
+            </Tooltip.Trigger>
+            {transaction.timeout && transaction.timeout > 0 && (
+              <Tooltip.Portal>
+                <Tooltip.Content className={s.tooltipContent} sideOffset={5}>
+                  Expire at block <strong>{transaction.timeout}</strong> on chain <strong>{transaction.chainName}</strong>
+                  <Tooltip.Arrow className={s.tooltipArrow} />
+                </Tooltip.Content>
+              </Tooltip.Portal>
+            )}
+          </Tooltip.Root>
+        </Tooltip.Provider>
       </TableCell>
 
       <TableCell className={s.cellAmount}>

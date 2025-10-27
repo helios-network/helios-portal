@@ -76,4 +76,6 @@ export type TransactionLight = {
   chainId?: number
   chainLogo?: string
   chainName?: string
+  timeout?: number
+  status_bridge_tx?: string
 }

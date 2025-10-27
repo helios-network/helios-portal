@@ -11,6 +11,7 @@
   "dependencies": {
     "@faker-js/faker": "^9.6.0",
     "@iconify/react": "^5.2.0",
+    "@radix-ui/react-tooltip": "^1.2.8",
     "@reown/appkit": "^1.7.0",
     "@reown/appkit-adapter-wagmi": "^1.7.0",
     "@t3-oss/env-nextjs": "^0.12.0",
