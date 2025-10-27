@@ -47,6 +47,7 @@ export const Interface = () => {
   const {
     sendToChain,
     sendToHelios,
+    contractIsPaused,
     feedback: bridgeFeedback
   } = useBridge()
   const { switchChain } = useSwitchChain()
@@ -319,7 +320,16 @@ export const Interface = () => {
   const heliosInOrOut =
     form.from?.chainId === HELIOS_NETWORK_ID ||
     form.to?.chainId === HELIOS_NETWORK_ID
-  const chainIsPaused = form.to?.paused || form.from?.paused || false
+  const { data: chainIsPaused, isLoading: chainPausedLoading } = useQuery({
+    queryKey: ["contractIsPaused", form.from?.chainId, form.to?.chainId],
+    queryFn: () =>
+      form.from?.chainId && form.to?.chainId
+        ? contractIsPaused(form.from.chainId, form.to.chainId)
+        : Promise.resolve(false),
+    enabled: !!form.from?.chainId && !!form.to?.chainId,
+    staleTime: 30000, // 30 seconds
+    refetchOnWindowFocus: false
+  })
   const assetDisabled = tokenInfo.data && tokenInfo.data.symbol === "HLS" && form.to?.chainId !== HELIOS_NETWORK_ID
   const isDisabled =
     form.inProgress ||
@@ -330,7 +340,8 @@ export const Interface = () => {
     form.from?.chainId === form.to?.chainId ||
     !heliosInOrOut ||
     chainIsPaused ||
-    assetDisabled
+    assetDisabled ||
+    chainPausedLoading
 
   return (
     <>

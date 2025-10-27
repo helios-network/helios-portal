@@ -1,4 +1,4 @@
-import { request } from "./request"
+import { request, requestWithRpcUrl } from "./request"
 import { Token, TokenMetadataResponse, TokensBalance } from "@/types/token"
 import { Block } from "@/types/block"
 import { Delegation } from "@/types/delegation"
@@ -154,3 +154,11 @@ export const getAccountLastTransactions = (address: string) =>
 
 export const getAllHyperionTransferTxs = async () =>
   request<HyperionBridgeTx[]>("eth_getAllHyperionTransferTxs", [toHex(10)])
+
+export const getHyperionContractIsPaused = async (rpcUrl: string, smartContractAddress: string): Promise<boolean> =>
+  requestWithRpcUrl<string>(rpcUrl, "eth_call", [{
+    "to": smartContractAddress,
+    "data": "0x5c975abb"
+  }, "latest"]).then((result) => {
+    return result === "0x0000000000000000000000000000000000000000000000000000000000000001"
+  })

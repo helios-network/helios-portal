@@ -13,7 +13,8 @@ import {
 import {
   getAllHyperionTransferTxs,
   getHyperionAccountTransferTxsByPageAndSize,
-  getTokensByChainIdAndPageAndSize
+  getTokensByChainIdAndPageAndSize,
+  getHyperionContractIsPaused
 } from "@/helpers/rpc-calls"
 import { toHex, TransactionReceipt } from "viem"
 import { secondsToMilliseconds } from "date-fns"
@@ -113,6 +114,29 @@ export const useBridge = () => {
       queryFn: () =>
         getTokensByChainIdAndPageAndSize(chainId, toHex(1), toHex(10))
     })
+  }
+
+  const contractIsPaused = async (fromChainId: number, toChainId: number): Promise<boolean> => {
+    if (fromChainId == 42000) {
+      const paused = chains.find(
+        (chain) => chain.chainId === toChainId
+      )?.paused
+      console.log("paused from helios network - ", paused)
+      return paused || false
+    } else {
+      const chainConfig = getChainConfig(fromChainId)
+      if (chainConfig == undefined) {
+        throw new Error("Chain configuration not found for chain " + fromChainId)
+      }
+      const chainContractAddress = chains.find(
+        (chain) => chain.chainId === fromChainId
+      )?.hyperionContractAddress
+      if (!chainContractAddress) {
+        throw new Error("Chain contract address not found for chain " + fromChainId)
+      }
+      const paused = await getHyperionContractIsPaused(chainConfig.rpcUrl, chainContractAddress) || false
+      return paused
+    }
   }
 
   // 🟡 sendToChain
@@ -461,6 +485,7 @@ export const useBridge = () => {
     sendToHelios,
     feedback,
     resetFeedback,
+    contractIsPaused,
     isLoading: sendToChainMutation.isPending || sendToHeliosMutation.isPending
   }
 }
