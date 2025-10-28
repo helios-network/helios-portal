@@ -1,4 +1,4 @@
-import apiClient, { shouldDisableRefetch } from "@/lib/api/apiClient"
+﻿import apiClient, { shouldDisableRefetch } from "@/lib/api/apiClient"
 import type {
     ChainStatsResponse,
     TotalTransactionCountResponse,
@@ -36,6 +36,10 @@ export const useHomeData = ({
     // Only enable queries if refreshInterval is provided (meaning we're on home page)
     const isEnabled = refreshInterval !== undefined
 
+    // Adjusted staleTime to match refetchInterval for better cache efficiency
+    const STATS_STALE_TIME = 4 * 60 * 1000 // 4 minutes - slightly less than refetchInterval
+    const CHART_STALE_TIME = 10 * 60 * 1000 // 10 minutes - charts change less frequently
+
     const queries = useQueries({
         queries: [
             // Total Transactions API
@@ -55,7 +59,7 @@ export const useHomeData = ({
                     }
                     return response?.result
                 },
-                staleTime: 5 * 60 * 1000,
+                staleTime: STATS_STALE_TIME,
                 refetchInterval: actualRefreshInterval,
                 enabled: isEnabled,
                 retry: false,
@@ -75,7 +79,7 @@ export const useHomeData = ({
                     )
                     return response?.result
                 },
-                staleTime: 5 * 60 * 1000,
+                staleTime: STATS_STALE_TIME,
                 refetchInterval: actualRefreshInterval,
                 enabled: isEnabled,
                 retry: false,
@@ -111,7 +115,7 @@ export const useHomeData = ({
                         throw error
                     }
                 },
-                staleTime: 5 * 60 * 1000,
+                staleTime: STATS_STALE_TIME,
                 refetchInterval: actualRefreshInterval,
                 refetchOnWindowFocus: false,
                 refetchOnMount: false,
@@ -149,7 +153,7 @@ export const useHomeData = ({
                         throw error
                     }
                 },
-                staleTime: 5 * 60 * 1000,
+                staleTime: STATS_STALE_TIME,
                 refetchInterval: actualRefreshInterval,
                 refetchOnWindowFocus: false,
                 refetchOnMount: false,
@@ -167,8 +171,8 @@ export const useHomeData = ({
                     })
                     return response?.result || []
                 },
-                staleTime: 5 * 60 * 1000,
-                refetchInterval: false,
+                staleTime: CHART_STALE_TIME,
+                refetchInterval: false, // Chart data doesn't need constant refetch
                 enabled: isEnabled,
                 retry: false,
             },
@@ -186,8 +190,8 @@ export const useHomeData = ({
                     )
                     return response?.result || []
                 },
-                staleTime: 5 * 60 * 1000,
-                refetchInterval: false,
+                staleTime: CHART_STALE_TIME,
+                refetchInterval: false, // Chart data doesn't need constant refetch
                 enabled: isEnabled,
                 retry: false,
             },

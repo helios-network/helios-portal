@@ -3,6 +3,10 @@ import { getGasPrice } from "@/helpers/rpc-calls"
 import { calculateAdjustedGasPrice } from "@/utils/gas"
 import { useQuery } from "@tanstack/react-query"
 
+// Cache configuration constants
+const GAS_PRICE_STALE_TIME = 5000 // 5 seconds
+const GAS_PRICE_REFETCH_INTERVAL = 30000 // 30 seconds
+
 /**
  * Hook to get the adjusted gas price based on the user's selected gas price option
  * @returns The adjusted gas price and related information
@@ -19,7 +23,8 @@ export function useGasPrice() {
     queryKey: ["gasPrice"],
     queryFn: getGasPrice,
     enabled: debugMode,
-    refetchInterval: 30000 // Refetch every 30 seconds
+    staleTime: GAS_PRICE_STALE_TIME,
+    refetchInterval: GAS_PRICE_REFETCH_INTERVAL
   })
 
   // Calculate the adjusted gas price based on the user's selected option

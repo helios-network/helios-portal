@@ -15,6 +15,16 @@ import { useQuery } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
 import { useAppStore } from "@/stores/app"
 
+// Cache configuration constants
+const BLOCK_NUMBER_STALE_TIME = secondsToMilliseconds(10)
+const BLOCK_NUMBER_REFETCH_INTERVAL = secondsToMilliseconds(30)
+const BLOCK_DATA_STALE_TIME = secondsToMilliseconds(15)
+const BLOCK_DATA_REFETCH_INTERVAL = secondsToMilliseconds(60)
+const HELIOS_PRICE_STALE_TIME = secondsToMilliseconds(60)
+const HELIOS_PRICE_REFETCH_INTERVAL = secondsToMilliseconds(300)
+const GAS_PRICE_STALE_TIME = secondsToMilliseconds(5)
+const GAS_PRICE_REFETCH_INTERVAL = secondsToMilliseconds(30)
+
 export const useBlockInfo = (options?: {
   forceEnable?: boolean
   includeGas?: boolean
@@ -27,13 +37,16 @@ export const useBlockInfo = (options?: {
     queryKey: ["blockNumber"],
     queryFn: getLatestBlockNumber,
     enabled: enableBlocks,
-    refetchInterval: secondsToMilliseconds(30)
+    staleTime: BLOCK_NUMBER_STALE_TIME,
+    refetchInterval: BLOCK_NUMBER_REFETCH_INTERVAL
   })
 
   const qBlockData = useQuery({
     queryKey: ["blockData", qBlockNumber.data],
     queryFn: () => getBlockByNumber(qBlockNumber.data ?? "latest"),
-    enabled: enableBlocks && !!qBlockNumber.data
+    enabled: enableBlocks && !!qBlockNumber.data,
+    staleTime: BLOCK_DATA_STALE_TIME,
+    refetchInterval: BLOCK_DATA_REFETCH_INTERVAL
   })
 
   const qPreviousBlockData = useQuery({
@@ -46,6 +59,7 @@ export const useBlockInfo = (options?: {
         qBlockNumber.data ? toHex(fromHex(qBlockNumber.data) - 1) : "latest"
       ),
     enabled: enableBlocks && !!qBlockNumber.data,
+    staleTime: BLOCK_DATA_STALE_TIME,
     refetchInterval: false
   })
 
@@ -64,13 +78,17 @@ export const useBlockInfo = (options?: {
   const qHeliosPrice = useQuery({
     queryKey: ["tokenData", ["hls"]],
     queryFn: () => fetchCGTokenData(["hls"]),
-    retry: false
+    retry: false,
+    staleTime: HELIOS_PRICE_STALE_TIME,
+    refetchInterval: HELIOS_PRICE_REFETCH_INTERVAL
   })
 
   const qGasPrice = useQuery({
     queryKey: ["gasPrice"],
     queryFn: getGasPrice,
-    enabled: enableGas
+    enabled: enableGas,
+    staleTime: GAS_PRICE_STALE_TIME,
+    refetchInterval: GAS_PRICE_REFETCH_INTERVAL
   })
 
   const gasPriceInETH = qGasPrice.data ? fromWeiToEther(qGasPrice.data) : "0"
