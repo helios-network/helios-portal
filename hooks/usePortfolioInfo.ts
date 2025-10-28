@@ -7,6 +7,12 @@ import { TokenExtended } from "@/types/token"
 import { ethers } from "ethers"
 import { HELIOS_NETWORK_ID } from "@/config/app"
 
+// Cache configuration constants
+const TOKEN_BALANCE_STALE_TIME = secondsToMilliseconds(20)
+const TOKEN_BALANCE_REFETCH_INTERVAL = secondsToMilliseconds(30)
+const ENRICHED_PORTFOLIO_STALE_TIME = secondsToMilliseconds(30)
+const ENRICHED_PORTFOLIO_REFETCH_INTERVAL = secondsToMilliseconds(60)
+
 export const usePortfolioInfo = () => {
   const { address } = useAccount()
   const { getTokenByAddress } = useTokenRegistry()
@@ -15,13 +21,16 @@ export const usePortfolioInfo = () => {
     queryKey: ["tokensBalance", address],
     queryFn: () => getTokensBalance(address!, toHex(1), toHex(10)),
     enabled: !!address,
-    refetchInterval: secondsToMilliseconds(30)
+    staleTime: TOKEN_BALANCE_STALE_TIME,
+    refetchInterval: TOKEN_BALANCE_REFETCH_INTERVAL
   })
 
   const enrichedTokensQuery = useQuery({
     queryKey: ["enrichedPortfolio", address, qTokenBalances.dataUpdatedAt],
     enabled: !!qTokenBalances.data,
     refetchOnWindowFocus: false,
+    staleTime: ENRICHED_PORTFOLIO_STALE_TIME,
+    refetchInterval: ENRICHED_PORTFOLIO_REFETCH_INTERVAL,
     queryFn: async (): Promise<TokenExtended[]> => {
       const results = await Promise.all(
         qTokenBalances.data!.Balances.map(async (token) => {

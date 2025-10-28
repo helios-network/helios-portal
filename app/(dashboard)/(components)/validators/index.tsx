@@ -7,7 +7,7 @@ import s from "./validators.module.scss"
 
 export const Validators = () => {
   const { activeValidators, maxValidators } = useValidatorInfo()
-  const { lastProposal } = useProposalInfo()
+  const { lastProposal } = useProposalInfo(1, 1, { enabled: false })
 
   return (
     <Card className={s.validators}>

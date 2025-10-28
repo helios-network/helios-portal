@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+﻿import { useQuery } from "@tanstack/react-query"
 import { request } from "@/helpers/request"
 import { secondsToMilliseconds } from "@/utils/number"
 
@@ -16,7 +16,7 @@ export interface WhitelistedAsset {
 
 export const useWhitelistedAssets = () => {
   const query = useQuery({
-    queryKey: ["whitelisted-assets"],
+    queryKey: ["whitelistedAssets"],
     queryFn: () =>
       request<WhitelistedAsset[]>("eth_getAllWhitelistedAssets", []),
     staleTime: secondsToMilliseconds(300), // 5 minutes

@@ -11,7 +11,7 @@ import {
 import { formatNumberWithNotation } from "@/helpers/format"
 import s from "./tvl.module.scss"
 import { useAssetsInfo } from "@/hooks/useAssetsInfo"
-import { useHomeData } from "@/hooks/useHomeData"
+import { useTVLData } from "@/hooks/useTVLData"
 import { useWhitelistedAssets } from "@/hooks/useWhitelistedAssets"
 import Image from "next/image"
 import { HELIOS_TOKEN_ADDRESS } from "@/config/app"
@@ -76,9 +76,9 @@ const Chart = ({ data, gradientId, prefix }: ChartProps) => {
 
 export const TVL = () => {
   const { assets, totalHolders, totalTVL } = useAssetsInfo()
-  const { tvlChartData } = useHomeData({
-    refreshInterval: 30000
-  })
+  // OPTIMIZATION: Use dedicated useTVLData instead of useHomeData
+  // This prevents loading 5+ unnecessary queries (listBlocks, listTransactions, chainStats, etc.)
+  const { data: tvlChartData = [] } = useTVLData()
   const { assets: whitelistedAssets } = useWhitelistedAssets()
 
   const filteredAssets = assets.filter(
@@ -90,23 +90,23 @@ export const TVL = () => {
   const dataTotal =
     tvlChartData.length > 0
       ? tvlChartData.map((item: any) => ({
-        date: item.date,
-        value: item.tvlValue
-      }))
+          date: item.date,
+          value: item.tvlValue
+        }))
       : [
-        { date: "Jan", value: 0 },
-        { date: "Feb", value: 0 },
-        { date: "Mar", value: 0 },
-        { date: "Apr", value: 0 },
-        { date: "May", value: 0 },
-        { date: "Jun", value: 0 },
-        { date: "Jul", value: 0 },
-        { date: "Aug", value: 0 },
-        { date: "Sep", value: 0 },
-        { date: "Oct", value: 0 },
-        { date: "Nov", value: 0 },
-        { date: "Dec", value: 0 }
-      ]
+          { date: "Jan", value: 0 },
+          { date: "Feb", value: 0 },
+          { date: "Mar", value: 0 },
+          { date: "Apr", value: 0 },
+          { date: "May", value: 0 },
+          { date: "Jun", value: 0 },
+          { date: "Jul", value: 0 },
+          { date: "Aug", value: 0 },
+          { date: "Sep", value: 0 },
+          { date: "Oct", value: 0 },
+          { date: "Nov", value: 0 },
+          { date: "Dec", value: 0 }
+        ]
 
   // Sort assets by network percentage (highest first) and take top 3
   const topAssets = [...whitelistedAssets]
