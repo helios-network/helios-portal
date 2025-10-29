@@ -16,13 +16,15 @@ export const useValidators = (page = 1, size = 100) => {
 
       if (!validators) return []
 
-      // Sort validators: jailed last
-      return validators.sort((a, b) => {
-        // Among non-active, jailed last
-        if (a.jailed && !b.jailed) return 1
-        if (!a.jailed && b.jailed) return -1
-        return 0
-      })
+      // Sort validators: jailed last and exclude helios-node (default moniker Remove after testnet)
+      return validators
+        .filter((v) => v.moniker !== "helios-node")
+        .sort((a, b) => {
+          // Among non-active, jailed last
+          if (a.jailed && !b.jailed) return 1
+          if (!a.jailed && b.jailed) return -1
+          return 0
+        })
     },
     enabled: !!page && !!size,
     staleTime: VALIDATOR_STALE_TIME,
