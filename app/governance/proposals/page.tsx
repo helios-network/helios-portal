@@ -98,7 +98,7 @@ const AllProposals: React.FC = () => {
       filters.push(`proposer=${HELIOS_ORG_ADDRESS}`)
     }
 
-    return filters.length > 0 ? filters.join(" && ") : ""
+    return filters.length > 0 ? filters.join("&&") : ""
   }
 
   // Get total proposals count - updates when filters change
