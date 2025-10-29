@@ -21,7 +21,7 @@ export const useTransactionInfo = (size = 3) => {
     queryFn: async () => {
       return Promise.all(
         qTransactions.data!.map(async (tx) => {
-          if (tx.ParsedInfo.type === "UNKNOWN") {
+          if (tx.ParsedInfo?.type === "UNKNOWN") {
             tx.ParsedInfo.type = "TRANSFER"
           }
           const token = tx.ParsedInfo.contractAddress
