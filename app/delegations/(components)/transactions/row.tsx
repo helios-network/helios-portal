@@ -51,7 +51,22 @@ const TRANSACTION_LABELS: Record<
     label: "Transaction",
     variant: "primary",
     icon: "hugeicons:gas-pipe"
-  }
+  },
+  CREATE_CRON: {
+    label: "Create Cron",
+    variant: "primary",
+    icon: "hugeicons:calendar-plus"
+  },
+  TRANSFER: {
+    label: "Transfer",
+    variant: "primary",
+    icon: "hugeicons:transfer"
+  },
+  CREATE_ERC20: {
+    label: "Create Token",
+    variant: "primary",
+    icon: "hugeicons:token"
+  },
 }
 
 interface TransactionRowProps {
