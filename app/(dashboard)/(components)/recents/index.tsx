@@ -7,11 +7,9 @@ import { Transactions } from "@/components/transactions"
 import { useTransactionInfo } from "@/hooks/useTransactionInfo"
 
 export const Recents = () => {
-  const { transactions } = useTransactionInfo(30)
+  const { transactions } = useTransactionInfo(3)
 
   const filteredTransactions = transactions
-    .filter((tx) => tx.type !== "UNKNOWN")
-    .filter((tx) => tx.status !== "failed")
     .slice(0, 3)
 
   return (

@@ -66,6 +66,9 @@ export type TransactionLastType =
   | "DEPOSIT"
   | "WITHDRAW"
   | "UNKNOWN"
+  | "CREATE_CRON"
+  | "TRANSFER"
+  | "CREATE_ERC20"
 
 export type TransactionLight = {
   type: TransactionLastType

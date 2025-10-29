@@ -20,7 +20,10 @@ export const CategoryConfig: {
   STAKE_OUT: { name: "Stake out", icon: "hugeicons:square-lock-minus-02" },
   DEPOSIT: { name: "Deposit", icon: "hugeicons:download-03" },
   WITHDRAW: { name: "Withdraw", icon: "hugeicons:upload-03" },
-  UNKNOWN: { name: "Unknown", icon: "hugeicons:help-circle" }
+  UNKNOWN: { name: "Unknown", icon: "hugeicons:help-circle" },
+  CREATE_CRON: { name: "Create cron", icon: "hugeicons:clock-01" },
+  TRANSFER: { name: "Transfer", icon: "hugeicons:arrow-up-right-01" },
+  CREATE_ERC20: { name: "Create HRC20", icon: "hugeicons:coins-02" }
 }
 
 export interface CategoryProps {

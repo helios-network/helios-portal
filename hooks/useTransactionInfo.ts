@@ -20,16 +20,35 @@ export const useTransactionInfo = (size = 3) => {
     queryFn: async () => {
       return Promise.all(
         qTransactions.data!.map(async (tx) => {
-          const token = tx.ParsedInfo.contractAddress
-            ? await getTokenByAddress(
+
+          if (tx.ParsedInfo.type == "UNKNOWN") {
+            tx.ParsedInfo.type = "TRANSFER"
+          }
+
+          let token = null
+          try {
+            if (tx.ParsedInfo?.contractAddress && tx.ParsedInfo.contractAddress != "0x0000000000000000000000000000000000000000") {
+              token = await getTokenByAddress(
                 tx.ParsedInfo.contractAddress,
                 HELIOS_NETWORK_ID,
                 { updateBalance: false }
               )
-            : null
-
+            } else {
+              token = await getTokenByAddress(
+                "0xD4949664cD82660AaE99bEdc034a0deA8A0bd517",
+                HELIOS_NETWORK_ID,
+                { updateBalance: false }
+              )
+            }
+          } catch (e) {
+            token = await getTokenByAddress(
+              "0xD4949664cD82660AaE99bEdc034a0deA8A0bd517",
+              HELIOS_NETWORK_ID,
+              { updateBalance: false }
+            )
+          }
           return {
-            type: tx.ParsedInfo.type,
+            type: tx.ParsedInfo.type || "TRANSFER",
             token,
             amount: tx.ParsedInfo.amount || "0",
             hash: tx.RawTransaction.hash
