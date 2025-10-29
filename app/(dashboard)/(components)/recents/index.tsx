@@ -8,9 +8,7 @@ import { useTransactionInfo } from "@/hooks/useTransactionInfo"
 
 export const Recents = () => {
   const { transactions } = useTransactionInfo(3)
-
-  const filteredTransactions = transactions
-    .slice(0, 3)
+  const filteredTransactions = transactions.slice(0, 3)
 
   return (
     <Card>
