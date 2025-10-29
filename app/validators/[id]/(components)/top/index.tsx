@@ -75,6 +75,16 @@ export const Top = () => {
 
   const explorerLink = EXPLORER_URL + "/address/" + validator.validatorAddress
 
+  const heliosNodesMonikers = [
+    "helios-peer",
+    "helios-unity",
+    "helios-inter",
+    "helios-hedge",
+    "helios-supra"
+  ]
+
+  const isHeliosNode = heliosNodesMonikers.includes(validator.moniker)
+
   return (
     <Grid className={s.top}>
       <Area area="a">
@@ -98,7 +108,7 @@ export const Top = () => {
             <Button
               icon="hugeicons:download-03"
               onClick={() => handleOpenStake()}
-              disabled={!enableDelegation || !isConnected}
+              disabled={!enableDelegation || !isConnected || !isHeliosNode}
             >
               Stake now
             </Button>

@@ -67,6 +67,16 @@ export const Item = ({
     setOpenStake(true)
   }
 
+  const heliosNodesMonikers = [
+    "helios-peer",
+    "helios-unity",
+    "helios-inter",
+    "helios-hedge",
+    "helios-supra"
+  ]
+
+  const isHeliosNode = heliosNodesMonikers.includes(moniker)
+
   return (
     <>
       <Link href={"/validators/" + validatorAddress} className={s.item}>
@@ -162,7 +172,7 @@ export const Item = ({
             className={s.stake}
             border
             onClick={handleOpenStake}
-            disabled={!enableDelegation}
+            disabled={!enableDelegation || !isHeliosNode}
           >
             Stake Now
           </Button>

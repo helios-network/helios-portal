@@ -18,7 +18,6 @@ export const useValidators = (page = 1, size = 100) => {
 
       // Sort validators: jailed last and exclude helios-node (default moniker Remove after testnet)
       return validators
-        .filter((v) => v.moniker !== "helios-node")
         .sort((a, b) => {
           // Among non-active, jailed last
           if (a.jailed && !b.jailed) return 1
