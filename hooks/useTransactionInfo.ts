@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useTokenRegistry } from "./useTokenRegistry"
 import { HELIOS_NETWORK_ID } from "@/config/app"
 import { TransactionLight } from "@/types/transaction"
+import { TokenExtended } from "@/types/token"
 
 export const useTransactionInfo = (size = 3) => {
   const { getTokenByAddress } = useTokenRegistry()
@@ -25,7 +26,7 @@ export const useTransactionInfo = (size = 3) => {
             tx.ParsedInfo.type = "TRANSFER"
           }
 
-          let token = undefined;
+          let token: TokenExtended | null = null;
           try {
             if (tx.ParsedInfo?.contractAddress
               && tx.ParsedInfo.contractAddress !== "0x0000000000000000000000000000000000000000") {
