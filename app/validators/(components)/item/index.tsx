@@ -98,6 +98,7 @@ export const Item = ({
           </div>
           <div className={s.heading}>
             {isActive && <Badge status="success">Active</Badge>}
+            {isHeliosNode && <Badge status="primary">Official Node</Badge>}
             <h3>{moniker}</h3>
             {/* {description.details && <h4>{description.details}</h4>} */}
           </div>
@@ -172,7 +173,7 @@ export const Item = ({
             className={s.stake}
             border
             onClick={handleOpenStake}
-            disabled={!enableDelegation || !isHeliosNode}
+            disabled={!enableDelegation}
           >
             Stake Now
           </Button>
