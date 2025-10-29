@@ -174,7 +174,7 @@ export const Item = ({
             className={s.stake}
             border
             onClick={handleOpenStake}
-            disabled={!enableDelegation}
+            disabled={!enableDelegation || !isHeliosNode}
           >
             Stake Now
           </Button>
