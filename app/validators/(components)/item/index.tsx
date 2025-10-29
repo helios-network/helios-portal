@@ -98,6 +98,7 @@ export const Item = ({
           </div>
           <div className={s.heading}>
             {isActive && <Badge status="success">Active</Badge>}
+            {isActive && isHeliosNode && <span className={s.spacing}>&nbsp;</span>}
             {isHeliosNode && <Badge status="primary">Official Node</Badge>}
             <h3>{moniker}</h3>
             {/* {description.details && <h4>{description.details}</h4>} */}
