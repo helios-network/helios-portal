@@ -26,30 +26,14 @@ export const useTransactionInfo = (size = 3) => {
             tx.ParsedInfo.type = "TRANSFER"
           }
 
-          let token: TokenExtended | null = null;
-          try {
-            if (tx.ParsedInfo?.contractAddress
-              && tx.ParsedInfo.contractAddress !== "0x0000000000000000000000000000000000000000") {
-              token = await getTokenByAddress(
-                tx.ParsedInfo.contractAddress,
-                HELIOS_NETWORK_ID,
-                { updateBalance: false }
-              )
-            } else {
-              token = await getTokenByAddress(
-                "0xD4949664cD82660AaE99bEdc034a0deA8A0bd517",
-                HELIOS_NETWORK_ID,
-                { updateBalance: false }
-              )
-            }
-          } catch (e) {
-            console.error(e)
-            token = await getTokenByAddress(
-              "0xD4949664cD82660AaE99bEdc034a0deA8A0bd517",
+          const tokenAddress: string = tx.ParsedInfo?.contractAddress && tx.ParsedInfo.contractAddress !== "0x0000000000000000000000000000000000000000"
+            ? tx.ParsedInfo.contractAddress
+            : "0xD4949664cD82660AaE99bEdc034a0deA8A0bd517";
+          const token = await getTokenByAddress(
+              tokenAddress,
               HELIOS_NETWORK_ID,
               { updateBalance: false }
             )
-          }
           return {
             type: tx.ParsedInfo.type || "TRANSFER",
             token,
