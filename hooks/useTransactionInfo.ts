@@ -27,7 +27,7 @@ export const useTransactionInfo = (size = 3) => {
 
           let token = null
           try {
-            if (tx.ParsedInfo?.contractAddress && tx.ParsedInfo.contractAddress != "0x0000000000000000000000000000000000000000") {
+            if (tx.ParsedInfo?.contractAddress && tx.ParsedInfo.contractAddress !== "0x0000000000000000000000000000000000000000") {
               token = await getTokenByAddress(
                 tx.ParsedInfo.contractAddress,
                 HELIOS_NETWORK_ID,
