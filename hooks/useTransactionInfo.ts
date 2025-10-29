@@ -41,6 +41,7 @@ export const useTransactionInfo = (size = 3) => {
               )
             }
           } catch (e) {
+            console.error(e)
             token = await getTokenByAddress(
               "0xD4949664cD82660AaE99bEdc034a0deA8A0bd517",
               HELIOS_NETWORK_ID,
