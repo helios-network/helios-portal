@@ -11,6 +11,7 @@ import { ModalStake } from "@/app/delegations/(components)/active/stake"
 import { useAccount, useChainId, useSwitchChain } from "wagmi"
 import { HELIOS_NETWORK_ID } from "@/config/app"
 import Link from "next/link"
+import HELIOS_NODE_MONIKERS from "@/config/helios-node-monikers"
 
 export const Item = ({
   moniker,
@@ -67,15 +68,7 @@ export const Item = ({
     setOpenStake(true)
   }
 
-  const heliosNodesMonikers = [
-    "helios-peer",
-    "helios-unity",
-    "helios-inter",
-    "helios-hedge",
-    "helios-supra"
-  ]
-
-  const isHeliosNode = heliosNodesMonikers.includes(moniker)
+  const isHeliosNode = HELIOS_NODE_MONIKERS.includes(moniker)
 
   return (
     <>

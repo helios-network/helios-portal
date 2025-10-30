@@ -10,6 +10,7 @@ import { Item } from "../item"
 import { Empty } from "./empty"
 import { Informations } from "./informations"
 import s from "./list.module.scss"
+import HELIOS_NODE_MONIKERS from "@/config/helios-node-monikers"
 
 export const List = () => {
   const [searchTerm, setSearchTerm] = useState("")
@@ -24,7 +25,7 @@ export const List = () => {
   )
 
   const sortedValidators = filteredValidators.sort((a, b) => {
-    return b.status - a.status
+    return b.status - a.status || (HELIOS_NODE_MONIKERS.includes(a.moniker) ? -1 : 1)
   })
 
   return (
