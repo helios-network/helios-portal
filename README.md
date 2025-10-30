@@ -54,3 +54,5 @@ For questions or support, join our community or reach out to the Helios team.
 ---
 
 **Helios Portal - Powering the Future of Interchain!**
+
+Testnet feedback contributor: hilmi.eth
