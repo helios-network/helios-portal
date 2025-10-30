@@ -2,7 +2,7 @@
 
 import { Area, Grid } from "@/components/grid"
 import routes from "@/config/routes"
-import { useBlockInfo } from "@/hooks/useBlockInfo"
+import { useBlockInfoBatch } from "@/hooks/useBlockInfoBatch"
 import { Discover } from "./(components)/discover"
 import { Linker } from "./(components)/linker"
 import { Portfolio } from "./(components)/portfolio"
@@ -15,7 +15,7 @@ import s from "./page.module.scss"
 import { formatNumber } from "@/lib/utils/number"
 
 export default function Page() {
-  const { lastBlockNumber, blockTime, gasPriceUSD } = useBlockInfo({
+  const { lastBlockNumber, blockTime, gasPriceUSD } = useBlockInfoBatch({
     forceEnable: true,
     includeGas: true
   })
