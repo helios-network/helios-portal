@@ -34,7 +34,6 @@ export const usePortfolioInfo = () => {
     staleTime: ENRICHED_PORTFOLIO_STALE_TIME,
     refetchInterval: ENRICHED_PORTFOLIO_REFETCH_INTERVAL,
     queryFn: async (): Promise<TokenExtended[]> => {
-      // ⚡ PHASE 5C: Batch fetch all token metadata in 1-2 HTTP requests instead of N
       const tokenAddresses = qTokenBalances.data!.Balances.map(b => b.address)
 
       // Batch fetch metadata for all tokens at once

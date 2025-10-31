@@ -3,22 +3,6 @@ import { batchRequest } from "@/helpers/batchRequest"
 import { Token, TokenMetadataResponse } from "@/types/token"
 import { secondsToMilliseconds } from "@/utils/number"
 
-/**
- * ⚡ PHASE 5C: Token Enrichment Batching
- * 
- * **Performance Improvement:**
- * - Original: 10-20 separate eth_getTokenDetails calls (1-2 seconds latency)
- * - useTokenEnrichmentBatch: 1-2 batched requests
- * - Latency improvement: ~80-90% reduction (1200-1800ms faster!)
- * 
- * **Implementation:**
- * Combines multiple eth_getTokenDetails calls into single batched HTTP requests
- * Automatically handles large token lists by splitting into multiple batches (max 50 per batch)
- * 
- * **Use Case:**
- * Portfolio enrichment, TVL calculations, token listings
- */
-
 const TOKEN_METADATA_STALE_TIME = secondsToMilliseconds(60)
 const TOKEN_METADATA_REFETCH_INTERVAL = secondsToMilliseconds(300)
 const MAX_TOKENS_PER_BATCH = 50 // Safe limit for batch size

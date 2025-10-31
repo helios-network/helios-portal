@@ -30,7 +30,6 @@ export const useAssetsInfo = (options: UseAssetsInfoOptions = {}) => {
     queryFn: async () => {
       const data = qAssets.data || []
 
-      // ⚡ PHASE 5C: Batch fetch all token metadata in 1-2 HTTP requests instead of N
       const tokenAddresses = data.map(asset => asset.contractAddress)
 
       // Batch fetch metadata for all tokens at once
