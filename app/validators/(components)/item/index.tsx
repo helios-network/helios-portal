@@ -3,14 +3,23 @@ import { Button } from "@/components/button"
 import { Icon } from "@/components/icon"
 import { formatBigNumber } from "@/lib/utils/number"
 import { Validator } from "@/types/validator"
+import { TokenExtended } from "@/types/token"
 import s from "./item.module.scss"
 import { StatItem } from "./stat"
-import { useValidatorDetail } from "@/hooks/useValidatorDetail"
 import { useState } from "react"
 import { ModalStake } from "@/app/delegations/(components)/active/stake"
 import { useAccount, useChainId, useSwitchChain } from "wagmi"
 import { HELIOS_NETWORK_ID } from "@/config/app"
 import Link from "next/link"
+
+interface ItemProps extends Validator {
+  cachedDetails?: {
+    delegation?: any
+    assets?: any
+    enrichedAssets?: any[]
+  }
+  userHasDelegated?: boolean
+}
 
 export const Item = ({
   moniker,
@@ -21,8 +30,10 @@ export const Item = ({
   status,
   delegationAuthorization,
   commission,
-  minDelegation
-}: Validator) => {
+  minDelegation,
+  cachedDetails,
+  userHasDelegated = false
+}: ItemProps) => {
   // const [favorite, setFavorite] = useState(false)
 
   // const handleFavorite = () => {
@@ -37,7 +48,6 @@ export const Item = ({
   const chainId = useChainId()
   const { isConnected } = useAccount()
   const { switchChain } = useSwitchChain()
-  const { delegation, userHasDelegated } = useValidatorDetail(validatorAddress)
 
   const isActive = status === 3
   const enableDelegation = delegationAuthorization && isConnected
@@ -46,16 +56,16 @@ export const Item = ({
     parseFloat(commission.commission_rates.rate) * 100 + "%"
   const formattedBoost =
     Math.min((parseFloat(boostPercentage) * 15) / 100, 15) + "%"
-  const tokens = delegation.assets
+  const tokens = cachedDetails?.enrichedAssets || []
 
   const totalDelegated = tokens.reduce(
-    (acc, token) => acc + token.balance.totalPrice,
+    (acc: number, token: TokenExtended) => acc + token.balance.totalPrice,
     0
   )
 
   const ratioOptimal =
-    (tokens.find((token) => token.display.symbol === "hls")?.balance
-      .totalPrice || 0) >= totalDelegated
+    (tokens.find((token: TokenExtended) => token.display.symbol === "hls")
+      ?.balance.totalPrice || 0) >= totalDelegated
 
   const handleOpenStake = (e: any) => {
     e.preventDefault()
@@ -98,7 +108,9 @@ export const Item = ({
           </div>
           <div className={s.heading}>
             {isActive && <Badge status="success">Active</Badge>}
-            {isActive && isHeliosNode && <span className={s.spacing}>&nbsp;</span>}
+            {isActive && isHeliosNode && (
+              <span className={s.spacing}>&nbsp;</span>
+            )}
             {isHeliosNode && <Badge status="primary">Official Node</Badge>}
             <h3>{moniker}</h3>
             {/* {description.details && <h4>{description.details}</h4>} */}
@@ -137,7 +149,7 @@ export const Item = ({
               <strong>${formatBigNumber(totalDelegated)}</strong>
             </div>
             <div className={s.bars}>
-              {tokens.map((token) => (
+              {tokens.map((token: TokenExtended) => (
                 <div
                   className={s.bar}
                   key={"validators-" + token.functionnal.address}

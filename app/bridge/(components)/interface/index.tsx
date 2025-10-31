@@ -95,8 +95,6 @@ export const Interface = () => {
       form.from?.chainId
     ],
     queryFn: async () => {
-      // ⚡ PHASE 5C: Batch fetch token metadata in 1 HTTP request instead of 3
-      // Limit to first 3 tokens to reduce load
       const tokensToEnrich = qTokensByChain.data!.slice(0, 3)
       const tokenAddresses = tokensToEnrich.map(
         (t) => t.metadata.contract_address
