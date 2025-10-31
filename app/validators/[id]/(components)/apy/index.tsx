@@ -11,6 +11,7 @@ import { useValidatorDetail } from "@/hooks/useValidatorDetail"
 import { ethers } from "ethers"
 import { Symbol } from "@/components/symbol"
 import { TOKEN_COLORS } from "@/config/constants"
+import { TokenExtended } from "@/types/token"
 
 export const Apy = () => {
   const params = useParams()
@@ -39,11 +40,11 @@ export const Apy = () => {
   // ]
   const tokens = delegation.assets
   const totalDelegated = tokens.reduce(
-    (acc, token) => acc + token.balance.totalPrice,
+    (acc: number, token: TokenExtended) => acc + token.balance.totalPrice,
     0
   )
 
-  const data = tokens.map((token) => ({
+  const data = tokens.map((token: TokenExtended) => ({
     name: token.display.symbol.toUpperCase(),
     value: token.balance.amount,
     price: token.balance.totalPrice,

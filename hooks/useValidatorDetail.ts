@@ -1,29 +1,35 @@
 import { useQuery } from "@tanstack/react-query"
 import {
   getDelegation,
-  getValidatorWithHisAssetsAndCommission,
-  getValidatorWithHisDelegationAndCommission
+  getValidatorDetailAndAssetsBatch
 } from "@/helpers/rpc-calls"
-import { useTokenRegistry } from "@/hooks/useTokenRegistry"
 import { ethers } from "ethers"
 import { TokenExtended } from "@/types/token"
 import { HELIOS_NETWORK_ID } from "@/config/app"
 import { useAccount } from "wagmi"
+import { getTokenDetailsInBatch } from "./useTokenEnrichmentBatch"
+import { fetchCGTokenData } from "@/utils/price"
+import { TOKEN_COLORS } from "@/config/constants"
+import { APP_COLOR_DEFAULT } from "@/config/app"
 
-export const useValidatorDetail = (address: string) => {
+interface CachedValidatorDetails {
+  delegation?: any
+  assets?: any
+  enrichedAssets?: TokenExtended[]
+}
+
+export const useValidatorDetail = (
+  address: string,
+  cachedDetails?: CachedValidatorDetails
+) => {
   const { address: userAddress } = useAccount()
-  const { getTokenByAddress } = useTokenRegistry()
-
-  const qValidatorDetail = useQuery({
-    queryKey: ["validatorDetail", address],
-    queryFn: () => getValidatorWithHisDelegationAndCommission(address),
-    enabled: !!address
-  })
-
-  const qValidatorAssets = useQuery({
-    queryKey: ["validatorAssets", address],
-    queryFn: () => getValidatorWithHisAssetsAndCommission(address),
-    enabled: !!address
+  const qValidatorDetailAndAssets = useQuery({
+    queryKey: ["validatorDetailAndAssets", address],
+    queryFn: () => getValidatorDetailAndAssetsBatch(address),
+    enabled: !!address && (!cachedDetails?.delegation || !cachedDetails?.assets),
+    initialData: cachedDetails?.delegation && cachedDetails?.assets
+      ? [cachedDetails.delegation, cachedDetails.assets]
+      : undefined
   })
 
   const qDelegationDetail = useQuery({
@@ -31,54 +37,80 @@ export const useValidatorDetail = (address: string) => {
     queryFn: () => getDelegation(userAddress!, address),
     enabled: !!address && !!userAddress
   })
+  const hasPreEnrichedAssets = !!cachedDetails?.enrichedAssets
 
   const enrichedAssetsQuery = useQuery({
-    queryKey: ["enrichedValidatorAssets", address, qValidatorAssets.data],
-    enabled: !!qValidatorAssets.data?.assets?.length,
+    queryKey: ["enrichedValidatorAssets", address, qValidatorDetailAndAssets.data?.[1]],
+    enabled: !!qValidatorDetailAndAssets.data?.[1]?.assets?.length && !hasPreEnrichedAssets,
     queryFn: async (): Promise<TokenExtended[]> => {
-      const assets = qValidatorAssets.data!.assets
+      const assets = qValidatorDetailAndAssets.data![1].assets
+      const tokenAddresses = assets.map((asset: any) => asset.contractAddress)
 
-      const results = await Promise.all(
-        assets.map(async (asset) => {
-          const enriched = await getTokenByAddress(
-            asset.contractAddress,
-            HELIOS_NETWORK_ID
-          )
-          if (!enriched) return null
+      // Batch fetch metadata for all tokens at once
+      const batchMetadata = await getTokenDetailsInBatch(tokenAddresses)
 
-          const amount = parseFloat(
-            ethers.formatUnits(asset.baseAmount, enriched.functionnal.decimals)
-          )
+      // Fetch price data for all symbols at once
+      const symbols = Object.values(batchMetadata)
+        .map((m: any) => m.metadata.symbol.toLowerCase())
+      const cgData = await fetchCGTokenData(symbols)
 
-          return {
-            ...enriched,
-            display: {
-              ...enriched.display,
-              symbolIcon:
-                enriched.display.symbolIcon ||
-                `token:${enriched.display.symbol.toLowerCase()}`
-            },
-            balance: {
-              amount,
-              totalPrice: amount * enriched.price.usd
-            }
+      // Map assets to enriched tokens
+      const results = assets.map((asset: any) => {
+        const metadata = batchMetadata[asset.contractAddress]
+        if (!metadata) return null
+
+        const symbol = metadata.metadata.symbol.toLowerCase()
+        const cgToken = cgData[symbol]
+        const unitPrice = cgToken?.price || 0
+
+        const amount = parseFloat(
+          ethers.formatUnits(asset.baseAmount, metadata.metadata.decimals)
+        )
+
+        return {
+          display: {
+            name: metadata.metadata.name,
+            description: "",
+            logo: cgToken?.logo || "",
+            symbol,
+            symbolIcon: symbol === "hls" ? "helios" : `token:${symbol}`,
+            color: TOKEN_COLORS[symbol as keyof typeof TOKEN_COLORS] || APP_COLOR_DEFAULT
+          },
+          price: { usd: unitPrice },
+          balance: {
+            amount,
+            totalPrice: amount * unitPrice
+          },
+          functionnal: {
+            address: asset.contractAddress,
+            chainId: HELIOS_NETWORK_ID,
+            denom: metadata.metadata.base,
+            decimals: metadata.metadata.decimals
+          },
+          stats: {
+            holdersCount: metadata.holdersCount,
+            totalSupply: metadata.total_supply
           }
-        })
-      )
+        } as TokenExtended
+      })
 
-      return results.filter((token): token is TokenExtended => token !== null)
+      return results.filter((token: any): token is TokenExtended => token !== null)
     }
   })
 
+  const assets = hasPreEnrichedAssets
+    ? cachedDetails!.enrichedAssets
+    : enrichedAssetsQuery.data || []
+
   return {
-    validator: qValidatorDetail.data?.validator,
+    validator: qValidatorDetailAndAssets.data?.[0]?.validator,
     delegation: {
-      ...qValidatorDetail.data?.delegation,
-      assets: enrichedAssetsQuery.data || []
+      ...qValidatorDetailAndAssets.data?.[0]?.delegation,
+      assets
     },
-    commission: qValidatorDetail.data?.commission,
+    commission: qValidatorDetailAndAssets.data?.[0]?.commission,
     userHasDelegated: !!qDelegationDetail.data,
-    isLoading: qValidatorDetail.isLoading || enrichedAssetsQuery.isLoading,
-    error: qValidatorDetail.error || enrichedAssetsQuery.error
+    isLoading: hasPreEnrichedAssets ? qValidatorDetailAndAssets.isLoading : (qValidatorDetailAndAssets.isLoading || enrichedAssetsQuery.isLoading),
+    error: qValidatorDetailAndAssets.error || enrichedAssetsQuery.error
   }
 }

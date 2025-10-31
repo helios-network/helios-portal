@@ -5,6 +5,7 @@ import { SkeletonCard } from "@/components/card/skeleton"
 import { Heading } from "@/components/heading"
 import { Icon } from "@/components/icon"
 import { useValidators } from "@/hooks/useValidators"
+import { useValidatorsBatchDetails } from "@/hooks/useValidatorsBatchDetails"
 import { useState } from "react"
 import { Item } from "../item"
 import { Empty } from "./empty"
@@ -15,6 +16,7 @@ import HELIOS_NODE_MONIKERS from "@/config/helios-node-monikers"
 export const List = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const { validators, isLoading: validatorsIsLoading } = useValidators()
+  const { data: validatorDetails = {} } = useValidatorsBatchDetails(validators)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value)
@@ -51,7 +53,21 @@ export const List = () => {
       </Card>
       <div className={s.list}>
         {sortedValidators.map((validator, i) => (
-          <Item key={"validators-" + i} {...validator} />
+          <Item
+            key={"validators-" + i}
+            {...validator}
+            cachedDetails={{
+              delegation:
+                validatorDetails[validator.validatorAddress]?.delegation,
+              assets: validatorDetails[validator.validatorAddress]?.assets,
+              enrichedAssets:
+                validatorDetails[validator.validatorAddress]?.enrichedAssets
+            }}
+            userHasDelegated={
+              validatorDetails[validator.validatorAddress]?.userHasDelegated ||
+              false
+            }
+          />
         ))}
         {sortedValidators.length === 0 && !validatorsIsLoading && (
           <Empty icon="hugeicons:sad-02" title="No validators found" />
