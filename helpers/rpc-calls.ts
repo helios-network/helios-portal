@@ -4,7 +4,7 @@ import { Block } from "@/types/block"
 import { Delegation } from "@/types/delegation"
 import { Proposal } from "@/types/proposal"
 import { Transaction, TransactionLast } from "@/types/transaction"
-import { Validator, ValidatorWithAssetsCommission, ValidatorWithDelegationCommission } from "@/types/validator"
+import { Validator, ValidatorWithAssetsCommission, ValidatorWithDelegationCommission, ValidatorWithAssetsCommissionAndDelegation } from "@/types/validator"
 import { WhitelistedAsset } from "@/types/whitelistedAsset"
 import { HyperionBridgeTx, HyperionChain } from "@/types/hyperion"
 import { TokenDenom } from "@/types/denom"
@@ -91,8 +91,11 @@ export const getTransactionsByPageAndSize = (page: string, size: string) =>
 export const getListTransactionsByPageAndSize = (page: string, size: string) =>
   request<Transaction[]>("eth_listTransactions", [page, size])
 
-export const getValidatorsByPageAndSize = (page: string, size: string) =>
-  request<Validator[]>("eth_getValidatorsByPageAndSize", [page, size])
+// export const getValidatorsByPageAndSize = (page: string, size: string) =>
+//   request<Validator[]>("eth_getValidatorsByPageAndSize", [page, size])
+
+export const getValidatorsByPageAndSizeWithHisAssetsAndCommissionAndDelegation = (page: string, size: string) =>
+  request<ValidatorWithAssetsCommissionAndDelegation[]>("eth_getValidatorsByPageAndSizeWithHisAssetsAndCommissionAndDelegation", [page, size])
 
 export const getActiveValidatorCount = () =>
   request<number>("eth_getActiveValidatorCount", [])

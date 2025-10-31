@@ -21,11 +21,11 @@ export const List = () => {
   }
 
   const filteredValidators = validators.filter((validator) =>
-    validator.moniker.toLowerCase().includes(searchTerm.toLowerCase())
+    validator.validator.moniker.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const sortedValidators = filteredValidators.sort((a, b) => {
-    return b.status - a.status || (HELIOS_NODE_MONIKERS.includes(a.moniker) ? -1 : 1)
+    return b.validator.status - a.validator.status || (HELIOS_NODE_MONIKERS.includes(a.validator.moniker) ? -1 : 1)
   })
 
   return (

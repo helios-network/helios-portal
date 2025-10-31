@@ -2,7 +2,6 @@ import { Badge } from "@/components/badge"
 import { Button } from "@/components/button"
 import { Icon } from "@/components/icon"
 import { formatBigNumber } from "@/lib/utils/number"
-import { Validator } from "@/types/validator"
 import s from "./item.module.scss"
 import { StatItem } from "./stat"
 import { useValidatorDetail } from "@/hooks/useValidatorDetail"
@@ -12,18 +11,9 @@ import { useAccount, useChainId, useSwitchChain } from "wagmi"
 import { HELIOS_NETWORK_ID } from "@/config/app"
 import Link from "next/link"
 import HELIOS_NODE_MONIKERS from "@/config/helios-node-monikers"
+import { ValidatorWithAssetsCommissionAndDelegation } from "@/types/validator"
 
-export const Item = ({
-  moniker,
-  validatorAddress,
-  boostPercentage,
-  // description,
-  apr,
-  status,
-  delegationAuthorization,
-  commission,
-  minDelegation
-}: Validator) => {
+export const Item = (validatorWithAssetsAndCommissionAndDelegation: ValidatorWithAssetsCommissionAndDelegation) => {
   // const [favorite, setFavorite] = useState(false)
 
   // const handleFavorite = () => {
@@ -38,15 +28,15 @@ export const Item = ({
   const chainId = useChainId()
   const { isConnected } = useAccount()
   const { switchChain } = useSwitchChain()
-  const { delegation, userHasDelegated } = useValidatorDetail(validatorAddress)
+  const { delegation, userHasDelegated } = useValidatorDetail(validatorWithAssetsAndCommissionAndDelegation.validator.validatorAddress, validatorWithAssetsAndCommissionAndDelegation)
 
-  const isActive = status === 3
-  const enableDelegation = delegationAuthorization && isConnected
-  const formattedApr = parseFloat(apr).toFixed(2) + "%"
+  const isActive = validatorWithAssetsAndCommissionAndDelegation.validator.status === 3
+  const enableDelegation = validatorWithAssetsAndCommissionAndDelegation.validator.delegationAuthorization && isConnected
+  const formattedApr = parseFloat(validatorWithAssetsAndCommissionAndDelegation.validator.apr).toFixed(2) + "%"
   const formattedCommission =
-    parseFloat(commission.commission_rates.rate) * 100 + "%"
+    parseFloat(validatorWithAssetsAndCommissionAndDelegation.validator.commission.commission_rates.rate) * 100 + "%"
   const formattedBoost =
-    Math.min((parseFloat(boostPercentage) * 15) / 100, 15) + "%"
+    Math.min((parseFloat(validatorWithAssetsAndCommissionAndDelegation.validator.boostPercentage) * 15) / 100, 15) + "%"
   const tokens = delegation.assets
 
   const totalDelegated = tokens.reduce(
@@ -68,11 +58,11 @@ export const Item = ({
     setOpenStake(true)
   }
 
-  const isHeliosNode = HELIOS_NODE_MONIKERS.includes(moniker)
+  const isHeliosNode = HELIOS_NODE_MONIKERS.includes(validatorWithAssetsAndCommissionAndDelegation.validator.moniker)
 
   return (
     <>
-      <Link href={"/validators/" + validatorAddress} className={s.item}>
+      <Link href={"/validators/" + validatorWithAssetsAndCommissionAndDelegation.validator.validatorAddress} className={s.item}>
         {/* <Button
         variant="secondary"
         border
@@ -93,7 +83,7 @@ export const Item = ({
             {isActive && <Badge status="success">Active</Badge>}
             {isActive && isHeliosNode && <span className={s.spacing}>&nbsp;</span>}
             {isHeliosNode && <Badge status="primary">Official Node</Badge>}
-            <h3>{moniker}</h3>
+            <h3>{validatorWithAssetsAndCommissionAndDelegation.validator.moniker}</h3>
             {/* {description.details && <h4>{description.details}</h4>} */}
           </div>
         </div>
@@ -112,7 +102,7 @@ export const Item = ({
           />
           <StatItem
             label="Min Delegation"
-            value={`${minDelegation} HLS`}
+            value={`${validatorWithAssetsAndCommissionAndDelegation.validator.minDelegation} HLS`}
             color="reputation"
             icon="hugeicons:balance-scale"
           />
@@ -176,9 +166,9 @@ export const Item = ({
         </div>
       </Link>
       <ModalStake
-        title={`Stake on ${moniker}`}
-        validatorAddress={validatorAddress}
-        minDelegation={minDelegation}
+        title={`Stake on ${validatorWithAssetsAndCommissionAndDelegation.validator.moniker}`}
+        validatorAddress={validatorWithAssetsAndCommissionAndDelegation.validator.validatorAddress}
+        minDelegation={validatorWithAssetsAndCommissionAndDelegation.validator.minDelegation}
         hasAlreadyDelegated={userHasDelegated}
         open={openStake}
         setOpen={setOpenStake}
