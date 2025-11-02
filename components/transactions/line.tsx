@@ -36,7 +36,7 @@ export const TransactionsLine = (transaction: TransactionLight) => {
             {transaction.timeout && transaction.timeout > 0 && (
               <Tooltip.Portal>
                 <Tooltip.Content className={s.tooltipContent} sideOffset={5}>
-                  Expire at block <strong>{transaction.timeout}</strong> on chain <strong>{transaction.chainName}</strong>
+                  Expire at block <strong>{transaction.timeout}</strong> on chain <strong>{transaction.chainName}</strong> {transaction.status_bridge_tx} {transaction.fees && `(fees: ${transaction.fees} HLS)`}
                   <Tooltip.Arrow className={s.tooltipArrow} />
                 </Tooltip.Content>
               </Tooltip.Portal>

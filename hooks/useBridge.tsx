@@ -8,13 +8,15 @@ import {
   BRIDGE_CONTRACT_ADDRESS,
   bridgeSendToChainAbi,
   bridgeSendToHeliosAbi,
+  bridgeCancelSentToChainAbi,
   erc20Abi
 } from "@/constant/helios-contracts"
 import {
   getAllHyperionTransferTxs,
   getHyperionAccountTransferTxsByPageAndSize,
   getTokensByChainIdAndPageAndSize,
-  getHyperionContractIsPaused
+  getHyperionContractIsPaused,
+  getHyperionHistoricalFees
 } from "@/helpers/rpc-calls"
 import { toHex, TransactionReceipt } from "viem"
 import { secondsToMilliseconds } from "date-fns"
@@ -62,6 +64,7 @@ export const useBridge = () => {
       chainLogo: chains.find((chain) => chain.chainId === tx.chainId)?.logo,
       timeout: tx.timeout,
       status_bridge_tx: tx.status,
+      fees: tx.direction === "OUT" ? ethers.formatEther(tx.receivedFee.amount) : "0",
     }
   }
 
@@ -113,6 +116,14 @@ export const useBridge = () => {
       queryKey: ["tokensByChain", chainId],
       queryFn: () =>
         getTokensByChainIdAndPageAndSize(chainId, toHex(1), toHex(10))
+    })
+  }
+
+  const getFeesByChain = async (chainId: number) => {
+    return queryClient.fetchQuery({
+      queryKey: ["hyperionHistoricalFees", chainId],
+      queryFn: () =>
+        getHyperionHistoricalFees(chainId)
     })
   }
 
@@ -477,12 +488,101 @@ export const useBridge = () => {
     }
   })
 
+  // cancelSendToChain
+  const cancelSendToChain = async (
+    chainId: number,
+    transactionId: number
+  ) => {
+    return cancelSendToChainMutation.mutateAsync({
+      chainId,
+      transactionId
+    })
+  }
+
+  const cancelSendToChainMutation = useMutation({
+    mutationFn: async ({
+      chainId,
+      transactionId
+    }: {
+      chainId: number
+      transactionId: number
+    }) => {
+      if (!web3Provider || !address) throw new Error("No wallet connected")
+
+      try {
+        const hyperionContract = new web3Provider.eth.Contract(
+          bridgeCancelSentToChainAbi,
+          BRIDGE_CONTRACT_ADDRESS
+        )
+
+        // simulate the transaction
+        const resultOfSimulation = await hyperionContract.methods.cancelSendToChain(chainId, transactionId).call({
+          from: address
+        })
+        if (!resultOfSimulation) {
+          throw new Error("Error during simulation, please try again later")
+        }
+
+        setFeedback({
+          status: "primary",
+          message: "Estimating gas..."
+        })
+
+        // estimate the gas
+        const gasEstimate = await hyperionContract.methods.cancelSendToChain(chainId, transactionId).estimateGas({
+          from: address
+        })
+        setFeedback({
+          status: "primary",
+          message: "Sending cancelSendToChain transaction..."
+        })
+        // add 20% to the gas estimation to be safe
+        const gasLimit = (gasEstimate * 120n) / 100n
+
+        const receipt = await new Promise<TransactionReceipt>((resolve, reject) => {
+          web3Provider.eth.sendTransaction({
+            from: address,
+            to: BRIDGE_CONTRACT_ADDRESS,
+            data: hyperionContract.methods.cancelSendToChain(chainId, transactionId).encodeABI(),
+            gas: gasLimit.toString()
+          }).then((tx) => {
+            resolve(tx as any)
+          }).catch((error) => {
+            reject(error)
+          })
+        })
+
+        setFeedback({
+          status: "success",
+          message: (
+            <>
+              Transaction cancelled in block{" "}
+              <strong>#{receipt.blockNumber}</strong>.
+            </>
+          )
+        })
+
+        return receipt
+      } catch (error: unknown) {
+        setFeedback({
+          status: "danger",
+          message: getErrorMessage(error) || "Error during cancelSendToChain"
+        })
+        throw error
+      }
+    }
+  })
+
+
+
   return {
     lastBridgeTxs: enrichedAllHyperionTxs.data || [],
     lastAccountBridgeTxs: enrichedAccountHyperionTxs.data || [],
     sendToChain,
     loadTokensByChain,
+    getFeesByChain,
     sendToHelios,
+    cancelSendToChain,
     feedback,
     resetFeedback,
     contractIsPaused,

@@ -7,8 +7,9 @@ import { Transaction, TransactionLast } from "@/types/transaction"
 import { Validator, ValidatorWithAssetsCommission, ValidatorWithDelegationCommission, ValidatorWithAssetsCommissionAndDelegation } from "@/types/validator"
 import { WhitelistedAsset } from "@/types/whitelistedAsset"
 import { HyperionBridgeTx, HyperionChain } from "@/types/hyperion"
-import { TokenDenom } from "@/types/denom"
+import { HyperionHistoricalFees, TokenDenom } from "@/types/denom"
 import { toHex } from "viem"
+import { ethers } from "ethers"
 
 export const getTokenBalance = (
   address: string,
@@ -123,6 +124,20 @@ export const getTokensByChainIdAndPageAndSize = (
     page,
     size
   ])
+
+export const getHyperionHistoricalFees = (chainId: number) =>
+  request<HyperionHistoricalFees>("eth_getHyperionHistoricalFees", [chainId]).then((result) => {
+    if (result?.average.amount) {
+      result.average.amount = ethers.formatEther(result.average.amount)
+    }
+    if (result?.low.amount) {
+      result.low.amount = ethers.formatEther(result.low.amount)
+    }
+    if (result?.high.amount) {
+      result.high.amount = ethers.formatEther(result.high.amount)
+    }
+    return result
+  })
 
 export const getHyperionAccountTransferTxsByPageAndSize = (
   address: string,

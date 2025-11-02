@@ -27,3 +27,15 @@ export interface TokenDenom {
   holdersCount: number
   total_supply: string
 }
+
+export interface HyperionHistoricalFee {
+  denom: string
+  amount: string
+}
+
+export interface HyperionHistoricalFees {
+  historical_fees: HyperionHistoricalFee[]
+  low: HyperionHistoricalFee
+  high: HyperionHistoricalFee
+  average: HyperionHistoricalFee
+}
