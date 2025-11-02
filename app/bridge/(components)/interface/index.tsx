@@ -93,14 +93,6 @@ export const Interface = () => {
     refetchOnWindowFocus: false
   })
 
-  const qHyperionHistoricalFees = useQuery({
-    queryKey: ["hyperionHistoricalFees", form.to?.chainId],
-    queryFn: () =>
-      getHyperionHistoricalFees(form.to!.chainId),
-    enabled: !!form.to,
-    staleTime: 60000, // 30 seconds
-    refetchOnWindowFocus: false
-  })
 
   const qEnrichedTokensByChain = useQuery({
     queryKey: [
@@ -129,6 +121,15 @@ export const Interface = () => {
   const isDeposit = heliosChainIndex
     ? form.to?.chainId === chains[heliosChainIndex]?.chainId
     : false
+
+  const qHyperionHistoricalFees = useQuery({
+    queryKey: ["hyperionHistoricalFees", form.to?.chainId],
+    queryFn: () =>
+      getHyperionHistoricalFees(form.to!.chainId),
+    enabled: !!form.to && !isDeposit,
+    staleTime: 60000, // 30 seconds
+    refetchOnWindowFocus: false
+  })
 
   const lowFee = qHyperionHistoricalFees.data?.low.amount || "0"
   const averageFee = qHyperionHistoricalFees.data?.average.amount || "0.5"
@@ -702,58 +703,60 @@ export const Interface = () => {
             </div>
           </div>
           <div className={s.recap}>
-            <div className={s.feeSelection}>
-              <div
-                className={clsx(s.feeBlock, {
-                  [s.selected]: selectedFeeType === FeeType.LOW,
-                })}
-                onClick={() => handleFeeSelection(FeeType.LOW)}
-              >
-                <p className={s.feeLabel}>Low</p>
-                <p className={s.feeAmount}>
-                  {Number(lowFee).toFixed(6)} HLS
-                </p>
+            {!isDeposit && (
+              <div className={s.feeSelection}>
+                <div
+                  className={clsx(s.feeBlock, {
+                    [s.selected]: selectedFeeType === FeeType.LOW,
+                  })}
+                  onClick={() => handleFeeSelection(FeeType.LOW)}
+                >
+                  <p className={s.feeLabel}>Low</p>
+                  <p className={s.feeAmount}>
+                    {Number(lowFee).toFixed(6)} HLS
+                  </p>
+                </div>
+                <div
+                  className={clsx(s.feeBlock, {
+                    [s.selected]: selectedFeeType === FeeType.AVERAGE,
+                  })}
+                  onClick={() => handleFeeSelection(FeeType.AVERAGE)}
+                >
+                  <p className={s.feeLabel}>Average</p>
+                  <p className={s.feeAmount}>
+                    {Number(averageFee).toFixed(6)} HLS
+                  </p>
+                </div>
+                <div
+                  className={clsx(s.feeBlock, {
+                    [s.selected]: selectedFeeType === FeeType.HIGH,
+                  })}
+                  onClick={() => handleFeeSelection(FeeType.HIGH)}
+                >
+                  <p className={s.feeLabel}>High</p>
+                  <p className={s.feeAmount}>
+                    {Number(highFee).toFixed(6)} HLS
+                  </p>
+                </div>
+                <div
+                  className={clsx(s.feeBlock, s.customFeeBlock, {
+                    [s.selected]: selectedFeeType === FeeType.CUSTOM,
+                  })}
+                  onClick={() => handleFeeSelection(FeeType.CUSTOM)}
+                >
+                  <p className={s.feeLabel}>Custom</p>
+                  <input
+                    type="text"
+                    className={s.customFeeInput}
+                    value={customFeeAmount}
+                    onChange={handleCustomFeeChange}
+                    onClick={(e) => e.stopPropagation()} // Prevent triggering parent onClick
+                    placeholder="0.00"
+                  />
+                  <p className={s.feeCurrency}>HLS</p>
+                </div>
               </div>
-              <div
-                className={clsx(s.feeBlock, {
-                  [s.selected]: selectedFeeType === FeeType.AVERAGE,
-                })}
-                onClick={() => handleFeeSelection(FeeType.AVERAGE)}
-              >
-                <p className={s.feeLabel}>Average</p>
-                <p className={s.feeAmount}>
-                  {Number(averageFee).toFixed(6)} HLS
-                </p>
-              </div>
-              <div
-                className={clsx(s.feeBlock, {
-                  [s.selected]: selectedFeeType === FeeType.HIGH,
-                })}
-                onClick={() => handleFeeSelection(FeeType.HIGH)}
-              >
-                <p className={s.feeLabel}>High</p>
-                <p className={s.feeAmount}>
-                  {Number(highFee).toFixed(6)} HLS
-                </p>
-              </div>
-              <div
-                className={clsx(s.feeBlock, s.customFeeBlock, {
-                  [s.selected]: selectedFeeType === FeeType.CUSTOM,
-                })}
-                onClick={() => handleFeeSelection(FeeType.CUSTOM)}
-              >
-                <p className={s.feeLabel}>Custom</p>
-                <input
-                  type="text"
-                  className={s.customFeeInput}
-                  value={customFeeAmount}
-                  onChange={handleCustomFeeChange}
-                  onClick={(e) => e.stopPropagation()} // Prevent triggering parent onClick
-                  placeholder="0.00"
-                />
-                <p className={s.feeCurrency}>HLS</p>
-              </div>
-            </div>
+            )}
             <div className={s.recapItem}>
               <span>Selected Fees:</span>
               <strong>
