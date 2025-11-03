@@ -239,38 +239,3 @@ export const getValidatorDetailAndAssetsBatch = (validatorAddress: string) =>
     { method: "eth_getValidatorWithHisDelegationAndCommission", params: [validatorAddress] },
     { method: "eth_getValidatorWithHisAssetsAndCommission", params: [validatorAddress] }
   ])
-
-/**
- * Batch: Get validator details and assets for multiple validators
- * Combines delegation/commission + assets/commission for all validators
- * Reduces 2N calls to ~N+1 batched HTTP requests (massive improvement for validator list)
- * Impact: For 50 validators: 100 calls → ~3-4 batches
- */
-export const getValidatorDetailsAndAssetsBatch = async (validatorAddresses: string[]) => {
-  // Split into chunks of 10 validators per batch (20 calls per batch)
-  const chunkSize = 10
-  const results: Record<string, {
-    delegation?: ValidatorWithDelegationCommission
-    assets?: ValidatorWithAssetsCommission
-  }> = {}
-
-  for (let i = 0; i < validatorAddresses.length; i += chunkSize) {
-    const chunk = validatorAddresses.slice(i, i + chunkSize)
-    const batchCalls = chunk.flatMap(addr => [
-      { method: "eth_getValidatorWithHisDelegationAndCommission", params: [addr] },
-      { method: "eth_getValidatorWithHisAssetsAndCommission", params: [addr] }
-    ])
-
-    const responses = await batchRequest<any[]>(batchCalls)
-
-    // Map responses back to validator addresses
-    chunk.forEach((addr, idx) => {
-      results[addr] = {
-        delegation: responses[idx * 2],
-        assets: responses[idx * 2 + 1]
-      }
-    })
-  }
-
-  return results
-}
