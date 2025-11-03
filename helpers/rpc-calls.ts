@@ -9,7 +9,7 @@ import { Validator, ValidatorWithAssetsCommission, ValidatorWithDelegationCommis
 import { WhitelistedAsset } from "@/types/whitelistedAsset"
 import { HyperionBridgeTx, HyperionChain } from "@/types/hyperion"
 import { TokenDenom } from "@/types/denom"
-import { toHex } from "viem"
+import { toHex } from "@/utils/number"
 
 export const getTokenBalance = (
   address: string,
@@ -94,6 +94,9 @@ export const getListTransactionsByPageAndSize = (page: string, size: string) =>
 
 export const getValidatorsByPageAndSize = (page: string, size: string) =>
   request<Validator[]>("eth_getValidatorsByPageAndSize", [page, size])
+
+export const getValidatorsByPageAndSizeWithHisAssetsAndCommissionAndDelegation = (page: string, size: string) =>
+  request<ValidatorWithAssetsCommission[]>("eth_getValidatorsByPageAndSizeWithHisAssetsAndCommissionAndDelegation", [page, size])
 
 export const getActiveValidatorCount = () =>
   request<number>("eth_getActiveValidatorCount", [])

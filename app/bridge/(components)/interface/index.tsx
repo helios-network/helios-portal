@@ -19,7 +19,7 @@ import { useAccount, useChainId, useSwitchChain } from "wagmi"
 import { useTokenInfo } from "@/hooks/useTokenInfo"
 import { HELIOS_NETWORK_ID } from "@/config/app"
 import { useQuery } from "@tanstack/react-query"
-import { toHex } from "viem"
+import { toHex } from "@/utils/number"
 import { getTokensByChainIdAndPageAndSize } from "@/helpers/rpc-calls"
 import { Message } from "@/components/message"
 import { useChains } from "@/hooks/useChains"
@@ -544,22 +544,22 @@ export const Interface = () => {
                             {!failedChainIcons.has(
                               token.enriched.originBlockchain
                             ) && (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={getOriginChainIconUrl(
-                                  token.enriched.originBlockchain
-                                )}
-                                alt=""
-                                width={12}
-                                height={12}
-                                className={s.originChainIcon}
-                                onError={() =>
-                                  handleChainIconError(
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={getOriginChainIconUrl(
                                     token.enriched.originBlockchain
-                                  )
-                                }
-                              />
-                            )}
+                                  )}
+                                  alt=""
+                                  width={12}
+                                  height={12}
+                                  className={s.originChainIcon}
+                                  onError={() =>
+                                    handleChainIconError(
+                                      token.enriched.originBlockchain
+                                    )
+                                  }
+                                />
+                              )}
                           </div>
                         )}
                         {token.enriched.display.logo === "" && (
@@ -571,22 +571,22 @@ export const Interface = () => {
                             {!failedChainIcons.has(
                               token.enriched.originBlockchain
                             ) && (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={getOriginChainIconUrl(
-                                  token.enriched.originBlockchain
-                                )}
-                                alt=""
-                                width={12}
-                                height={12}
-                                className={s.originChainIcon}
-                                onError={() =>
-                                  handleChainIconError(
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={getOriginChainIconUrl(
                                     token.enriched.originBlockchain
-                                  )
-                                }
-                              />
-                            )}
+                                  )}
+                                  alt=""
+                                  width={12}
+                                  height={12}
+                                  className={s.originChainIcon}
+                                  onError={() =>
+                                    handleChainIconError(
+                                      token.enriched.originBlockchain
+                                    )
+                                  }
+                                />
+                              )}
                           </div>
                         )}
                       </div>
