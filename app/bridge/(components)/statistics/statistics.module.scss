@@ -1,0 +1,9 @@
+@use "styles/mixins" as *;
+
+.statistics {
+  --card-padding: var(--size-6);
+}
+
+.blocks {
+  margin-top: var(--size-4);
+}

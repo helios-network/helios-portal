@@ -6,13 +6,15 @@
   grid-template-areas:
     "a c"
     "a b"
-    "d e";
+    "d f"
+    "e f";
 
   @include max(1300px) {
     grid-template-areas:
       "a a"
       "c d"
-      "b e";
+      "b e"
+      "f f";
   }
 
   @include max(1150px) {
@@ -21,7 +23,8 @@
       "c c"
       "d d"
       "b b"
-      "e e";
+      "e e"
+      "f f";
   }
 }
 
