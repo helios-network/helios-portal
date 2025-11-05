@@ -16,7 +16,7 @@ export const Recents = () => {
         icon="hugeicons:blockchain-05"
         title="Global recent bridge transactions"
       ></Heading>
-      <Transactions transactions={lastBridgeTxs} />
+      <Transactions transactions={lastBridgeTxs} isClientTxs={false} />
     </Card>
   )
 }

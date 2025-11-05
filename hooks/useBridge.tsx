@@ -65,6 +65,7 @@ export const useBridge = () => {
       timeout: tx.timeout,
       status_bridge_tx: tx.status,
       fees: tx.direction === "OUT" ? ethers.formatEther(tx.receivedFee.amount) : "0",
+      transactionId: tx.id,
     }
   }
 

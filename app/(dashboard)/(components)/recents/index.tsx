@@ -15,7 +15,7 @@ export const Recents = () => {
       <Heading icon="hugeicons:blockchain-05" title="Recent Transactions">
         <Button icon="hugeicons:arrow-right-01" variant="secondary" border />
       </Heading>
-      <Transactions transactions={filteredTransactions} />
+      <Transactions transactions={filteredTransactions} isClientTxs={true} />
     </Card>
   )
 }

@@ -82,4 +82,5 @@ export type TransactionLight = {
   timeout?: number
   status_bridge_tx?: string
   fees?: string
+  transactionId?: number
 }
