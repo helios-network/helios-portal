@@ -199,7 +199,7 @@ export const AssetSelector = ({
                                 ))
                             ) : (
                                 <div className={s.noResults}>
-                                    No assets found for "{searchQuery}"
+                                    No assets found for &quot;{searchQuery}&quot;
                                 </div>
                             )}
                         </div>
