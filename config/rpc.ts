@@ -3,7 +3,7 @@
 import { useAppStore } from "@/stores/app"
 
 // Default RPC URL as fallback
-const DEFAULT_RPC_URL = "https://testnet1.helioschainlabs.org"
+const DEFAULT_RPC_URL = "http://localhost:8545"
 
 // Function to get the current RPC URL based on debug mode
 export const getRpcUrl = () => {

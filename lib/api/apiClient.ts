@@ -131,7 +131,7 @@ const isLocalDevelopment = (process.env.NODE_ENV === 'development' || process.en
         window.location.hostname.startsWith('10.') ||
         window.location.hostname.startsWith('192.168.') ||
         window.location.hostname.startsWith('172.') ||
-        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname === 'localhost' ||
         window.location.hostname.includes('ngrok') ||
         window.location.hostname.includes('ngrok-free.app')
     )

@@ -3,7 +3,8 @@ export const HELIOS_NODE_MONIKERS = [
   "helios-unity",
   "helios-inter",
   "helios-hedge",
-  "helios-supra"
+  "helios-supra",
+  "jiji-local"
 ]
 
 export default HELIOS_NODE_MONIKERS

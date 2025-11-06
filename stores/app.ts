@@ -32,7 +32,7 @@ export const useAppStore = create<AppStore>()(
       setDebugMode: (debugMode) => set({ debugMode }),
       hasHydrated: false,
       setHasHydrated: (hasHydrated) => set({ hasHydrated }),
-      rpcUrl: "https://testnet1.helioschainlabs.org",
+      rpcUrl: "http://localhost:8545",
       setRpcUrl: (rpcUrl) => set({ rpcUrl }),
       gasPriceOption: "average" as GasPriceOption,
       setGasPriceOption: (gasPriceOption) => set({ gasPriceOption })

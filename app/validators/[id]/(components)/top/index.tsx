@@ -14,6 +14,7 @@ import { useState } from "react"
 import { ModalStake } from "@/app/delegations/(components)/active/stake"
 import { Message } from "@/components/message"
 import { EnrichedAsset } from "@/types/validator"
+import HELIOS_NODE_MONIKERS from "@/config/helios-node-monikers"
 
 export const Top = () => {
   const { isConnected } = useAccount()
@@ -75,15 +76,7 @@ export const Top = () => {
 
   const explorerLink = EXPLORER_URL + "/address/" + validator.validatorAddress
 
-  const heliosNodesMonikers = [
-    "helios-peer",
-    "helios-unity",
-    "helios-inter",
-    "helios-hedge",
-    "helios-supra"
-  ]
-
-  const isHeliosNode = heliosNodesMonikers.includes(validator.moniker)
+  const isHeliosNode = HELIOS_NODE_MONIKERS.includes(validator.moniker)
 
   return (
     <Grid className={s.top}>

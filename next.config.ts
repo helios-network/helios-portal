@@ -4,8 +4,8 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "testnet1.helioschainlabs.org"
+        protocol: "http",
+        hostname: "localhost"
       },
       {
         protocol: "http",

@@ -105,7 +105,7 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
     } else if (debugMode && !localDebugMode) {
       // If debug mode was turned off, reset to default RPC URL
       // This ensures we don't use a custom RPC URL when debug mode is off
-      setRpcUrl("https://testnet1.helioschainlabs.org")
+      setRpcUrl("http://localhost:8545")
     }
 
     // Manually update localStorage to ensure settings are persisted immediately
@@ -118,7 +118,7 @@ export const SettingsModal = ({ open, onClose }: SettingsModalProps) => {
         debugMode: localDebugMode,
         rpcUrl: localDebugMode
           ? localRpcUrl
-          : "https://testnet1.helioschainlabs.org",
+          : "http://localhost:8545",
         gasPriceOption: localGasPriceOption
       }
       localStorage.setItem("helios-app-store", JSON.stringify(storeData))

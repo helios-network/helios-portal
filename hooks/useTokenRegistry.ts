@@ -74,10 +74,12 @@ export const useTokenRegistry = () => {
 
         let originBlockchain = "42000"
 
-        for (const chainMetadata of data.metadata.chainsMetadatas) {
-          if (chainMetadata.isOriginated) {
-            originBlockchain = `${chainMetadata.chainId}`
-            break
+        if (data.metadata.chainsMetadatas && data.metadata.chainsMetadatas.length > 0) {
+          for (const chainMetadata of data.metadata.chainsMetadatas) {
+            if (chainMetadata.isOriginated) {
+              originBlockchain = `${chainMetadata.chainId}`
+              break
+            }
           }
         }
 
