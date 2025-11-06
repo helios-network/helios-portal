@@ -8,7 +8,7 @@ import { Modal } from "@/components/modal"
 import { formatNumber } from "@/lib/utils/number"
 import clsx from "clsx"
 import Image from "next/image"
-import { ChangeEvent, useEffect, useState, useCallback } from "react"
+import { ChangeEvent, useEffect, useState, useCallback, useMemo } from "react"
 import { toast } from "sonner"
 import s from "./interface.module.scss"
 import { useBridge } from "@/hooks/useBridge"
@@ -19,8 +19,8 @@ import { useAccount, useChainId, useSwitchChain } from "wagmi"
 import { useTokenInfo } from "@/hooks/useTokenInfo"
 import { HELIOS_NETWORK_ID } from "@/config/app"
 import { useQuery } from "@tanstack/react-query"
-import { toHex } from "@/utils/number"
-import { getTokensByChainIdAndPageAndSize } from "@/helpers/rpc-calls"
+import { toHex } from "viem"
+import { getHyperionHistoricalFees, getTokensByChainIdAndPageAndSize } from "@/helpers/rpc-calls"
 import { Message } from "@/components/message"
 import { useChains } from "@/hooks/useChains"
 import { ModalWrapper } from "../wrapper/modal"
@@ -43,6 +43,13 @@ type BridgeForm = {
   inProgress: boolean
 }
 
+enum FeeType {
+  LOW = "low",
+  AVERAGE = "average",
+  HIGH = "high",
+  CUSTOM = "custom",
+}
+
 export const Interface = () => {
   const chainId = useChainId()
   const { chains, heliosChainIndex } = useChains()
@@ -60,6 +67,8 @@ export const Interface = () => {
   const [openWrapModal, setOpenWrapModal] = useState(false)
   const [openUnwrapModal, setOpenUnwrapModal] = useState(false)
   const [openTokenSearch, setOpenTokenSearch] = useState(false)
+  const [selectedFeeType, setSelectedFeeType] = useState<FeeType>(FeeType.AVERAGE)
+  const [customFeeAmount, setCustomFeeAmount] = useState<string>("0")
 
   const { isWrappable } = useWrapper({
     enableNativeBalance: openWrapModal,
@@ -87,6 +96,7 @@ export const Interface = () => {
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: false
   })
+
 
   const qEnrichedTokensByChain = useQuery({
     queryKey: [
@@ -166,10 +176,48 @@ export const Interface = () => {
 
   const tokensByChain = qEnrichedTokensByChain.data || []
   // const estimatedFees = (parseFloat(form.amount) / 100).toString()
-  const estimatedFees = "0.5"
   const isDeposit = heliosChainIndex
     ? form.to?.chainId === chains[heliosChainIndex]?.chainId
     : false
+
+  const qHyperionHistoricalFees = useQuery({
+    queryKey: ["hyperionHistoricalFees", form.to?.chainId],
+    queryFn: () =>
+      getHyperionHistoricalFees(form.to!.chainId),
+    enabled: !!form.to && !isDeposit,
+    staleTime: 60000, // 30 seconds
+    refetchOnWindowFocus: false
+  })
+
+  const lowFee = qHyperionHistoricalFees.data?.low.amount || "0"
+  const averageFee = qHyperionHistoricalFees.data?.average.amount || "0.5"
+  const highFee = qHyperionHistoricalFees.data?.high.amount || "1"
+
+  const estimatedFees = useMemo(() => {
+    switch (selectedFeeType) {
+      case FeeType.LOW:
+        return lowFee
+      case FeeType.AVERAGE:
+        return averageFee
+      case FeeType.HIGH:
+        return highFee
+      case FeeType.CUSTOM:
+        return customFeeAmount
+      default:
+        return averageFee
+    }
+  }, [selectedFeeType, customFeeAmount, lowFee, averageFee, highFee])
+
+  const handleFeeSelection = (feeType: FeeType) => {
+    setSelectedFeeType(feeType)
+  }
+
+  const handleCustomFeeChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value
+    const normalizedValue = inputValue.replace(",", ".")
+    if (!/^[0-9.]*$/.test(normalizedValue)) return
+    setCustomFeeAmount(normalizedValue)
+  }
 
   const displayedChains =
     chainType === "to"
@@ -737,16 +785,68 @@ export const Interface = () => {
             </div>
           </div>
           <div className={s.recap}>
+            {!isDeposit && (
+              <div className={s.feeSelection}>
+                <div
+                  className={clsx(s.feeBlock, {
+                    [s.selected]: selectedFeeType === FeeType.LOW,
+                  })}
+                  onClick={() => handleFeeSelection(FeeType.LOW)}
+                >
+                  <p className={s.feeLabel}>Low</p>
+                  <p className={s.feeAmount}>
+                    {Number(lowFee).toFixed(6)} HLS
+                  </p>
+                </div>
+                <div
+                  className={clsx(s.feeBlock, {
+                    [s.selected]: selectedFeeType === FeeType.AVERAGE,
+                  })}
+                  onClick={() => handleFeeSelection(FeeType.AVERAGE)}
+                >
+                  <p className={s.feeLabel}>Average</p>
+                  <p className={s.feeAmount}>
+                    {Number(averageFee).toFixed(6)} HLS
+                  </p>
+                </div>
+                <div
+                  className={clsx(s.feeBlock, {
+                    [s.selected]: selectedFeeType === FeeType.HIGH,
+                  })}
+                  onClick={() => handleFeeSelection(FeeType.HIGH)}
+                >
+                  <p className={s.feeLabel}>High</p>
+                  <p className={s.feeAmount}>
+                    {Number(highFee).toFixed(6)} HLS
+                  </p>
+                </div>
+                <div
+                  className={clsx(s.feeBlock, s.customFeeBlock, {
+                    [s.selected]: selectedFeeType === FeeType.CUSTOM,
+                  })}
+                  onClick={() => handleFeeSelection(FeeType.CUSTOM)}
+                >
+                  <p className={s.feeLabel}>Custom</p>
+                  <input
+                    type="text"
+                    className={s.customFeeInput}
+                    value={customFeeAmount}
+                    onChange={handleCustomFeeChange}
+                    onClick={(e) => e.stopPropagation()} // Prevent triggering parent onClick
+                    placeholder="0.00"
+                  />
+                  <p className={s.feeCurrency}>HLS</p>
+                </div>
+              </div>
+            )}
             <div className={s.recapItem}>
-              <span>Estimated Fees:</span>
+              <span>Selected Fees:</span>
               <strong>
                 {isDeposit ? (
                   "No Fees"
                 ) : (
                   <>
-                    {/* <small>~1% =</small> */}
-                    {/* {estimatedFees} {tokenInfo.data?.symbol} */}
-                    {estimatedFees} HLS
+                    {Number(estimatedFees).toFixed(6)} HLS
                   </>
                 )}
               </strong>

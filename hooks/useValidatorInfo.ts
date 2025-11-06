@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import {
   getActiveValidatorCount,
-  getValidatorsByPageAndSize
+  getValidatorsByPageAndSizeWithHisAssetsAndCommissionAndDelegation
 } from "@/helpers/rpc-calls"
 import { toHex } from "@/utils/number"
-import { secondsToMilliseconds } from "@/utils/number"
 import { Validator } from "@/types/validator"
 
 enum NetworkSecurity {
@@ -26,7 +25,7 @@ export const useValidatorInfo = () => {
 
   const qValidators = useQuery({
     queryKey: ["validators", page, size],
-    queryFn: () => getValidatorsByPageAndSize(toHex(page), toHex(size)),
+    queryFn: () => getValidatorsByPageAndSizeWithHisAssetsAndCommissionAndDelegation(toHex(page), toHex(size)),
     enabled: !!page && !!size,
     staleTime: VALIDATOR_STALE_TIME,
     refetchInterval: VALIDATOR_REFETCH_INTERVAL
@@ -58,7 +57,7 @@ export const useValidatorInfo = () => {
   }
 
   const activeValidators = qActiveValidatorCount.data || 0
-  const avgApr = getAverageApr(qValidators.data || [])
+  const avgApr = getAverageApr(qValidators.data?.map((v) => v.validator) || [])
   const networkSecurity = getNetworkSecurity(activeValidators)
 
   return {

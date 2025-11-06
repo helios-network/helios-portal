@@ -1,116 +1,45 @@
 import { useQuery } from "@tanstack/react-query"
 import {
   getDelegation,
-  getValidatorDetailAndAssetsBatch
+  getValidatorWithHisAssetsAndCommission,
+  getValidatorWithHisDelegationAndCommission
 } from "@/helpers/rpc-calls"
 import { ethers } from "ethers"
 import { TokenExtended } from "@/types/token"
 import { HELIOS_NETWORK_ID } from "@/config/app"
 import { useAccount } from "wagmi"
-import { getTokenDetailsInBatch } from "./useTokenEnrichmentBatch"
-import { fetchCGTokenData } from "@/utils/price"
-import { TOKEN_COLORS } from "@/config/constants"
-import { APP_COLOR_DEFAULT } from "@/config/app"
+import { ValidatorWithAssetsCommissionAndDelegation } from "@/types/validator"
+import { useTokenRegistry } from "@/hooks/useTokenRegistry"
 
-interface CachedValidatorDetails {
-  delegation?: any
-  assets?: any
-  enrichedAssets?: TokenExtended[]
-}
-
-export const useValidatorDetail = (
-  address: string,
-  cachedDetails?: CachedValidatorDetails
-) => {
+export const useValidatorDetail = (address: string, validatorWithAssetsAndCommissionAndDelegation?: ValidatorWithAssetsCommissionAndDelegation) => {
   const { address: userAddress } = useAccount()
-  const qValidatorDetailAndAssets = useQuery({
-    queryKey: ["validatorDetailAndAssets", address],
-    queryFn: () => getValidatorDetailAndAssetsBatch(address),
-    enabled: !!address && (!cachedDetails?.delegation || !cachedDetails?.assets),
-    initialData: cachedDetails?.delegation && cachedDetails?.assets
-      ? [cachedDetails.delegation, cachedDetails.assets]
-      : undefined
+  const { getTokenByAddress } = useTokenRegistry()
+
+  const qValidatorDetail = useQuery({
+    queryKey: ["validatorDetail", address],
+    queryFn: () => getValidatorWithHisDelegationAndCommission(address),
+    enabled: !!address && !validatorWithAssetsAndCommissionAndDelegation
+  })
+
+  const qValidatorAssets = useQuery({
+    queryKey: ["validatorAssets", address],
+    queryFn: () => getValidatorWithHisAssetsAndCommission(address),
+    enabled: !!address && !validatorWithAssetsAndCommissionAndDelegation
   })
 
   const qDelegationDetail = useQuery({
     queryKey: ["delegationDetail", userAddress, address],
     queryFn: () => getDelegation(userAddress!, address),
-    enabled: !!address && !!userAddress
+    enabled: !!address && !!userAddress && !validatorWithAssetsAndCommissionAndDelegation
   })
-  const hasPreEnrichedAssets = !!cachedDetails?.enrichedAssets
-
-  const enrichedAssetsQuery = useQuery({
-    queryKey: ["enrichedValidatorAssets", address, qValidatorDetailAndAssets.data?.[1]],
-    enabled: !!qValidatorDetailAndAssets.data?.[1]?.assets?.length && !hasPreEnrichedAssets,
-    queryFn: async (): Promise<TokenExtended[]> => {
-      const assets = qValidatorDetailAndAssets.data![1].assets
-      const tokenAddresses = assets.map((asset: any) => asset.contractAddress)
-
-      // Batch fetch metadata for all tokens at once
-      const batchMetadata = await getTokenDetailsInBatch(tokenAddresses)
-
-      // Fetch price data for all symbols at once
-      const symbols = Object.values(batchMetadata)
-        .map((m: any) => m.metadata.symbol.toLowerCase())
-      const cgData = await fetchCGTokenData(symbols)
-
-      // Map assets to enriched tokens
-      const results = assets.map((asset: any) => {
-        const metadata = batchMetadata[asset.contractAddress]
-        if (!metadata) return null
-
-        const symbol = metadata.metadata.symbol.toLowerCase()
-        const cgToken = cgData[symbol]
-        const unitPrice = cgToken?.price || 0
-
-        const amount = parseFloat(
-          ethers.formatUnits(asset.baseAmount, metadata.metadata.decimals)
-        )
-
-        return {
-          display: {
-            name: metadata.metadata.name,
-            description: "",
-            logo: cgToken?.logo || "",
-            symbol,
-            symbolIcon: symbol === "hls" ? "helios" : `token:${symbol}`,
-            color: TOKEN_COLORS[symbol as keyof typeof TOKEN_COLORS] || APP_COLOR_DEFAULT
-          },
-          price: { usd: unitPrice },
-          balance: {
-            amount,
-            totalPrice: amount * unitPrice
-          },
-          functionnal: {
-            address: asset.contractAddress,
-            chainId: HELIOS_NETWORK_ID,
-            denom: metadata.metadata.base,
-            decimals: metadata.metadata.decimals
-          },
-          stats: {
-            holdersCount: metadata.holdersCount,
-            totalSupply: metadata.total_supply
-          }
-        } as TokenExtended
-      })
-
-      return results.filter((token: any): token is TokenExtended => token !== null)
-    }
-  })
-
-  const assets = hasPreEnrichedAssets
-    ? cachedDetails!.enrichedAssets
-    : enrichedAssetsQuery.data || []
+  const hasPreEnrichedAssets = !!validatorWithAssetsAndCommissionAndDelegation?.delegation?.assets?.length
 
   return {
-    validator: qValidatorDetailAndAssets.data?.[0]?.validator,
-    delegation: {
-      ...qValidatorDetailAndAssets.data?.[0]?.delegation,
-      assets
-    },
-    commission: qValidatorDetailAndAssets.data?.[0]?.commission,
+    validator: validatorWithAssetsAndCommissionAndDelegation?.validator || qValidatorDetail.data?.validator,
+    delegation: validatorWithAssetsAndCommissionAndDelegation?.delegation || qValidatorDetail.data?.delegation,
+    commission: validatorWithAssetsAndCommissionAndDelegation?.commission || qValidatorDetail.data?.commission,
     userHasDelegated: !!qDelegationDetail.data,
-    isLoading: hasPreEnrichedAssets ? qValidatorDetailAndAssets.isLoading : (qValidatorDetailAndAssets.isLoading || enrichedAssetsQuery.isLoading),
-    error: qValidatorDetailAndAssets.error || enrichedAssetsQuery.error
+    isLoading: qValidatorDetail.isLoading || qValidatorAssets.isLoading || qDelegationDetail.isLoading,
+    error: qValidatorDetail.error || qValidatorAssets.error || qDelegationDetail.error
   }
 }

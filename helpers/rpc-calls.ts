@@ -5,11 +5,12 @@ import { Block } from "@/types/block"
 import { Delegation } from "@/types/delegation"
 import { Proposal } from "@/types/proposal"
 import { Transaction, TransactionLast } from "@/types/transaction"
-import { Validator, ValidatorWithAssetsCommission, ValidatorWithDelegationCommission } from "@/types/validator"
+import { Validator, ValidatorWithAssetsCommission, ValidatorWithDelegationCommission, ValidatorWithAssetsCommissionAndDelegation } from "@/types/validator"
 import { WhitelistedAsset } from "@/types/whitelistedAsset"
 import { HyperionBridgeTx, HyperionChain } from "@/types/hyperion"
-import { TokenDenom } from "@/types/denom"
-import { toHex } from "@/utils/number"
+import { HyperionHistoricalFees, TokenDenom } from "@/types/denom"
+import { toHex } from "viem"
+import { ethers } from "ethers"
 
 export const getTokenBalance = (
   address: string,
@@ -92,11 +93,11 @@ export const getTransactionsByPageAndSize = (page: string, size: string) =>
 export const getListTransactionsByPageAndSize = (page: string, size: string) =>
   request<Transaction[]>("eth_listTransactions", [page, size])
 
-export const getValidatorsByPageAndSize = (page: string, size: string) =>
-  request<Validator[]>("eth_getValidatorsByPageAndSize", [page, size])
+// export const getValidatorsByPageAndSize = (page: string, size: string) =>
+//   request<Validator[]>("eth_getValidatorsByPageAndSize", [page, size])
 
 export const getValidatorsByPageAndSizeWithHisAssetsAndCommissionAndDelegation = (page: string, size: string) =>
-  request<ValidatorWithAssetsCommission[]>("eth_getValidatorsByPageAndSizeWithHisAssetsAndCommissionAndDelegation", [page, size])
+  request<ValidatorWithAssetsCommissionAndDelegation[]>("eth_getValidatorsByPageAndSizeWithHisAssetsAndCommissionAndDelegation", [page, size])
 
 export const getActiveValidatorCount = () =>
   request<number>("eth_getActiveValidatorCount", [])
@@ -124,6 +125,20 @@ export const getTokensByChainIdAndPageAndSize = (
     page,
     size
   ])
+
+export const getHyperionHistoricalFees = (chainId: number) =>
+  request<HyperionHistoricalFees>("eth_getHyperionHistoricalFees", [chainId]).then((result) => {
+    if (result?.average.amount) {
+      result.average.amount = ethers.formatEther(result.average.amount)
+    }
+    if (result?.low.amount) {
+      result.low.amount = ethers.formatEther(result.low.amount)
+    }
+    if (result?.high.amount) {
+      result.high.amount = ethers.formatEther(result.high.amount)
+    }
+    return result
+  })
 
 export const getHyperionAccountTransferTxsByPageAndSize = (
   address: string,

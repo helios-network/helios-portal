@@ -132,12 +132,24 @@ export const useDelegate = () => {
           message: `Transaction sent, waiting for confirmation...`
         })
 
+        const gasEstimate = await contract.methods.undelegate(address, validatorAddress, undelegateAmount, symbol).estimateGas({
+          from: address
+        })
+
+        const gasLimit = (gasEstimate * 120n) / 100n
+
+        setFeedback({
+          status: "primary",
+          message: `Transaction sent, waiting for confirmation...`
+        })
+
         // send the transaction
         const receipt = await new Promise<TransactionReceipt>((resolve, reject) => {
           web3Provider.eth.sendTransaction({
             from: address,
             to: DELEGATE_CONTRACT_ADDRESS,
-            data: contract.methods.undelegate(address, validatorAddress, undelegateAmount, symbol).encodeABI()
+            data: contract.methods.undelegate(address, validatorAddress, undelegateAmount, symbol).encodeABI(),
+            gas: gasLimit.toString()
           }).then((tx) => {
             resolve(tx as any)
           }).catch((error) => {

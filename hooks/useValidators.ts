@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { getValidatorsByPageAndSize } from "@/helpers/rpc-calls"
+import { getValidatorsByPageAndSizeWithHisAssetsAndCommissionAndDelegation } from "@/helpers/rpc-calls"
 import { toHex } from "@/utils/number"
 
 export const useValidators = (page = 1, size = 100) => {
@@ -12,7 +12,7 @@ export const useValidators = (page = 1, size = 100) => {
   const qValidators = useQuery({
     queryKey: ["validators", page, size],
     queryFn: async () => {
-      const validators = await getValidatorsByPageAndSize(toHex(page), toHex(size))
+      const validators = await getValidatorsByPageAndSizeWithHisAssetsAndCommissionAndDelegation(toHex(page), toHex(size))
 
       if (!validators) return []
 
@@ -20,8 +20,8 @@ export const useValidators = (page = 1, size = 100) => {
       return validators
         .sort((a, b) => {
           // Among non-active, jailed last
-          if (a.jailed && !b.jailed) return 1
-          if (!a.jailed && b.jailed) return -1
+          if (a.validator.jailed && !b.validator.jailed) return 1
+          if (!a.validator.jailed && b.validator.jailed) return -1
           return 0
         })
     },

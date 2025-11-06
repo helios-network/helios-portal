@@ -19,6 +19,7 @@ import { Item } from "../item"
 import { Empty } from "./empty"
 import { Informations } from "./informations"
 import s from "./list.module.scss"
+import HELIOS_NODE_MONIKERS from "@/config/helios-node-monikers"
 
 export const List = () => {
   const [searchTerm, setSearchTerm] = useState("")
@@ -98,6 +99,7 @@ export const List = () => {
       // Enrich each validator's assets
       return sorted.map(data => {
         const enrichedAssets: TokenExtended[] = []
+        const enrichedDelegationAssets: any[] = []
 
         data.assets?.forEach((asset: any) => {
           const metadata = batchMetadata[asset.contractAddress as keyof typeof batchMetadata]
@@ -136,10 +138,29 @@ export const List = () => {
               totalSupply: metadata.total_supply
             }
           } as TokenExtended)
+
+          enrichedDelegationAssets.push({
+            denom: metadata.metadata.base,
+            baseAmount: asset.baseAmount,
+            amount: amount.toString(),
+            weightedAmount: asset.weightedAmount,
+            price: unitPrice,
+            logo: cgToken?.logo || "",
+            color: TOKEN_COLORS[symbol as keyof typeof TOKEN_COLORS] || APP_COLOR_DEFAULT,
+            contractAddress: asset.contractAddress
+          })
         })
 
         return {
-          ...data.validator,
+          validator: data.validator,
+          assets: data.assets,
+          delegation: {
+            validatorAddress: data.validator.validatorAddress,
+            shares: data.validator.shares,
+            assets: enrichedDelegationAssets.filter(a => a !== null),
+            rewards: { denom: "", amount: "0" }
+          },
+          commission: data.commission,
           cachedDetails: {
             assets: data.assets,
             enrichedAssets: enrichedAssets.filter(t => t !== null)
@@ -160,8 +181,12 @@ export const List = () => {
   }
 
   const filteredValidators = validators.filter((validator) =>
-    validator.moniker.toLowerCase().includes(searchTerm.toLowerCase())
+    validator.validator.moniker.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  const sortedValidators = filteredValidators.sort((a, b) => {
+    return b.validator.status - a.validator.status || (HELIOS_NODE_MONIKERS.includes(a.validator.moniker) ? -1 : 1)
+  })
 
   return (
     <>
@@ -185,15 +210,17 @@ export const List = () => {
         </div>
       </Card>
       <div className={s.list}>
-        {filteredValidators.map((validator, i) => (
+        {sortedValidators.map((validator, i) => (
           <Item
             key={"validators-" + i}
-            {...validator}
-            cachedDetails={validator.cachedDetails}
-            userHasDelegated={validator.userHasDelegated}
+            validator={validator.validator}
+            assets={validator.assets}
+            delegation={validator.delegation}
+            commission={validator.commission}
+            enrichedAssets={validator.cachedDetails?.enrichedAssets}
           />
         ))}
-        {filteredValidators.length === 0 && !validatorsIsLoading && (
+        {sortedValidators.length === 0 && !validatorsIsLoading && (
           <Empty icon="hugeicons:sad-02" title="No validators found" />
         )}
         {validatorsIsLoading && (

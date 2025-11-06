@@ -11,8 +11,10 @@ import Image from "next/image"
 import { getLogoByHash } from "@/utils/url"
 import { Icon } from "../icon"
 import { getChainConfig } from "@/config/chain-config"
+import { useBridge } from "@/hooks/useBridge"
 
-export const TransactionsLine = (transaction: TransactionLight) => {
+export const TransactionsLine = ({ transaction, isClientTxs }: { transaction: TransactionLight, isClientTxs?: boolean }) => {
+  const { cancelSendToChain } = useBridge()
   const isCosmosHash = !transaction.hash?.startsWith("0x")
   let explorerLink = !isCosmosHash ? EXPLORER_URL + "/tx/" + transaction.hash : undefined
 
@@ -36,7 +38,7 @@ export const TransactionsLine = (transaction: TransactionLight) => {
             {transaction.timeout && transaction.timeout > 0 && (
               <Tooltip.Portal>
                 <Tooltip.Content className={s.tooltipContent} sideOffset={5}>
-                  Expire at block <strong>{transaction.timeout}</strong> on chain <strong>{transaction.chainName}</strong>
+                  Expire at block <strong>{transaction.timeout}</strong> on chain <strong>{transaction.chainName}</strong> {transaction.status_bridge_tx} {transaction.fees && `(fees: ${transaction.fees} HLS)`}
                   <Tooltip.Arrow className={s.tooltipArrow} />
                 </Tooltip.Content>
               </Tooltip.Portal>
@@ -94,6 +96,24 @@ export const TransactionsLine = (transaction: TransactionLight) => {
         )}
       </TableCell>
       <TableCell align="right" className={s.cellRight}>
+        {isClientTxs && transaction.type === "BRIDGE_OUT" && transaction.status_bridge_tx === "PROGRESS_UNBATCHED" && (
+          <Button
+            icon="hugeicons:cancel-01"
+            variant="danger"
+            border
+            onClick={async() => {
+              await cancelSendToChain(transaction.chainId || 0, transaction.transactionId || 0)
+            }}
+          />
+        )}
+        {!isClientTxs && transaction.type === "BRIDGE_OUT" && transaction.status_bridge_tx === "PROGRESS_BATCHED" && (
+          <Button
+            icon="hugeicons:link-square-02"
+            variant="secondary"
+            border
+            href={""}
+          />
+        )}
         {explorerLink && <Button
           icon="hugeicons:link-square-02"
           variant="secondary"

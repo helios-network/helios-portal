@@ -1,0 +1,368 @@
+@use "styles/mixins" as *;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2);
+}
+
+.label {
+  font-size: var(--size-4);
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: block;
+}
+
+.selector {
+  position: relative;
+  z-index: 1000;
+}
+
+.trigger {
+  width: 100%;
+  background-color: var(--background-low);
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-m);
+  padding: var(--size-6) var(--size-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--size-4);
+  cursor: pointer;
+  transition: all var(--transition-link);
+  font-size: var(--size-4);
+  color: var(--text-primary);
+
+  &:hover {
+    border-color: var(--primary-medium);
+    background-color: var(--background-medium);
+  }
+
+  &.open {
+    border-color: var(--primary-medium);
+    background-color: var(--background-medium);
+
+    .chevron {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.selectedContent {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4);
+  flex: 1;
+}
+
+.selectedIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: var(--background-lowest);
+  border-radius: var(--radius-rounded);
+  flex-shrink: 0;
+
+  img {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-s);
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.selectedInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-1);
+  flex: 1;
+}
+
+.selectedName {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: var(--size-4);
+  @include ellipsis;
+}
+
+.selectedSymbol {
+  font-size: var(--size-3);
+  color: var(--text-secondary);
+}
+
+.placeholder {
+  color: var(--text-tertiary);
+}
+
+.chevron {
+  width: 20px;
+  height: 20px;
+  color: var(--text-secondary);
+  transition: transform var(--transition-link);
+  flex-shrink: 0;
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--background-low);
+  border: 2px solid var(--primary-medium);
+  border-radius: var(--radius-m);
+  margin-top: var(--size-2);
+  // z-index: 10000;
+  box-shadow: var(--shadow-l);
+  overflow: clip;
+  // display: flex;
+  // flex-direction: column;
+  max-height: 400px;
+}
+
+.searchContainer {
+  display: flex;
+  align-items: right;
+  gap: var(--size-3);
+  margin-top: var(--size-4);
+  margin-bottom: var(--size-4);
+  margin-left: var(--size-2);
+  margin-right: var(--size-2);
+  padding: var(--size-4) var(--size-4);
+  border-bottom: 1px solid var(--border-medium);
+  background-color: var(--background-medium);
+  border-radius: var(--radius-s);
+}
+
+.searchInput {
+  flex: 1;
+  background-color: transparent;
+  text-align: left;
+  border: none;
+  padding-left: var(--size-3);
+  font-size: var(--size-4);
+  color: var(--text-primary);
+
+  &::placeholder {
+    color: var(--text-tertiary);
+  }
+
+  &:focus {
+    outline: none;
+    color: var(--text-primary);
+  }
+}
+
+.searchIcon {
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.assetsList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--border-medium);
+    border-radius: 3px;
+
+    &:hover {
+      background-color: var(--text-secondary);
+    }
+  }
+}
+
+.assetItem {
+  display: flex;
+  align-items: center;
+  gap: var(--size-6);
+  padding: var(--size-4) var(--size-5);
+  border: none;
+  background-color: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-link);
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background-color: var(--background-medium);
+  }
+
+  &.selected {
+    background-color: var(--background-highest);
+  }
+}
+
+.assetIcon {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background-lowest);
+  border-radius: var(--radius-m);
+  flex-shrink: 0;
+
+  img {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-s);
+  }
+
+  svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.chainBadge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 24px;
+  height: 24px;
+  background-color: var(--background-low);
+  border: 2px solid var(--background-low);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-m);
+}
+
+.chainIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.assetInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.assetName {
+  display: flex;
+  align-items: center;
+  gap: var(--size-3);
+  font-weight: 600;
+  font-size: var(--size-4);
+  color: var(--text-primary);
+  @include ellipsis;
+}
+
+.originLabel {
+  font-size: var(--size-3);
+  font-weight: 400;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.assetDetails {
+  display: flex;
+  gap: var(--size-3);
+  font-size: var(--size-3);
+  color: var(--text-secondary);
+}
+
+.assetSymbol {
+  font-weight: 600;
+}
+
+.assetAddress {
+  color: var(--text-tertiary);
+  font-family: monospace;
+  font-size: 0.85em;
+}
+
+.favoriteIcon {
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary);
+  transition: all var(--transition-link);
+  flex-shrink: 0;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--warning-medium);
+    transform: scale(1.1);
+  }
+}
+
+.noResults {
+  padding: var(--size-8) var(--size-4);
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--size-4);
+}
+
+@include max(600px) {
+  .trigger {
+    padding: var(--size-5) var(--size-4);
+  }
+
+  .selectedIcon {
+    width: 28px;
+    height: 28px;
+
+    img,
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .dropdown {
+    max-height: 300px;
+  }
+
+  .assetItem {
+    padding: var(--size-3) var(--size-4);
+    gap: var(--size-3);
+  }
+
+  .assetIcon {
+    width: 36px;
+    height: 36px;
+
+    img,
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .assetName {
+    font-size: var(--size-3-5);
+  }
+
+  .originLabel {
+    display: none;
+  }
+}
