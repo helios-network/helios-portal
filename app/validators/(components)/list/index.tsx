@@ -4,7 +4,7 @@ import { Card } from "@/components/card"
 import { SkeletonCard } from "@/components/card/skeleton"
 import { Heading } from "@/components/heading"
 import { Icon } from "@/components/icon"
-import { getValidatorsByPageAndSizeWithHisAssetsAndCommissionAndDelegation, getDelegation } from "@/helpers/rpc-calls"
+import { getValidatorsByPageAndSizeWithHisAssetsAndCommissionAndDelegation, getDelegationsForValidatorsByUser } from "@/helpers/rpc-calls"
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useAccount } from "wagmi"
@@ -73,14 +73,27 @@ export const List = () => {
         cgData = await fetchCGTokenData(symbols)
       }
 
-      // Fetch user delegation data for all validators in parallel
-      const userDelegationPromises = sorted.map(data =>
-        userAddress ? getDelegation(userAddress, data.validator.validatorAddress).catch(() => null) : Promise.resolve(null)
-      )
-      const userDelegations = await Promise.all(userDelegationPromises)
-      const userDelegationMap = new Map(
-        sorted.map((data, idx) => [data.validator.validatorAddress, userDelegations[idx]])
-      )
+      let userDelegationMap = new Map<string, any>()
+      if (userAddress) {
+
+        try {
+
+          // Extract all validator addresses from sorted validators
+          const validatorAddresses = sorted
+            .map((data: any) => data.validator?.validatorAddress)
+            .filter(Boolean)
+          if (validatorAddresses.length > 0) {
+            const allUserDelegations = await getDelegationsForValidatorsByUser(userAddress, validatorAddresses)
+            userDelegationMap = new Map(
+              allUserDelegations
+                ?.filter((delegation: any) => delegation !== null)
+                ?.map((delegation: any) => [delegation.validatorAddress, delegation]) ?? []
+            )
+          }
+        } catch (error) {
+          console.warn("Failed to fetch user delegations:", error)
+        }
+      }
 
       // Enrich each validator's assets
       return sorted.map(data => {
