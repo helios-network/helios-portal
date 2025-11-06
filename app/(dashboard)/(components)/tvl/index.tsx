@@ -76,7 +76,7 @@ const Chart = ({ data, gradientId, prefix }: ChartProps) => {
 
 export const TVL = () => {
   const { assets, totalHolders, totalTVL } = useAssetsInfo()
-  // OPTIMIZATION: Use dedicated useTVLData instead of useHomeData
+  // Use dedicated useTVLData instead of useHomeData
   // This prevents loading 5+ unnecessary queries (listBlocks, listTransactions, chainStats, etc.)
   const { data: tvlChartData = [] } = useTVLData()
   const { assets: whitelistedAssets } = useWhitelistedAssets()

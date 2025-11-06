@@ -21,7 +21,6 @@ import { HELIOS_NETWORK_ID } from "@/config/app"
 import { useQuery } from "@tanstack/react-query"
 import { toHex } from "viem"
 import { getHyperionHistoricalFees, getTokensByChainIdAndPageAndSize } from "@/helpers/rpc-calls"
-import { useTokenRegistry } from "@/hooks/useTokenRegistry"
 import { Message } from "@/components/message"
 import { useChains } from "@/hooks/useChains"
 import { ModalWrapper } from "../wrapper/modal"
@@ -30,6 +29,10 @@ import { getChainConfig } from "@/config/chain-config"
 import { getErrorMessage } from "@/utils/string"
 import { useWhitelistedAssets } from "@/hooks/useWhitelistedAssets"
 import { TokenSearchModal } from "./token-search-modal"
+import { getTokenDetailsInBatch } from "@/hooks/useTokenEnrichmentBatch"
+import { fetchCGTokenData } from "@/utils/price"
+import { TOKEN_COLORS } from "@/config/constants"
+import { APP_COLOR_DEFAULT } from "@/config/app"
 
 type BridgeForm = {
   asset: string | null
@@ -66,7 +69,7 @@ export const Interface = () => {
   const [openTokenSearch, setOpenTokenSearch] = useState(false)
   const [selectedFeeType, setSelectedFeeType] = useState<FeeType>(FeeType.AVERAGE)
   const [customFeeAmount, setCustomFeeAmount] = useState<string>("0")
-  
+
   const { isWrappable } = useWrapper({
     enableNativeBalance: openWrapModal,
     enableWrappedBalance: openUnwrapModal
@@ -79,9 +82,10 @@ export const Interface = () => {
     address: address || "",
     inProgress: false
   })
-  const [failedChainIcons, setFailedChainIcons] = useState<Set<string>>(new Set())
+  const [failedChainIcons, setFailedChainIcons] = useState<Set<string>>(
+    new Set()
+  )
   const tokenInfo = useTokenInfo(form.asset)
-  const { getTokenByAddress } = useTokenRegistry()
   const chainConfig = chainId ? getChainConfig(chainId) : undefined
 
   const qTokensByChain = useQuery({
@@ -101,13 +105,67 @@ export const Interface = () => {
       form.from?.chainId
     ],
     queryFn: async () => {
-      // Limit to first 3 tokens to reduce load
       const tokensToEnrich = qTokensByChain.data!.slice(0, 3)
-      const results = await Promise.all(
-        tokensToEnrich.map((token) =>
-          getTokenByAddress(token.metadata.contract_address, form.from!.chainId)
-        )
+      const tokenAddresses = tokensToEnrich.map(
+        (t) => t.metadata.contract_address
       )
+
+      // Batch fetch metadata for all tokens at once
+      const batchMetadata = await getTokenDetailsInBatch(tokenAddresses)
+
+      // Fetch price data for all symbols at once
+      const symbols = Object.values(batchMetadata).map((m) =>
+        m.metadata.symbol.toLowerCase()
+      )
+      const cgData = await fetchCGTokenData(symbols)
+
+      // Map raw tokens to enriched format
+      const results = tokensToEnrich.map((token) => {
+        const metadata = batchMetadata[token.metadata.contract_address]
+        if (!metadata) return null
+
+        const symbol = metadata.metadata.symbol.toLowerCase()
+        const cgToken = cgData[symbol]
+
+        return {
+          ...token,
+          metadata: {
+            ...token.metadata,
+            name: metadata.metadata.name,
+            decimals: metadata.metadata.decimals,
+            symbol,
+            logo: cgToken?.logo || ""
+          },
+          enriched: {
+            display: {
+              name: metadata.metadata.name,
+              description: "",
+              logo: cgToken?.logo || "",
+              symbol,
+              symbolIcon: symbol === "hls" ? "helios" : `token:${symbol}`,
+              color:
+                TOKEN_COLORS[symbol as keyof typeof TOKEN_COLORS] ||
+                APP_COLOR_DEFAULT
+            },
+            price: { usd: cgToken?.price || 0 },
+            balance: {
+              amount: 0,
+              totalPrice: 0
+            },
+            functionnal: {
+              address: token.metadata.contract_address,
+              chainId: form.from!.chainId,
+              denom: metadata.metadata.base,
+              decimals: metadata.metadata.decimals
+            },
+            stats: {
+              holdersCount: metadata.holdersCount,
+              totalSupply: metadata.total_supply
+            },
+            originBlockchain: "42000"
+          }
+        }
+      })
 
       return results.filter((v) => v !== null)
     },
@@ -167,16 +225,20 @@ export const Interface = () => {
       : chains
 
   // Function to check if a token is whitelisted
-  const isTokenWhitelisted = useCallback((tokenAddress: string): boolean => {
-    // Don't show stars while loading whitelisted assets
-    if (whitelistedAssetsLoading) return false
-    
-    const isWhitelisted = assets.some((asset) => 
-      asset.contractAddress.toLowerCase() === tokenAddress.toLowerCase()
-    )
-    
-    return isWhitelisted
-  }, [whitelistedAssetsLoading, assets])
+  const isTokenWhitelisted = useCallback(
+    (tokenAddress: string): boolean => {
+      // Don't show stars while loading whitelisted assets
+      if (whitelistedAssetsLoading) return false
+
+      const isWhitelisted = assets.some(
+        (asset) =>
+          asset.contractAddress.toLowerCase() === tokenAddress.toLowerCase()
+      )
+
+      return isWhitelisted
+    },
+    [whitelistedAssetsLoading, assets]
+  )
 
   // Function to get origin chain icon URL
   const getOriginChainIconUrl = useCallback((originBlockchain: string) => {
@@ -191,11 +253,9 @@ export const Interface = () => {
     return chainConfig?.name || `Chain ${chainId}`
   }, [])
 
-
-
   // Function to handle chain icon load error
   const handleChainIconError = useCallback((originBlockchain: string) => {
-    setFailedChainIcons(prev => new Set(prev).add(originBlockchain))
+    setFailedChainIcons((prev) => new Set(prev).add(originBlockchain))
   }, [])
 
   const lightResetForm = useCallback(() => {
@@ -262,8 +322,6 @@ export const Interface = () => {
     const value = e.target.value
     setForm({ ...form, asset: value, amount: "0" })
   }
-
-
 
   const handleAmountChange = (e: ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value
@@ -334,9 +392,12 @@ export const Interface = () => {
 
       lightResetForm()
     } catch (err: any) {
-      toast.error(getErrorMessage(err) || "Failed to send bridge transaction.", {
-        id: toastId
-      })
+      toast.error(
+        getErrorMessage(err) || "Failed to send bridge transaction.",
+        {
+          id: toastId
+        }
+      )
     }
     setForm({ ...form, inProgress: false })
   }
@@ -378,7 +439,10 @@ export const Interface = () => {
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: false
   })
-  const assetDisabled = tokenInfo.data && tokenInfo.data.symbol === "HLS" && form.to?.chainId !== HELIOS_NETWORK_ID
+  const assetDisabled =
+    tokenInfo.data &&
+    tokenInfo.data.symbol === "HLS" &&
+    form.to?.chainId !== HELIOS_NETWORK_ID
   const isDisabled =
     form.inProgress ||
     !tokenInfo.data ||
@@ -491,77 +555,94 @@ export const Interface = () => {
                 <div className={s.bestTokensLabel}>Available tokens :</div>
                 <div className={s.bestTokensList}>
                   <Button
-                      variant="secondary"
-                      size="xsmall"
-                      onClick={() => setOpenTokenSearch(true)}
-                      className={s.searchButton}
-                    >
-                      <Icon icon="hugeicons:search-02" />
-                    </Button>
+                    variant="secondary"
+                    size="xsmall"
+                    onClick={() => setOpenTokenSearch(true)}
+                    className={s.searchButton}
+                  >
+                    <Icon icon="hugeicons:search-02" />
+                  </Button>
                   {tokensByChain.slice(0, 3).map((token) => (
                     <Button
                       iconLeft={
-                        token.display.logo === ""
-                          ? token.display.symbolIcon
+                        token.enriched.display.logo === ""
+                          ? token.enriched.display.symbolIcon
                           : undefined
                       }
-                      key={token.functionnal.address}
+                      key={token.enriched.functionnal.address}
                       variant="secondary"
                       size="xsmall"
                       onClick={() =>
                         handleTokenSearchChange({
                           target: {
-                            value: token.functionnal.address
+                            value: token.enriched.functionnal.address
                           }
                         })
                       }
                     >
                       <div className={s.tokenContainer}>
-                        {token.display.logo !== "" && (
+                        {token.enriched.display.logo !== "" && (
                           <div className={s.tokenIconWrapper}>
                             <Image
-                              src={token.display.logo}
+                              src={token.enriched.display.logo}
                               alt=""
                               width={16}
                               height={16}
                             />
-                            {!failedChainIcons.has(token.originBlockchain) && (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={getOriginChainIconUrl(token.originBlockchain)}
-                                alt=""
-                                width={12}
-                                height={12}
-                                className={s.originChainIcon}
-                                onError={() => handleChainIconError(token.originBlockchain)}
-                              />
-                            )}
+                            {!failedChainIcons.has(
+                              token.enriched.originBlockchain
+                            ) && (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={getOriginChainIconUrl(
+                                    token.enriched.originBlockchain
+                                  )}
+                                  alt=""
+                                  width={12}
+                                  height={12}
+                                  className={s.originChainIcon}
+                                  onError={() =>
+                                    handleChainIconError(
+                                      token.enriched.originBlockchain
+                                    )
+                                  }
+                                />
+                              )}
                           </div>
                         )}
-                        {token.display.logo === "" && (
+                        {token.enriched.display.logo === "" && (
                           <div className={s.tokenIconWrapper}>
-                            <Icon 
-                              icon={token.display.symbolIcon} 
+                            <Icon
+                              icon={token.enriched.display.symbolIcon}
                               className={s.tokenIcon}
                             />
-                            {!failedChainIcons.has(token.originBlockchain) && (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={getOriginChainIconUrl(token.originBlockchain)}
-                                alt=""
-                                width={12}
-                                height={12}
-                                className={s.originChainIcon}
-                                onError={() => handleChainIconError(token.originBlockchain)}
-                              />
-                            )}
+                            {!failedChainIcons.has(
+                              token.enriched.originBlockchain
+                            ) && (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={getOriginChainIconUrl(
+                                    token.enriched.originBlockchain
+                                  )}
+                                  alt=""
+                                  width={12}
+                                  height={12}
+                                  className={s.originChainIcon}
+                                  onError={() =>
+                                    handleChainIconError(
+                                      token.enriched.originBlockchain
+                                    )
+                                  }
+                                />
+                              )}
                           </div>
                         )}
                       </div>
-                      {token.display.symbol.toUpperCase()} - {getOriginChainName(token.originBlockchain)}
-                      {isTokenWhitelisted(token.functionnal.address) && (
-                        <span className={s.whitelistedIcon}>⭐</span>
-                      )}
+                      {token.enriched.display.symbol.toUpperCase()} -{" "}
+                      {getOriginChainName(token.enriched.originBlockchain)}
+                      {isTokenWhitelisted(
+                        token.enriched.functionnal.address
+                      ) && <span className={s.whitelistedIcon}>⭐</span>}
                     </Button>
                   ))}
                 </div>
@@ -643,7 +724,8 @@ export const Interface = () => {
             )}
             {assetDisabled && (
               <Message title="Asset disabled" variant={"warning"}>
-                The asset {tokenInfo.data?.symbol} is currently disabled. Please try again later.
+                The asset {tokenInfo.data?.symbol} is currently disabled. Please
+                try again later.
               </Message>
             )}
             <div
