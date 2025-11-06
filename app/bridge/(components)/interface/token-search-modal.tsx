@@ -102,13 +102,13 @@ export const TokenSearchModal = ({
             </thead>
             <tbody>
               {filteredTokens.map((token) => (
-                <tr key={token.functionnal.address} className={s.tokenRow}>
+                <tr key={token.functionnal?.address} className={s.tokenRow}>
                   <td 
                     className={s.tokenCell}
-                    onClick={() => handleTokenSelect(token.functionnal.address)}
+                    onClick={() => handleTokenSelect(token.functionnal?.address)}
                   >
                     <div className={s.tokenLogoWrapper}>
-                      {token.display.logo !== "" && (
+                      {token.display?.logo &&token.display.logo !== "" && (
                         <Image
                           src={token.display.logo}
                           alt=""
@@ -117,7 +117,7 @@ export const TokenSearchModal = ({
                           className={s.tokenLogo}
                         />
                       )}
-                      {token.display.logo === "" && (
+                      {token.display?.logo &&token.display.logo === "" && (
                         <Icon 
                           icon={token.display.symbolIcon} 
                           className={s.tokenLogo}
@@ -138,13 +138,13 @@ export const TokenSearchModal = ({
                   </td>
                   <td 
                     className={s.tokenCell}
-                    onClick={() => handleTokenSelect(token.functionnal.address)}
+                    onClick={() => handleTokenSelect(token.functionnal?.address)}
                   >
                     <div className={s.tokenInfo}>
-                      <div className={s.tokenName}>{token.display.name}</div>
+                      <div className={s.tokenName}>{token.display?.name}</div>
                       <div className={s.tokenDetails}>
-                        <span className={s.tokenSymbol}>{token.display.symbol.toUpperCase()}</span>
-                        <span className={s.tokenAddress}>{token.functionnal.address.slice(0, 6)}...{token.functionnal.address.slice(-4)}</span>
+                        <span className={s.tokenSymbol}>{token.display?.symbol.toUpperCase()}</span>
+                        <span className={s.tokenAddress}>{token.functionnal?.address.slice(0, 6)}...{token.functionnal?.address.slice(-4)}</span>
                       </div>
                     </div>
                   </td>
@@ -155,7 +155,7 @@ export const TokenSearchModal = ({
                         className={s.favoriteIcon}
                         onClick={(e) => {
                           e.stopPropagation()
-                          handleFavoriteToggle(token.functionnal.address)
+                          handleFavoriteToggle(token.functionnal?.address)
                         }}
                       />
                     </div>
