@@ -14,6 +14,7 @@ import { useChainId, useSwitchChain } from "wagmi"
 import { HELIOS_NETWORK_ID, HELIOS_TOKEN_ADDRESS } from "@/config/app"
 import { ModalClaim } from "../claim/modal"
 import Image from "next/image"
+import { getChainName } from "@/config/chain-config"
 
 export const Row = ({
   address,
@@ -86,6 +87,11 @@ ValidatorRow) => {
                 {asset.functionnal.address === HELIOS_TOKEN_ADDRESS
                   ? "Boost"
                   : ""}
+                {asset.originBlockchain !== undefined && asset.originBlockchain !== "" && (
+                  <sup className={s.originBlockchain}>
+                    (Origin: {getChainName(parseInt(asset.originBlockchain))})
+                  </sup>
+                )}
               </div>
               <div className={s.amount}>{asset.balance.amount}</div>
             </li>

@@ -166,3 +166,7 @@ export const getChainConfig = (chainId: number): ChainConfig | undefined => {
 export const isWrappableChain = (chainId: number): boolean => {
   return !!CHAIN_CONFIG[chainId]?.wrapperContract
 }
+
+export const getChainName = (chainId: number): string => {
+  return CHAIN_CONFIG[chainId]?.name || `Chain ${chainId}`
+}
