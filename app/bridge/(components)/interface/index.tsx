@@ -127,6 +127,16 @@ export const Interface = () => {
         const symbol = metadata.metadata.symbol.toLowerCase()
         const cgToken = cgData[symbol]
 
+        let originBlockchain = "42000"
+        if (metadata.metadata.chainsMetadatas && metadata.metadata.chainsMetadatas.length > 0) {
+          for (const chainMetadata of metadata.metadata.chainsMetadatas) {
+            if (chainMetadata.isOriginated) {
+              originBlockchain = `${chainMetadata.chainId}`
+              break
+            }
+          }
+        }
+
         return {
           ...token,
           metadata: {
@@ -162,7 +172,7 @@ export const Interface = () => {
               holdersCount: metadata.holdersCount,
               totalSupply: metadata.total_supply
             },
-            originBlockchain: "42000"
+            originBlockchain: originBlockchain
           }
         }
       })
