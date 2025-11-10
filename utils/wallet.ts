@@ -26,8 +26,8 @@ export const addTokenToWallet = async (token: TokenExtended) => {
     })
     toast.success(`${token.display.symbol} added to wallet!`)
     return true
-  } catch (error) {
-    toast.error(`Failed to add ${token.display.symbol} to wallet`)
+  } catch (error: any) {
+    toast.error(`Failed to add ${token.display.symbol} to wallet: ${error.message}`)
     return false
   }
 }
