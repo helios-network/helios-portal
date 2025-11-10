@@ -136,7 +136,7 @@ const formatFieldName = (field: string): string => {
 }
 
 // Helper function to format field values
-const formatFieldValue = (value: any): string => {
+const formatFieldValue = (value: any): string | React.ReactNode => {
   if (typeof value === 'string') {
     // Remove leading slash if present
     const cleaned = value.startsWith('/') ? value.substring(1) : value
@@ -147,6 +147,16 @@ const formatFieldValue = (value: any): string => {
   }
   if (typeof value === 'boolean') {
     return value ? 'Yes' : 'No'
+  }
+  if (Array.isArray(value)) {
+    if (value.length === 0) return '[]'
+    if (typeof value[0] === 'object') {
+      return value.length + ' item(s)'
+    }
+    return value.join(', ')
+  }
+  if (typeof value === 'object' && value !== null) {
+    return '[object Object]'
   }
   return String(value)
 }
@@ -426,16 +436,54 @@ export function VotingSection({
                         <div className={styles.detailDenoms}>
                           <table className={styles.detailTable}>
                             <tbody>
-                              {Object.entries(detail).map(([key, value]) => (
-                                <tr key={key} className={styles.tableRow}>
-                                  <td className={styles.tableKey}>
-                                    {formatFieldName(key)}
-                                  </td>
-                                  <td className={styles.tableValue}>
-                                    {formatFieldValue(value)}
-                                  </td>
-                                </tr>
-                              ))}
+                              {Object.entries(detail).map(([key, value]) => {
+                                if (key === 'messages' && Array.isArray(value)) {
+                                  return (
+                                    <tr key={key} className={styles.tableRow}>
+                                      <td className={styles.tableKey}>
+                                        {formatFieldName(key)}
+                                      </td>
+                                      <td className={styles.tableValue}>
+                                        <div className={styles.nestedObject}>
+                                          {value.map((msg, msgIndex) => (
+                                            <table key={msgIndex} className={styles.nestedTable}>
+                                              <tbody>
+                                                {Object.entries(msg).map(([msgKey, msgValue]) => (
+                                                  <tr key={msgKey} className={styles.nestedTableRow}>
+                                                    <td className={styles.nestedTableKey}>
+                                                      {formatFieldName(msgKey)}
+                                                    </td>
+                                                    <td className={styles.nestedTableValue}>
+                                                      {typeof msgValue === 'object' && msgValue !== null ? (
+                                                        <details className={styles.expandable}>
+                                                          <summary>{Array.isArray(msgValue) ? 'Array' : 'Object'}</summary>
+                                                          <pre className={styles.expandedContent}>{JSON.stringify(msgValue, null, 2)}</pre>
+                                                        </details>
+                                                      ) : (
+                                                        formatFieldValue(msgValue)
+                                                      )}
+                                                    </td>
+                                                  </tr>
+                                                ))}
+                                              </tbody>
+                                            </table>
+                                          ))}
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  )
+                                }
+                                return (
+                                  <tr key={key} className={styles.tableRow}>
+                                    <td className={styles.tableKey}>
+                                      {formatFieldName(key)}
+                                    </td>
+                                    <td className={styles.tableValue}>
+                                      {formatFieldValue(value)}
+                                    </td>
+                                  </tr>
+                                )
+                              })}
                             </tbody>
                           </table>
                         </div>
