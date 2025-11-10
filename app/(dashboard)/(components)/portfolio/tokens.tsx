@@ -3,7 +3,7 @@
 import { Button } from "@/components/button"
 import { Icon } from "@/components/icon"
 import { Symbol } from "@/components/symbol"
-import { APP_COLOR_SECONDARY } from "@/config/app"
+import { Link } from "@/components/link"
 import { formatCurrency } from "@/lib/utils/number"
 import s from "./portfolio.module.scss"
 import { usePortfolioInfo } from "@/hooks/usePortfolioInfo"
@@ -77,9 +77,6 @@ const Line = ({
 
 export const PortfolioTokens = () => {
   const { portfolio: tokens } = usePortfolioInfo()
-  const totalOtherTokens = tokens
-    .slice(4)
-    .reduce((total, token) => total + (token.balance.totalPrice || 0), 0)
 
   if (tokens.length === 0) {
     return (
@@ -110,14 +107,14 @@ export const PortfolioTokens = () => {
           token={token}
         />
       ))}
-      {tokens.length > 4 && (
-        <Line
-          symbolIcon={
-            <Symbol icon="mdi:star-four-points" color={APP_COLOR_SECONDARY} />
-          }
-          symbol="Other"
-          price={totalOtherTokens}
-        />
+      {tokens.length > 0 && (
+        <li className={s.viewAllButton}>
+          <Link href="/portfolio">
+            <Button variant="primary">
+              View All Tokens
+            </Button>
+          </Link>
+        </li>
       )}
     </ul>
   )

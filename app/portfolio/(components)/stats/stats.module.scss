@@ -1,0 +1,62 @@
+@use "styles/mixins" as *;
+
+.stats {
+  --card-padding: var(--size-10);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--size-6);
+
+  @include max(1200px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include max(700px) {
+    grid-template-columns: 1fr;
+    gap: var(--size-5);
+  }
+}
+
+.statItem {
+  @include block(var(--size-8), var(--size-4), row);
+  align-items: center;
+}
+
+.statIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--size-12);
+  min-height: var(--size-12);
+  background: linear-gradient(135deg, var(--primary-low), var(--primary-medium));
+  border-radius: var(--radius-m);
+  color: var(--white);
+  font-size: var(--size-6);
+}
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-1);
+  flex: 1;
+}
+
+.statLabel {
+  font-size: var(--size-3-5);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: var(--size-6);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+
+  @include max(700px) {
+    font-size: var(--size-5);
+  }
+}
+

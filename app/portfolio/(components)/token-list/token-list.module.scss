@@ -1,0 +1,295 @@
+@use "styles/mixins" as *;
+
+.tokenList {
+  --card-padding: var(--size-10);
+  width: 100%;
+}
+
+.tableContainer {
+  width: 100%;
+  margin: 0;
+}
+
+.table {
+  --td-padding: var(--size-5);
+  --td-radius: var(--radius-xl);
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+  
+  thead {
+    th {
+      font-size: var(--size-3-5);
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-align: left;
+      padding-bottom: var(--size-5);
+      padding-left: var(--size-4) !important;
+      padding-right: var(--size-4) !important;
+
+      &:nth-child(1) {
+        width: 40%;
+        text-align: left;
+      }
+
+      &:nth-child(2) {
+        text-align: center;
+        width: 15%;
+      }
+
+      &:nth-child(3) {
+        text-align: right;
+        width: 15%;
+      }
+
+      &:nth-child(4) {
+        text-align: right;
+        width: 20%;
+      }
+
+      &:nth-child(5) {
+        text-align: center;
+        width: 10%;
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      td {
+        padding-left: var(--size-4) !important;
+        padding-right: var(--size-4) !important;
+        
+        &:not(:last-child) {
+          padding-right: var(--size-3) !important;
+        }
+        
+        &:not(:first-child) {
+          padding-left: var(--size-3) !important;
+        }
+      }
+    }
+  }
+}
+
+.row {
+  @include transition(0.2, (background-color, transform));
+  cursor: pointer;
+
+  @include is-hover {
+    td {
+      background-color: var(--background-low);
+    }
+  }
+}
+
+.tokenInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4);
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--size-10);
+  min-height: var(--size-10);
+  border-radius: var(--radius-m);
+  overflow: hidden;
+}
+
+.logo {
+  border-radius: var(--radius-m);
+  object-fit: cover;
+}
+
+.tokenDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-0-5);
+}
+
+.tokenName {
+  font-size: var(--size-4);
+  font-weight: 600;
+  color: var(--text-primary);
+  @include ellipsis;
+}
+
+.tokenSymbol {
+  font-size: var(--size-3);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.chainBadge {
+  font-size: var(--size-3);
+  white-space: nowrap;
+}
+
+.balance {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--size-0-5);
+}
+
+.balanceAmount {
+  font-size: var(--size-4);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.balanceSymbol {
+  font-size: var(--size-3);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--size-0-5);
+}
+
+.priceValue {
+  font-size: var(--size-4);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.priceUnit {
+  font-size: var(--size-3);
+  color: var(--text-secondary);
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-10);
+  height: var(--size-10);
+  border-radius: var(--radius-m);
+  background-color: var(--primary-medium);
+  color: var(--white);
+  border: none;
+  cursor: pointer;
+  font-size: var(--size-5);
+  margin: 0 auto;
+  @include transition(0.2, (background-color, transform));
+
+  @include is-hover {
+    background-color: var(--primary-high);
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.tokenCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--size-2) var(--size-4);
+  background-color: var(--background-lower);
+  border-radius: var(--radius-m);
+  font-size: var(--size-3-5);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.loading,
+.error,
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--size-4);
+  padding: var(--size-16) var(--size-8);
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--size-4);
+
+  svg {
+    font-size: var(--size-14);
+    color: var(--text-tertiary);
+  }
+}
+
+.error {
+  svg {
+    color: var(--danger-medium);
+  }
+}
+
+.emptyHint {
+  font-size: var(--size-3-5);
+  color: var(--text-tertiary);
+  margin-top: var(--size-2);
+}
+
+// Responsive
+@include max(1200px) {
+  .table {
+    thead {
+      th {
+        font-size: var(--size-3);
+      }
+    }
+  }
+
+  .tokenName {
+    font-size: var(--size-3-5);
+  }
+
+  .balanceAmount,
+  .priceValue {
+    font-size: var(--size-3-5);
+  }
+}
+
+@include max(700px) {
+  .tokenList {
+    --card-padding: var(--size-8);
+  }
+
+  .table {
+    thead {
+      th {
+        &:nth-child(2) {
+          display: none;
+        }
+      }
+    }
+  }
+
+  .row {
+    td {
+      &:nth-child(2) {
+        display: none;
+      }
+    }
+  }
+
+  .tokenInfo {
+    gap: var(--size-3);
+  }
+
+  .logoContainer {
+    min-width: var(--size-8);
+    min-height: var(--size-8);
+  }
+
+  .addButton {
+    width: var(--size-9);
+    height: var(--size-9);
+    font-size: var(--size-4);
+  }
+}
+

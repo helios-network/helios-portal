@@ -1,0 +1,13 @@
+@use "styles/mixins" as *;
+
+.portfolio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-6);
+  padding: var(--main-padding);
+
+  @include max(700px) {
+    gap: var(--size-5);
+  }
+}
+

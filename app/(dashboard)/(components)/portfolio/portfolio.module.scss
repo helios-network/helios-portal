@@ -168,6 +168,19 @@
   }
 }
 
+.viewAllButton {
+  width: 100%;
+
+  a {
+    width: 100%;
+    display: block;
+  }
+
+  button {
+    width: 100%;
+  }
+}
+
 .addToWallet {
   display: flex;
   align-items: center;
