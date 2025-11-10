@@ -79,8 +79,12 @@ function TokenRowComponent({ token }: TokenRowProps) {
   );
 }
 
-export function TokenList() {
-  const { portfolio: tokens, isLoading, error } = usePortfolioInfo();
+interface TokenListProps {
+  watchAddress?: string | null;
+}
+
+export function TokenList({ watchAddress }: TokenListProps) {
+  const { portfolio: tokens, isLoading, error, isWatching } = usePortfolioInfo({ watchAddress });
 
   if (isLoading) {
     return (
@@ -123,7 +127,7 @@ export function TokenList() {
     <Card className={s.tokenList}>
       <Heading 
         icon="hugeicons:coins-02" 
-        title="My Tokens"
+        title={isWatching ? "Watched Tokens" : "My Tokens"}
       >
         <div className={s.tokenCount}>
           {tokens.length} {tokens.length === 1 ? "Token" : "Tokens"}

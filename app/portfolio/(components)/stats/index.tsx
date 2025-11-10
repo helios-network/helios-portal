@@ -7,8 +7,12 @@ import { usePortfolioInfo } from "@/hooks/usePortfolioInfo";
 import { formatCurrency } from "@/lib/utils/number";
 import s from "./stats.module.scss";
 
-export function Stats() {
-  const { totalUSD, portfolio, isLoading } = usePortfolioInfo();
+interface StatsProps {
+  watchAddress?: string | null;
+}
+
+export function Stats({ watchAddress }: StatsProps) {
+  const { totalUSD, portfolio, isLoading, isWatching } = usePortfolioInfo({ watchAddress });
 
   const tokensCount = portfolio.length;
   const highestToken = portfolio.length > 0 
@@ -21,8 +25,8 @@ export function Stats() {
     <Card className={s.stats}>
       <Heading
         icon="hugeicons:wallet-04"
-        title="My Portfolio"
-        description="View and manage all your tokens in one place"
+        title={isWatching ? "Watched Portfolio" : "My Portfolio"}
+        description={isWatching ? "Viewing tokens from watched wallet" : "View and manage all your tokens in one place"}
       />
       
       <div className={s.grid}>

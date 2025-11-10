@@ -1,0 +1,72 @@
+@use "styles/mixins" as *;
+
+.walletWatch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-5);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-4);
+}
+
+.inputWrapper {
+  display: flex;
+  gap: var(--size-3);
+  align-items: flex-start;
+
+  @include max(700px) {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+.input {
+  flex: 1;
+
+  @include max(700px) {
+    width: 100%;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: var(--size-2);
+  align-items: flex-start;
+
+  @include max(700px) {
+    width: 100%;
+  }
+}
+
+.watchButton,
+.clearButton {
+  white-space: nowrap;
+
+  @include max(700px) {
+    flex: 1;
+  }
+}
+
+.watchingInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  padding: var(--size-3);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+
+  code {
+    font-family: var(--font-mono);
+    color: var(--color-primary);
+    background-color: var(--color-bg-tertiary);
+    padding: var(--size-1) var(--size-2);
+    border-radius: var(--radius-1);
+    font-size: var(--font-size-xs);
+  }
+}
+

@@ -16,8 +16,15 @@ const TOKEN_BALANCE_REFETCH_INTERVAL = secondsToMilliseconds(30)
 const ENRICHED_PORTFOLIO_STALE_TIME = secondsToMilliseconds(30)
 const ENRICHED_PORTFOLIO_REFETCH_INTERVAL = secondsToMilliseconds(60)
 
-export const usePortfolioInfo = () => {
-  const { address } = useAccount()
+interface UsePortfolioInfoOptions {
+  watchAddress?: string | null;
+}
+
+export const usePortfolioInfo = (options?: UsePortfolioInfoOptions) => {
+  const { address: connectedAddress } = useAccount()
+  
+  // Use watched address if provided, otherwise use connected address
+  const address = options?.watchAddress || connectedAddress
 
   const qTokenBalances = useQuery({
     queryKey: ["tokensBalance", address],
@@ -110,6 +117,8 @@ export const usePortfolioInfo = () => {
     totalUSD,
     portfolio: enrichedTokensQuery.data || [],
     isLoading: qTokenBalances.isLoading || enrichedTokensQuery.isLoading,
-    error: qTokenBalances.error || enrichedTokensQuery.error
+    error: qTokenBalances.error || enrichedTokensQuery.error,
+    address,
+    isWatching: !!options?.watchAddress
   }
 }
