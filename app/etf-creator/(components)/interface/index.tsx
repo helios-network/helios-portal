@@ -26,6 +26,7 @@ type ETFForm = {
     currentTokenAddress: string
     currentTokenSymbol: string
     currentTokenPercentage: string
+    rebalancingMode: "automatic" | "manual" | "no-rebalancing" | null
 }
 
 export const ETFCreatorInterface = () => {
@@ -35,6 +36,9 @@ export const ETFCreatorInterface = () => {
     const [showSuccess, setShowSuccess] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [deployedETF, setDeployedETF] = useState<any>(null)
+    const [showAutomaticModal, setShowAutomaticModal] = useState(false)
+    const [showManualModal, setShowManualModal] = useState(false)
+    const [showNoRebalancingModal, setShowNoRebalancingModal] = useState(false)
 
     const [form, setForm] = useState<ETFForm>({
         name: "",
@@ -42,7 +46,8 @@ export const ETFCreatorInterface = () => {
         tokens: [],
         currentTokenAddress: "",
         currentTokenSymbol: "",
-        currentTokenPercentage: ""
+        currentTokenPercentage: "",
+        rebalancingMode: null
     })
 
     const { addETF } = useRecentETFsContext()
@@ -165,7 +170,8 @@ export const ETFCreatorInterface = () => {
             tokens: [],
             currentTokenAddress: "",
             currentTokenSymbol: "",
-            currentTokenPercentage: ""
+            currentTokenPercentage: "",
+            rebalancingMode: null
         })
         setDeployedETF(null)
         setShowSuccess(false)
@@ -176,7 +182,8 @@ export const ETFCreatorInterface = () => {
         form.name &&
         form.symbol &&
         form.tokens.length > 0 &&
-        getTotalPercentage() === 100
+        getTotalPercentage() === 100 &&
+        form.rebalancingMode !== null
 
     const isHeliosNetwork = chainId === HELIOS_NETWORK_ID
     const isWalletConnected = !!address
@@ -214,6 +221,109 @@ export const ETFCreatorInterface = () => {
                             maxLength={10}
                             style={{ textTransform: "uppercase" }}
                         />
+
+                        {/* Rebalancing Mode Selection */}
+                        <div className={s.modeSection}>
+                            <div className={s.modeHeader}>
+                                <h3>Rebalancing Mode</h3>
+                                <p>Choose how your ETF will be managed</p>
+                            </div>
+
+                            <div className={s.modeGrid}>
+                                <button
+                                    className={`${s.modeButton} ${
+                                        form.rebalancingMode === "automatic" ? s.selected : ""
+                                    }`}
+                                    onClick={() =>
+                                        setForm((prev) => ({
+                                            ...prev,
+                                            rebalancingMode: "automatic"
+                                        }))
+                                    }
+                                    type="button"
+                                >
+                                    <div className={s.modeButtonContent}>
+                                        <Icon icon="hugeicons:automation" className={s.modeIcon} />
+                                        <h4>Automatic Rebalancing</h4>
+                                        <p>Automatically maintains target allocations</p>
+                                        <button
+                                            className={s.infoButton}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setShowAutomaticModal(true)
+                                            }}
+                                            type="button"
+                                            title="Learn more about Automatic Rebalancing"
+                                        >
+                                            <Icon icon="hugeicons:help-circle" />
+                                        </button>
+                                    </div>
+                                </button>
+
+                                <button
+                                    className={`${s.modeButton} ${
+                                        form.rebalancingMode === "manual" ? s.selected : ""
+                                    }`}
+                                    onClick={() =>
+                                        setForm((prev) => ({
+                                            ...prev,
+                                            rebalancingMode: "manual"
+                                        }))
+                                    }
+                                    type="button"
+                                >
+                                    <div className={s.modeButtonContent}>
+                                        <Icon icon="hugeicons:hand-02" className={s.modeIcon} />
+                                        <h4>Manual Rebalancing</h4>
+                                        <p>Full control over reserves and allocations</p>
+                                        <button
+                                            className={s.infoButton}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setShowManualModal(true)
+                                            }}
+                                            type="button"
+                                            title="Learn more about Manual Rebalancing"
+                                        >
+                                            <Icon icon="hugeicons:help-circle" />
+                                        </button>
+                                    </div>
+                                </button>
+
+                                <button
+                                    className={`${s.modeButton} ${
+                                        form.rebalancingMode === "no-rebalancing" ? s.selected : ""
+                                    }`}
+                                    onClick={() =>
+                                        setForm((prev) => ({
+                                            ...prev,
+                                            rebalancingMode: "no-rebalancing"
+                                        }))
+                                    }
+                                    type="button"
+                                >
+                                    <div className={s.modeButtonContent}>
+                                        <Icon
+                                            icon="hugeicons:lock-02"
+                                            className={s.modeIcon}
+                                        />
+                                        <h4>No Rebalancing</h4>
+                                        <p>Fixed composition, no automatic adjustments</p>
+                                        <button
+                                            className={s.infoButton}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setShowNoRebalancingModal(true)
+                                            }}
+                                            type="button"
+                                            title="Learn more about No Rebalancing"
+                                        >
+                                            <Icon icon="hugeicons:help-circle" />
+                                        </button>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
 
                         {/* Token Selection Section */}
                         <div className={s.tokenSection}>
@@ -460,6 +570,123 @@ export const ETFCreatorInterface = () => {
                         >
                             View on Explorer
                         </Button>
+                    </div>
+                </Card>
+            </Modal>
+
+            {/* Automatic Rebalancing Modal */}
+            <Modal
+                open={showAutomaticModal}
+                onClose={() => setShowAutomaticModal(false)}
+                title="Automatic Rebalancing Mode"
+                className={s.modal}
+            >
+                <Card className={s.infoCard}>
+                    <div className={s.infoContent}>
+                        <div className={s.infoSection}>
+                            <h4>How it works:</h4>
+                            <p>
+                                The smart contract automatically rebalances the basket to maintain your
+                                target token allocations. When the price of tokens changes and allocations
+                                drift from their targets, the contract executes rebalancing transactions to
+                                restore the desired percentages.
+                            </p>
+                        </div>
+                        <div className={s.infoSection}>
+                            <h4>Key Features:</h4>
+                            <ul>
+                                <li>Automatically maintains target allocations</li>
+                                <li>Rebalances when allocations drift beyond threshold</li>
+                                <li>Minimal manual intervention required</li>
+                                <li>Smart contract handles all operations</li>
+                                <li>Best for passive management strategies</li>
+                            </ul>
+                        </div>
+                        <div className={s.infoSection}>
+                            <h4>Best For:</h4>
+                            <p>
+                                Passive investors who want a set-it-and-forget-it approach with
+                                consistent portfolio allocations over time.
+                            </p>
+                        </div>
+                    </div>
+                </Card>
+            </Modal>
+
+            {/* Manual Rebalancing Modal */}
+            <Modal
+                open={showManualModal}
+                onClose={() => setShowManualModal(false)}
+                title="Manual Rebalancing Mode"
+                className={s.modal}
+            >
+                <Card className={s.infoCard}>
+                    <div className={s.infoContent}>
+                        <div className={s.infoSection}>
+                            <h4>How it works:</h4>
+                            <p>
+                                You have complete control over the ETF reserve and basket composition. You
+                                can manually deposit tokens, withdraw tokens, and adjust the quantities of
+                                each token in the basket. No automatic rebalancing occurs.
+                            </p>
+                        </div>
+                        <div className={s.infoSection}>
+                            <h4>Key Features:</h4>
+                            <ul>
+                                <li>Full control over all reserve operations</li>
+                                <li>Can deposit and withdraw tokens at will</li>
+                                <li>Adjust token quantities independently</li>
+                                <li>Rebalance only when you decide</li>
+                                <li>Active management required</li>
+                            </ul>
+                        </div>
+                        <div className={s.infoSection}>
+                            <h4>Best For:</h4>
+                            <p>
+                                Active fund managers who want precise control over their ETF composition
+                                and are willing to manage rebalancing decisions manually.
+                            </p>
+                        </div>
+                    </div>
+                </Card>
+            </Modal>
+
+            {/* No Rebalancing Modal */}
+            <Modal
+                open={showNoRebalancingModal}
+                onClose={() => setShowNoRebalancingModal(false)}
+                title="No Rebalancing Mode"
+                className={s.modal}
+            >
+                <Card className={s.infoCard}>
+                    <div className={s.infoContent}>
+                        <div className={s.infoSection}>
+                            <h4>How it works:</h4>
+                            <p>
+                                The basket maintains a fixed composition with no automatic or manual
+                                rebalancing. This is useful for creating specialized baskets like a
+                                multi-origin token collection (e.g., WETH from Ethereum, WETH from BSC,
+                                etc.) where the exact token sources matter.
+                            </p>
+                        </div>
+                        <div className={s.infoSection}>
+                            <h4>Key Features:</h4>
+                            <ul>
+                                <li>Fixed basket composition</li>
+                                <li>No automatic rebalancing</li>
+                                <li>No manual rebalancing possible</li>
+                                <li>Ideal for multi-origin token baskets</li>
+                                <li>Tracks different versions of the same token</li>
+                            </ul>
+                        </div>
+                        <div className={s.infoSection}>
+                            <h4>Best For:</h4>
+                            <p>
+                                Creating specialized indices or baskets that require multiple versions of
+                                the same token from different blockchain sources or maintaining exact token
+                                composition over time.
+                            </p>
+                        </div>
                     </div>
                 </Card>
             </Modal>
