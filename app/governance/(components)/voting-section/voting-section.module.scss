@@ -799,3 +799,116 @@
   flex-wrap: wrap;
   --btn-size: var(--size-3);
 }
+
+.nestedObject {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-3);
+}
+
+.nestedTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--background-medium);
+  border: 1px solid var(--background-high);
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  
+  .nestedTableRow {
+    border-bottom: 1px solid var(--background-high);
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    @include max(480px) {
+      display: flex;
+      flex-direction: column;
+      padding-bottom: var(--size-2);
+    }
+    
+    .nestedTableKey {
+      padding: var(--size-3) var(--size-3);
+      font-size: var(--size-3);
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--background-low);
+      text-align: left;
+      width: 30%;
+      vertical-align: top;
+      
+      @include max(600px) {
+        width: 35%;
+        font-size: var(--size-2-5);
+      }
+      
+      @include max(480px) {
+        width: 100%;
+        border-bottom: 1px dashed var(--background-high);
+      }
+    }
+    
+    .nestedTableValue {
+      padding: var(--size-3) var(--size-3);
+      font-size: var(--size-3);
+      color: var(--text-primary);
+      word-break: break-all;
+      font-family: monospace;
+      text-align: left;
+      
+      @include max(600px) {
+        font-size: var(--size-2-5);
+      }
+      
+      @include max(480px) {
+        padding-top: var(--size-2);
+      }
+    }
+  }
+}
+
+.expandable {
+  cursor: pointer;
+  user-select: none;
+  
+  summary {
+    padding: var(--size-2-5) var(--size-3);
+    background: var(--background-low);
+    border-radius: var(--radius-s);
+    font-weight: 600;
+    color: var(--primary-medium);
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: var(--background-high);
+      color: var(--primary-high);
+    }
+  }
+  
+  &[open] summary {
+    background: var(--background-high);
+    margin-bottom: var(--size-2);
+  }
+}
+
+.expandedContent {
+  margin: 0;
+  padding: var(--size-3);
+  background: var(--background-lowest);
+  border: 1px solid var(--background-high);
+  border-radius: var(--radius-s);
+  font-size: var(--size-3);
+  color: var(--text-secondary);
+  font-family: 'Courier New', monospace;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+  max-height: 300px;
+  overflow-y: auto;
+  
+  @include max(600px) {
+    font-size: var(--size-2-5);
+    padding: var(--size-2);
+  }
+}
