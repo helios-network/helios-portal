@@ -5,7 +5,12 @@ import {
   polygonAmoy,
   bscTestnet,
   avalancheFuji,
-  AppKitNetwork
+  AppKitNetwork,
+  bsc,
+  arbitrum,
+  base,
+  optimism,
+  polygon
 } from "@reown/appkit/networks"
 import { cookieStorage, createStorage } from "@wagmi/core"
 import { defineChain } from "viem"
@@ -69,9 +74,14 @@ export const toAppKitNetwork = (chain: any): AppKitNetwork => ({
   blockExplorers: { ...chain.blockExplorers }
 })
 
-export const networks: AppKitNetwork[] = [
+export const networksWagmiOfHelios: AppKitNetwork[] = [
   toAppKitNetwork(heliosChain),
   toAppKitNetwork(mainnet),
+  toAppKitNetwork(bsc),
+  toAppKitNetwork(arbitrum),
+  toAppKitNetwork(base),
+  toAppKitNetwork(optimism),
+  toAppKitNetwork(polygon),
   toAppKitNetwork(sepolia),
   toAppKitNetwork(polygonAmoy),
   toAppKitNetwork(bscTestnet),
@@ -84,7 +94,7 @@ export const wagmiAdapter = new WagmiAdapter({
   }),
   ssr: true,
   projectId,
-  networks
+  networks: networksWagmiOfHelios
 })
 
 export const config = wagmiAdapter.wagmiConfig

@@ -66,6 +66,9 @@ export type TransactionLastType =
   | "DEPOSIT"
   | "WITHDRAW"
   | "UNKNOWN"
+  | "CREATE_CRON"
+  | "TRANSFER"
+  | "CREATE_ERC20"
 
 export type TransactionLight = {
   type: TransactionLastType
@@ -76,4 +79,8 @@ export type TransactionLight = {
   chainId?: number
   chainLogo?: string
   chainName?: string
+  timeout?: number
+  status_bridge_tx?: string
+  fees?: string
+  transactionId?: number
 }

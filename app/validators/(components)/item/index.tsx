@@ -2,27 +2,27 @@ import { Badge } from "@/components/badge"
 import { Button } from "@/components/button"
 import { Icon } from "@/components/icon"
 import { formatBigNumber } from "@/lib/utils/number"
-import { Validator } from "@/types/validator"
+import { TokenExtended } from "@/types/token"
 import s from "./item.module.scss"
 import { StatItem } from "./stat"
-import { useValidatorDetail } from "@/hooks/useValidatorDetail"
 import { useState } from "react"
 import { ModalStake } from "@/app/delegations/(components)/active/stake"
 import { useAccount, useChainId, useSwitchChain } from "wagmi"
 import { HELIOS_NETWORK_ID } from "@/config/app"
 import Link from "next/link"
+import HELIOS_NODE_MONIKERS from "@/config/helios-node-monikers"
+import { Validator, Delegation, EnrichedAsset } from "@/types/validator"
+import { useValidatorDetail } from "@/hooks/useValidatorDetail"
 
-export const Item = ({
-  moniker,
-  validatorAddress,
-  boostPercentage,
-  // description,
-  apr,
-  status,
-  delegationAuthorization,
-  commission,
-  minDelegation
-}: Validator) => {
+interface ItemProps {
+  validator: Validator
+  assets?: any[]
+  delegation: Delegation
+  commission: { denom: string; amount: string }
+  enrichedAssets?: TokenExtended[]
+}
+
+export const Item = ({ validator, delegation, commission, enrichedAssets }: ItemProps) => {
   // const [favorite, setFavorite] = useState(false)
 
   // const handleFavorite = () => {
@@ -37,25 +37,53 @@ export const Item = ({
   const chainId = useChainId()
   const { isConnected } = useAccount()
   const { switchChain } = useSwitchChain()
-  const { delegation, userHasDelegated } = useValidatorDetail(validatorAddress)
+  const { userHasDelegated } = useValidatorDetail(validator.validatorAddress, { validator, delegation, commission } as any)
 
-  const isActive = status === 3
-  const enableDelegation = delegationAuthorization && isConnected
-  const formattedApr = parseFloat(apr).toFixed(2) + "%"
+  const isActive = validator.status === 3
+  const enableDelegation = validator.delegationAuthorization && isConnected
+  const formattedApr = parseFloat(validator.apr).toFixed(2) + "%"
   const formattedCommission =
-    parseFloat(commission.commission_rates.rate) * 100 + "%"
+    parseFloat(validator.commission.commission_rates.rate) * 100 + "%"
   const formattedBoost =
-    Math.min((parseFloat(boostPercentage) * 15) / 100, 15) + "%"
-  const tokens = delegation.assets
+    Math.min((parseFloat(validator.boostPercentage) * 15) / 100, 15) + "%"
+
+  // Use enrichedAssets if available, otherwise convert delegation.assets to display format
+  const tokens: TokenExtended[] = enrichedAssets && enrichedAssets.length > 0
+    ? enrichedAssets
+    : (delegation?.assets || []).map((asset: EnrichedAsset) => ({
+      display: {
+        name: asset.denom,
+        description: "",
+        logo: asset.logo || "",
+        symbol: asset.denom.toLowerCase(),
+        symbolIcon: asset.denom === "hls" ? "helios" : `token:${asset.denom.toLowerCase()}`,
+        color: asset.color || "#000000"
+      },
+      price: { usd: asset.price || 0 },
+      balance: {
+        amount: parseFloat(asset.amount),
+        totalPrice: parseFloat(asset.amount) * (asset.price || 0)
+      },
+      functionnal: {
+        address: asset.contractAddress,
+        chainId: HELIOS_NETWORK_ID,
+        denom: asset.denom,
+        decimals: 18
+      },
+      stats: {
+        holdersCount: 0,
+        totalSupply: "0"
+      }
+    } as TokenExtended))
 
   const totalDelegated = tokens.reduce(
-    (acc, token) => acc + token.balance.totalPrice,
+    (acc: number, token: TokenExtended) => acc + token.balance.totalPrice,
     0
   )
 
   const ratioOptimal =
-    (tokens.find((token) => token.display.symbol === "hls")?.balance
-      .totalPrice || 0) >= totalDelegated
+    (tokens.find((token: TokenExtended) => token.display.symbol === "hls")
+      ?.balance.totalPrice || 0) >= totalDelegated
 
   const handleOpenStake = (e: any) => {
     e.preventDefault()
@@ -67,9 +95,11 @@ export const Item = ({
     setOpenStake(true)
   }
 
+  const isHeliosNode = HELIOS_NODE_MONIKERS.includes(validator.moniker)
+
   return (
     <>
-      <Link href={"/validators/" + validatorAddress} className={s.item}>
+      <Link href={"/validators/" + validator.validatorAddress} className={s.item}>
         {/* <Button
         variant="secondary"
         border
@@ -88,7 +118,11 @@ export const Item = ({
           </div>
           <div className={s.heading}>
             {isActive && <Badge status="success">Active</Badge>}
-            <h3>{moniker}</h3>
+            {isActive && isHeliosNode && (
+              <span className={s.spacing}>&nbsp;</span>
+            )}
+            {isHeliosNode && <Badge status="primary">Official Node</Badge>}
+            <h3>{validator.moniker}</h3>
             {/* {description.details && <h4>{description.details}</h4>} */}
           </div>
         </div>
@@ -107,7 +141,7 @@ export const Item = ({
           />
           <StatItem
             label="Min Delegation"
-            value={`${minDelegation} HLS`}
+            value={`${validator.minDelegation} HLS`}
             color="reputation"
             icon="hugeicons:balance-scale"
           />
@@ -125,15 +159,14 @@ export const Item = ({
               <strong>${formatBigNumber(totalDelegated)}</strong>
             </div>
             <div className={s.bars}>
-              {tokens.map((token) => (
+              {tokens.map((token: TokenExtended) => (
                 <div
                   className={s.bar}
                   key={"validators-" + token.functionnal.address}
                   style={
                     {
-                      "--width": `${
-                        (token.balance.totalPrice / totalDelegated) * 100
-                      }%`,
+                      "--width": `${(token.balance.totalPrice / totalDelegated) * 100
+                        }%`,
                       "--color": token.display.color
                     } as React.CSSProperties
                   }
@@ -162,7 +195,7 @@ export const Item = ({
             className={s.stake}
             border
             onClick={handleOpenStake}
-            disabled={!enableDelegation}
+            disabled={!enableDelegation || !isHeliosNode}
           >
             Stake Now
           </Button>
@@ -171,9 +204,9 @@ export const Item = ({
         </div>
       </Link>
       <ModalStake
-        title={`Stake on ${moniker}`}
-        validatorAddress={validatorAddress}
-        minDelegation={minDelegation}
+        title={`Stake on ${validator.moniker}`}
+        validatorAddress={validator.validatorAddress}
+        minDelegation={validator.minDelegation}
         hasAlreadyDelegated={userHasDelegated}
         open={openStake}
         setOpen={setOpenStake}

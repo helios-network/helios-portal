@@ -7,16 +7,17 @@
 
 .container {
   width: 100%;
+  overflow: hidden;
   // height: var(--size-20);
   position: relative;
   // margin-bottom: var(--size-10);
 }
 
 .list {
-  overflow: visible;
+  overflow: hidden;
   cursor: grab;
   // position: absolute;
-  width: 100%;
+  width: 100vw;
   height: 100%;
 
   &:active {
@@ -28,6 +29,8 @@
   --padding: var(--size-6);
   --symbol-size: var(--size-7);
   width: auto !important;
+  max-width: 150px;
+  min-width: 150px;
   background-color: var(--background-lower);
   border-radius: var(--radius-m);
   display: flex !important;
@@ -60,4 +63,11 @@
   overflow: hidden;
   border-radius: 50%;
   background-color: var(--white);
+}
+
+// if screen > 700px
+@include min(700px) {
+  .list {
+    width: 40vw;
+  }
 }

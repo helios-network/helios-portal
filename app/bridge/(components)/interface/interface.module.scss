@@ -368,6 +368,86 @@ $responsiveSwap: 800px;
       }
     }
   }
+
+  .feeSelection {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--size-2);
+    width: 100%;
+
+    @include max(700px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .feeBlock {
+      background-color: var(--background-low);
+      border-radius: var(--radius-m);
+      padding: var(--size-4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: border-color var(--transition-link);
+
+      &:hover {
+        border-color: var(--primary-medium);
+      }
+
+      &.selected {
+        border-color: var(--primary-high);
+        background-color: var(--primary-lowest);
+      }
+
+      .feeLabel {
+        font-size: var(--size-3-5);
+        color: var(--text-secondary);
+        margin-bottom: var(--size-1);
+      }
+
+      .feeAmount {
+        font-size: var(--size-4);
+        font-weight: 600;
+      }
+
+      &.customFeeBlock {
+        display: grid;
+        grid-template-columns: 80% 20%;
+        grid-template-rows: auto auto;
+        align-items: center;
+        gap: var(--size-1) var(--size-1);
+
+        .feeLabel {
+          grid-column: 1 / -1;
+          text-align: center;
+          margin-bottom: 0;
+        }
+
+        .customFeeInput {
+          width: 80%;
+          background: var(--background-low);
+          border: 1px solid var(--background-medium);
+          padding: var(--size-1) var(--size-2);
+          border-radius: 5px;
+          text-align: right;
+          font-size: var(--size-4);
+          font-weight: 600;
+          color: var(--text-primary);
+
+          &:focus {
+            outline: none;
+            border-color: var(--primary-medium);
+          }
+        }
+
+        .feeCurrency {
+          font-size: var(--size-4);
+          font-weight: 600;
+        }
+      }
+    }
+  }
 }
 
 .deposit {

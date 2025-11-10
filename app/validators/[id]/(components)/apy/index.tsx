@@ -11,13 +11,14 @@ import { useValidatorDetail } from "@/hooks/useValidatorDetail"
 import { ethers } from "ethers"
 import { Symbol } from "@/components/symbol"
 import { TOKEN_COLORS } from "@/config/constants"
+import { EnrichedAsset } from "@/types/validator"
 
 export const Apy = () => {
   const params = useParams()
   const validatorId = params.id as string
   const { validator, delegation } = useValidatorDetail(validatorId)
 
-  if (!validator) return <></>
+  if (!validator || !delegation?.assets?.length) return <></>
 
   // const blocks = [
   //   {
@@ -39,16 +40,16 @@ export const Apy = () => {
   // ]
   const tokens = delegation.assets
   const totalDelegated = tokens.reduce(
-    (acc, token) => acc + token.balance.totalPrice,
+    (acc: number, token: EnrichedAsset) => acc + (parseFloat(token.amount) * token.price),
     0
   )
 
-  const data = tokens.map((token) => ({
-    name: token.display.symbol.toUpperCase(),
-    value: token.balance.amount,
-    price: token.balance.totalPrice,
-    percentage: (token.balance.totalPrice / totalDelegated) * 100,
-    color: token.display.color
+  const data = tokens.map((token: EnrichedAsset) => ({
+    name: token.denom.toUpperCase(),
+    value: parseFloat(token.amount),
+    price: parseFloat(token.amount) * token.price,
+    percentage: ((parseFloat(token.amount) * token.price) / totalDelegated) * 100,
+    color: token.color || TOKEN_COLORS[token.denom.toLowerCase() as keyof typeof TOKEN_COLORS] || "#999"
   }))
 
   // const data = [

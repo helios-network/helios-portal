@@ -3,6 +3,8 @@
 // import { History } from "./(components)/history"
 // import { Proposal } from "./(components)/proposal"
 // import { Statistics } from "./(components)/statistics"
+// import { Power } from "./(components)/power"
+// import { List } from "./(components)/list"
 // import s from "./page.module.scss"
 
 // export default function Page() {
@@ -10,8 +12,8 @@
 //     <>
 //       <div className={s.governance}>
 //         <div className={s.left}>
-//           {/* <Power /> */}
-//           {/* <List /> */}
+//           <Power />
+//           <List />
 //           <History />
 //           <Guide />
 //         </div>

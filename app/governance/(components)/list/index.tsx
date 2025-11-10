@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/button"
 import { Card } from "@/components/card"
+import { Heading } from "@/components/heading"
 import { Input } from "@/components/input/input"
 import { Select } from "@/components/input/select"
 import { generateVotes } from "@/lib/faker"
@@ -15,6 +16,7 @@ export const List = () => {
 
   return (
     <Card className={s.list} auto>
+      <Heading icon="hugeicons:task-01" title="Active Proposals" />
       <div className={s.filters}>
         <div className={s.left}>
           <Button

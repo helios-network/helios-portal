@@ -2,7 +2,7 @@
 
 import { Area, Grid } from "@/components/grid"
 import routes from "@/config/routes"
-import { useBlockInfo } from "@/hooks/useBlockInfo"
+import { useBlockInfoBatch } from "@/hooks/useBlockInfoBatch"
 import { Discover } from "./(components)/discover"
 import { Linker } from "./(components)/linker"
 import { Portfolio } from "./(components)/portfolio"
@@ -10,12 +10,12 @@ import { Recents } from "./(components)/recents"
 import { Stat } from "./(components)/stat"
 import { TVL } from "./(components)/tvl"
 import { Validators } from "./(components)/validators"
+import { TotalTransactions } from "./(components)/overview"
 import s from "./page.module.scss"
-import { Weights } from "./(components)/weights"
 import { formatNumber } from "@/lib/utils/number"
 
 export default function Page() {
-  const { lastBlockNumber, blockTime, gasPriceUSD } = useBlockInfo({
+  const { lastBlockNumber, blockTime, gasPriceUSD } = useBlockInfoBatch({
     forceEnable: true,
     includeGas: true
   })
@@ -71,13 +71,13 @@ export default function Page() {
           />
         </Area>
         <Area area="i">
-          <Recents />
+          <TotalTransactions />
         </Area>
         <Area area="j">
-          <TVL />
+          <Recents />
         </Area>
         <Area area="k">
-          <Weights />
+          <TVL />
         </Area>
       </Grid>
     </>

@@ -1354,6 +1354,33 @@ export const bridgeSendToHeliosAbi = [
   }
 ]
 
+export const bridgeCancelSentToChainAbi = [
+  {
+    inputs: [
+      {
+        internalType: "uint64",
+        name: "chainId",
+        type: "uint64"
+      }, 
+      {
+        internalType: "uint64",
+        name: "transactionId",
+        type: "uint64"
+      }
+    ],
+    name: "cancelSendToChain",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "success",
+        type: "bool"
+      }
+    ],
+    stateMutability: "nonpayable",
+    type: "function"
+  }
+]
+
 export const wrapperAbi = [
   {
     anonymous: false,

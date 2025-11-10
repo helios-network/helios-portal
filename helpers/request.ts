@@ -1,10 +1,7 @@
 import { RPC_URL_DEFAULT } from "@/config/app"
 import { getRpcUrl } from "@/config/rpc"
 
-async function request<T>(method: string, params: any[]): Promise<T | null> {
-  // Get the dynamic RPC URL based on debug mode
-  const rpcUrl = typeof window !== "undefined" ? getRpcUrl() : RPC_URL_DEFAULT
-
+async function requestWithRpcUrl<T>(rpcUrl: string, method: string, params: any[]): Promise<T | null> { 
   const response = await fetch(rpcUrl, {
     method: "POST",
     headers: {
@@ -31,4 +28,11 @@ async function request<T>(method: string, params: any[]): Promise<T | null> {
   return data.result ?? null
 }
 
-export { request }
+async function request<T>(method: string, params: any[]): Promise<T | null> {
+  // Get the dynamic RPC URL based on debug mode
+  const rpcUrl = typeof window !== "undefined" ? getRpcUrl() : RPC_URL_DEFAULT
+
+  return requestWithRpcUrl(rpcUrl, method, params)
+}
+
+export { request, requestWithRpcUrl }

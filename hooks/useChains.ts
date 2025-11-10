@@ -9,7 +9,7 @@ export const useChains = () => {
 
   return {
     chains: qHyperionChains.data || [],
-    heliosChainIndex: qHyperionChains.data?.findIndex(
+    heliosChainIndex: (qHyperionChains.data || []).findIndex(
       (chain) => chain.hyperionId === 0
     ),
     isLoading: qHyperionChains.isLoading

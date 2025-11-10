@@ -10,6 +10,7 @@ import { usePortfolioInfo } from "@/hooks/usePortfolioInfo"
 import { addTokenToWallet } from "@/utils/wallet"
 import { TokenExtended } from "@/types/token"
 import Image from "next/image"
+import { getChainConfig } from "@/config/chain-config"
 
 interface LineProps {
   name?: string
@@ -39,6 +40,9 @@ const Line = ({
     }
   }
 
+  const originChainConfig = token ? getChainConfig(parseInt(token.originBlockchain)) : "All"
+  const originBlockchainName = originChainConfig !== "All" ? originChainConfig?.name : ""
+
   return (
     <li>
       {logo && logo !== "" ? (
@@ -49,6 +53,9 @@ const Line = ({
       <div className={s.info}>
         <div className={s.top}>{symbol}</div>
         <div className={s.bottom}>{name}</div>
+        {originBlockchainName !== undefined && originBlockchainName !== "" && (
+          <div className={s.bottom}>Origin: ({originBlockchainName})</div>
+        )}
       </div>
       <div className={s.right}>
         {amountFixed && <div className={s.top}>{amountFixed}</div>}
@@ -71,7 +78,7 @@ const Line = ({
 export const PortfolioTokens = () => {
   const { portfolio: tokens } = usePortfolioInfo()
   const totalOtherTokens = tokens
-    .slice(3)
+    .slice(4)
     .reduce((total, token) => total + (token.balance.totalPrice || 0), 0)
 
   if (tokens.length === 0) {
@@ -86,7 +93,7 @@ export const PortfolioTokens = () => {
 
   return (
     <ul className={s.tokens}>
-      {tokens.slice(0, 3).map((token) => (
+      {tokens.slice(0, 4).map((token) => (
         <Line
           key={"portfoliotokens-" + token.display.symbol}
           logo={token.display.logo}
@@ -103,7 +110,7 @@ export const PortfolioTokens = () => {
           token={token}
         />
       ))}
-      {tokens.length > 3 && (
+      {tokens.length > 4 && (
         <Line
           symbolIcon={
             <Symbol icon="mdi:star-four-points" color={APP_COLOR_SECONDARY} />

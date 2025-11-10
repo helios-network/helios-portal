@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/button"
 import { Input } from "@/components/input/input"
-import { Select } from "@/components/input/select"
+import { AssetSelector } from "@/components/asset-selector"
 import { Modal } from "@/components/modal"
 import { ChangeEvent, useState } from "react"
 import { toast } from "sonner"
@@ -106,20 +106,17 @@ export const ModalStake = ({
       className={s.modal}
       responsiveBottom
     >
-      <Select
-        value={selectedAsset}
-        onChange={(evt) => {
-          setSelectedAsset(evt.target.value)
+      <AssetSelector
+        assets={
+          assets?.map((asset) => asset.enriched) || []
+        }
+        selectedAssetAddress={selectedAsset}
+        onSelect={(address) => {
+          setSelectedAsset(address)
           setAmount("0")
         }}
-        placeholder="Please select an asset"
-        options={
-          assets?.map((asset) => ({
-            value: asset.enriched.functionnal.address,
-            label: asset.enriched.display.name
-          })) || []
-        }
         label="Choose an asset"
+        placeholder="Please select an asset"
       />
 
       {assetIsHLS && (
@@ -127,6 +124,7 @@ export const ModalStake = ({
           title="About HLS for boosting purpose"
           variant="warning"
           nobreak
+          className={s.message}
         >
           {`You will need to unstake all other assets to withdraw them, it's a way to secure the network and validators as they also take the risk of accepting your assets.`}
           <br />
@@ -138,24 +136,27 @@ export const ModalStake = ({
       {enrichedAsset &&
         ((formattedMinDelegation > 0 && !hasAlreadyDelegated && assetIsHLS) ||
           formattedMinDelegation === 0) && (
-          <Input
-            icon={enrichedAsset.enriched.display.symbolIcon}
-            label="Amount"
-            type="text"
-            value={amount}
-            onChange={handleAmountChange}
-            balance={enrichedAsset.enriched.balance.amount}
-            showMaxButton
-            onMaxClick={() =>
-              setAmount(enrichedAsset.enriched.balance.amount.toString())
-            }
-          />
+          <div className={s.inputWrapper}>
+            <Input
+              icon={enrichedAsset.enriched.display.symbolIcon}
+              label="Amount"
+              type="text"
+              value={amount}
+              onChange={handleAmountChange}
+              balance={enrichedAsset.enriched.balance.amount}
+              showMaxButton
+              onMaxClick={() =>
+                setAmount(enrichedAsset.enriched.balance.amount.toString())
+              }
+            />
+          </div>
         )}
 
       {formattedMinDelegation > 0 && !hasAlreadyDelegated && (
         <Message
           title="Minimum delegation"
           variant="warning"
+          className={s.message}
         >{`The minimum delegation is ${formattedMinDelegation} HLS`}</Message>
       )}
       <div className={s.group}>
@@ -177,7 +178,7 @@ export const ModalStake = ({
       </div>
 
       {feedback && feedback.message !== "" && (
-        <Message title="Staking feedback" variant={feedback.status}>
+        <Message title="Staking feedback" variant={feedback.status} className={s.message}>
           {feedback.message}
         </Message>
       )}

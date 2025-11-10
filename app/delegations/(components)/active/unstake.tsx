@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/button"
 import { Input } from "@/components/input/input"
-import { Select } from "@/components/input/select"
+import { AssetSelector } from "@/components/asset-selector"
 import { Message } from "@/components/message"
 import { Modal } from "@/components/modal"
 import { ChangeEvent, useState } from "react"
@@ -92,33 +92,30 @@ export const ModalUnstake = ({
       className={s.modal}
       responsiveBottom
     >
-      <Select
-        value={selectedAsset}
-        onChange={(evt) => {
-          setSelectedAsset(evt.target.value)
+      <AssetSelector
+        assets={delegatedAssets || []}
+        selectedAssetAddress={selectedAsset}
+        onSelect={(address) => {
+          setSelectedAsset(address)
           setAmount("0")
         }}
-        placeholder="Please select an asset"
-        options={
-          delegatedAssets?.map((asset) => ({
-            value: asset.functionnal.address,
-            label: asset.display.name
-          })) || []
-        }
         label="Choose an asset"
+        placeholder="Please select an asset"
       />
 
       {enrichedAsset && (
-        <Input
-          icon={enrichedAsset.display.symbolIcon}
-          label="Amount"
-          type="text"
-          value={amount}
-          onChange={handleAmountChange}
-          balance={enrichedAsset.balance.amount}
-          showMaxButton
-          onMaxClick={() => setAmount(enrichedAsset.balance.amount.toString())}
-        />
+        <div className={s.inputWrapper}>
+          <Input
+            icon={enrichedAsset.display.symbolIcon}
+            label="Amount"
+            type="text"
+            value={amount}
+            onChange={handleAmountChange}
+            balance={enrichedAsset.balance.amount}
+            showMaxButton
+            onMaxClick={() => setAmount(enrichedAsset.balance.amount.toString())}
+          />
+        </div>
       )}
 
       <Message
@@ -150,7 +147,7 @@ export const ModalUnstake = ({
         </Button>
       </div>
       {feedback && feedback.message !== "" && (
-        <Message title="Unstaking feedback" variant={feedback.status}>
+        <Message title="Unstaking feedback" variant={feedback.status} className={s.message}>
           {feedback.message}
         </Message>
       )}

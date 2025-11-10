@@ -1,223 +1,187 @@
-.card {
-  background: #f5f7ff;
-  border: 1px solid #e5e7eb;
-  border-radius: 2rem;
-  padding: 2rem;
-  color: #111827;
-}
+@use "styles/mixins" as *;
 
-.title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 24px 0;
-}
+.voteResults {
+  @include block($padding: var(--size-6));
+  gap: var(--size-4);
+  background-color: var(--background-lower);
+  flex: 1;
+  text-align: center;
 
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.voteHeader {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  font-size: 14px;
-
-  .forVotes,
-  .againstVotes {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
-    justify-self: center;
+  h3 {
+    font-size: var(--size-4);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--size-3);
   }
 
-  .voteDivider {
-    width: 2.5px;
-    height: 40px;
-    background: #cbd5e1;
-    border-radius: 2px;
-    justify-self: center;
-  }
-
-  .forVotes {
-    color: #16a34a;
-  }
-
-  .againstVotes {
-    color: #dc2626;
+  & > * {
+    width: 100%;
   }
 }
 
-.progressContainer {
-  margin-bottom: 8px;
+.description {
+  font-size: var(--size-3-5);
+  color: var(--text-secondary);
+  margin-bottom: var(--size-4);
+  margin-top: var(--size-4);
+  text-align: center;
 }
 
-.progressBar {
-  height: 8px;
+.legend {
+  padding-left: 0;
+  margin-bottom: var(--size-5);
+}
+
+.pie {
+  width: calc(200px + 50 * (100vw - 320px) / 1080);
+  max-width: 280px;
+  margin: 0 auto var(--size-4);
+}
+
+.divider {
+  height: 2px;
+  background-color: var(--background-higher);
+  border-radius: var(--radius-rounded);
   width: 100%;
-  background: #f3f4f6;
-  border-radius: 4px;
-  overflow: hidden;
-  display: flex;
+}
 
-  .forBar {
-    background: #16a34a;
-    transition: width 0.3s ease;
+.progress {
+  margin-bottom: var(--size-4);
+  text-align: left;
+
+  &Title {
+    font-size: var(--size-4);
+    font-weight: 600;
+    margin-bottom: var(--size-3);
+    color: var(--text-primary);
   }
 
-  .abstainBar {
-    background: #6b7280;
-    transition: width 0.3s ease;
-  }
-
-  .againstBar {
-    background: #dc2626;
-    transition: width 0.3s ease;
+  &Bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--size-3);
+    color: var(--text-secondary);
+    margin-top: var(--size-2);
   }
 }
 
-.quorum {
-  font-size: 14px;
-  color: #6b7280;
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--size-2);
+  margin-bottom: var(--size-4);
+  color: var(--text-tertiary);
+  font-size: var(--size-3-5);
+}
+
+.metaDivider {
+  color: var(--text-tertiary);
+}
+
+.endDate {
+  color: var(--text-tertiary);
 }
 
 .statusBadge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-
-  &.executed {
-    background: rgba(22, 163, 74, 0.1);
-    color: #16a34a;
-  }
-
-  &.rejected {
-    background: rgba(220, 38, 38, 0.1);
-    color: #dc2626;
-  }
-  &.voting_period {
-    background: rgba(59, 130, 246, 0.1);
-    color: #60a5fa;
-  }
-
-  .separator {
-    color: #6b7280;
-  }
-
-  .endDate {
-    color: #6b7280;
-  }
+  font-size: var(--size-3) !important;
+  padding: 0.5em 1em !important;
 }
 
 .votersSection {
-  margin-top: 8px;
+  text-align: left;
 }
 
 .votersHeader {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: var(--size-3);
 }
 
-.votersButton {
-  font-size: 14px;
-  background: #f9fafb;
-  color: #374151;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background: #f3f4f6;
-  }
+.votersTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  color: var(--text-secondary);
+  font-size: var(--size-4);
+  font-weight: 600;
 }
 
 .votersList {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--size-2);
 }
 
 .voterItem {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: var(--size-3);
+  border-radius: var(--radius-m);
+  background: var(--background-lower);
+  border: 1px solid var(--border-light);
 }
 
 .voterInfo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--size-3);
 }
 
 .avatar {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f3f4f6;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  background: var(--background-medium);
+  color: var(--text-tertiary);
 }
 
 .voterAddress {
-  font-size: 14px;
-  color: #111827;
+  font-size: var(--size-3-5);
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
 .voteType {
-  font-size: 14px;
+  font-size: var(--size-3);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--size-1);
+  padding: var(--size-1) var(--size-2);
+  border-radius: var(--radius-s);
+  background: var(--background-medium);
 
   &.votedFor {
-    color: #16a34a;
+    color: var(--success-medium);
+    background: var(--success-light);
   }
 
   &.votedAgainst {
-    color: #dc2626;
+    color: var(--danger-medium);
+    background: var(--danger-light);
+  }
+
+  &.votedAbstain {
+    color: var(--text-secondary);
+    background: var(--background-medium);
+  }
+
+  &.votedVeto {
+    color: var(--warning-medium);
+    background: var(--warning-light);
   }
 }
 
 .voteAmount {
-  font-size: 14px;
-  color: #111827;
-}
-
-.setupButton {
-  width: 100%;
-  background: #111827;
-  color: white;
-  font-weight: 500;
-  border: none;
-  border-radius: 6px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background: #1f2937;
-  }
-}
-
-.connectButtonContainer {
-  display: flex;
-  justify-content: center;
-  width: 100%;
+  font-size: var(--size-3-5);
+  color: var(--text-primary);
+  font-weight: 600;
 }

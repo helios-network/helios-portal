@@ -13,6 +13,7 @@ import { EXPLORER_URL, HELIOS_NETWORK_ID } from "@/config/app"
 import { useState } from "react"
 import { ModalStake } from "@/app/delegations/(components)/active/stake"
 import { Message } from "@/components/message"
+import { EnrichedAsset } from "@/types/validator"
 
 export const Top = () => {
   const { isConnected } = useAccount()
@@ -24,7 +25,7 @@ export const Top = () => {
   const { switchChain } = useSwitchChain()
   const [openStake, setOpenStake] = useState(false)
 
-  if (!validator) return <></>
+  if (!validator || !delegation?.assets?.length) return <></>
 
   // const socials = [
   //   {
@@ -57,13 +58,12 @@ export const Top = () => {
   const minDelegation = validator.minDelegation
 
   const totalDelegated = tokens.reduce(
-    (acc, token) => acc + token.balance.totalPrice,
+    (acc: number, token: EnrichedAsset) => acc + (parseFloat(token.amount) * token.price),
     0
   )
 
   const ratioOptimal =
-    (tokens.find((token) => token.display.symbol === "hls")?.price.usd || 0) >=
-    totalDelegated
+    (tokens.find((token: EnrichedAsset) => token.denom === "hls")?.price || 0) >= totalDelegated
 
   const handleOpenStake = () => {
     if (chainId !== HELIOS_NETWORK_ID) {
@@ -74,6 +74,16 @@ export const Top = () => {
   }
 
   const explorerLink = EXPLORER_URL + "/address/" + validator.validatorAddress
+
+  const heliosNodesMonikers = [
+    "helios-peer",
+    "helios-unity",
+    "helios-inter",
+    "helios-hedge",
+    "helios-supra"
+  ]
+
+  const isHeliosNode = heliosNodesMonikers.includes(validator.moniker)
 
   return (
     <Grid className={s.top}>
@@ -98,7 +108,7 @@ export const Top = () => {
             <Button
               icon="hugeicons:download-03"
               onClick={() => handleOpenStake()}
-              disabled={!enableDelegation || !isConnected}
+              disabled={!enableDelegation || !isConnected || !isHeliosNode}
             >
               Stake now
             </Button>

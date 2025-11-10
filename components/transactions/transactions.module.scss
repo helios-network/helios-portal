@@ -142,3 +142,19 @@ $responsive: 700px;
   font-size: 2em;
   color: var(--primary-medium);
 }
+
+.tooltipContent {
+  @include backdrop;
+  padding: var(--size-2) var(--size-3);
+  border-radius: var(--radius-m);
+  white-space: nowrap;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-m);
+  background-color: var(--background-lower);
+}
+
+.tooltipArrow {
+  fill: var(--bg);
+}

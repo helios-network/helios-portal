@@ -5,9 +5,10 @@ import { Message } from "../message"
 
 type TransactionsProps = {
   transactions: TransactionLight[]
+  isClientTxs?: boolean
 }
 
-export const Transactions = ({ transactions }: TransactionsProps) => {
+export const Transactions = ({ transactions, isClientTxs }: TransactionsProps) => {
   if (transactions.length === 0) {
     return (
       <Message title="Transactions informations" variant="primary">
@@ -19,10 +20,11 @@ export const Transactions = ({ transactions }: TransactionsProps) => {
   return (
     <Table>
       <tbody>
-        {transactions.map((transaction) => (
+        {transactions.map((transaction, index) => (
           <TransactionsLine
-            key={"transactions-" + Math.random().toString(36).substring(2, 15)}
-            {...transaction}
+            key={"transactions-" + index}
+            transaction={transaction}
+            isClientTxs={isClientTxs}
           />
         ))}
       </tbody>

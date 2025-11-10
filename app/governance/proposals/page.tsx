@@ -2,21 +2,29 @@
 
 import BackSection from "@/components/back"
 import { Heading } from "@/components/heading"
-import { Icon } from "@/components/icon"
-import { truncateAddress } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import React, { useState } from "react"
 import { useAccount } from "wagmi"
 import { ModalProposal } from "../(components)/proposal/modal"
+import { VotingHistory } from "./(components)/voting-history"
+import { Statistics } from "../(components)/statistics"
+import { VotingHistoryProvider } from "@/context/VotingHistoryContext"
 import styles from "./page.module.scss"
 import { useQuery } from "@tanstack/react-query"
-import { getProposalsByPageAndSize, getProposalTotalCount } from "@/helpers/rpc-calls"
+import { getProposalTotalCount, getProposalsByPageAndSizeWithFilter } from "@/helpers/rpc-calls"
 import { toHex } from "@/utils/number"
+import { Badge } from "@/components/badge"
+import { STATUS_CONFIG } from "@/config/vote"
+import { Button } from "@/components/button"
+import { Input } from "@/components/input/input"
 
 interface ProposalData {
   id: string
-  meta: string
+  meta: string // "By <address>"
+  proposer: string
+  isHeliosOrg: boolean
   status: string
+  submitDate: string
   votes: string
   title: string
   result: string
@@ -29,74 +37,171 @@ interface ProposalData {
   voteAgainstPercent: string
   voteAbstainPercent: string
   voteNoWithVetoPercent: string
+  yesShort: string
+  abstainShort: string
+  noShort: string
+  noWithVetoShort: string
+  totalVotesFormatted: string
+  totalAddresses: number
+}
+
+const HELIOS_ORG_ADDRESS = "0x72a9b3509b19d9dbc2e0df71c4a6451e8a3dd705"
+
+// Status code mapping
+const STATUS_CODE_MAP: Record<string, string> = {
+  active: "2",
+  passed: "3",
+  rejected: "4"
 }
 
 const AllProposals: React.FC = () => {
   const router = useRouter()
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize] = useState(20)
+  const [pageSize] = useState(10)
   const { isConnected } = useAccount()
   const [isCreateLoading, setIsCreateLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [status, setStatus] = useState<string>("all")
+  const [searchQuery, setSearchQuery] = useState<string>("")
+  const [proposerFilter, setProposerFilter] = useState<string>("all") // "all" or "helios"
+  const [filterKey, setFilterKey] = useState(0) // Track filter changes to force data reset
 
-  // Get total proposals count
+  // Handler to reset page when status filter changes
+  const handleStatusChange = (newStatus: string) => {
+    if (newStatus !== status) {
+      setStatus(newStatus)
+      setCurrentPage(1)
+      setFilterKey(prev => prev + 1)
+    }
+  }
+
+  // Handler to reset page when proposer filter changes
+  const handleProposerFilterChange = (newFilter: string) => {
+    if (newFilter !== proposerFilter) {
+      setProposerFilter(newFilter)
+      setCurrentPage(1)
+      setFilterKey(prev => prev + 1)
+    }
+  }
+
+  // Build filter string based on current filters
+  const buildFilterString = (): string => {
+    const filters: string[] = []
+
+    // Add status filter (only if not "all")
+    if (status !== "all" && STATUS_CODE_MAP[status]) {
+      filters.push(`status=${STATUS_CODE_MAP[status]}`)
+    }
+
+    // Add proposer filter for Helios org
+    if (proposerFilter === "helios") {
+      filters.push(`proposer=${HELIOS_ORG_ADDRESS}`)
+    }
+
+    return filters.length > 0 ? filters.join("&&") : ""
+  }
+
+  // Get total proposals count - updates when filters change
   const { data: totalProposals = 0 } = useQuery({
-    queryKey: ["proposalTotalCount"],
-    queryFn: () => getProposalTotalCount(),
+    queryKey: ["proposalTotalCount", filterKey, status, proposerFilter],
+    queryFn: async () => {
+      const filterString = buildFilterString()
+
+      // If no filters, get all proposals count
+      if (!filterString) {
+        return getProposalTotalCount()
+      }
+
+      // For filtered results, fetch first page with large size to get approximate total
+      // Or use a dedicated filtered count API if available
+      const firstPage = await getProposalsByPageAndSizeWithFilter(toHex(1), toHex(1000), filterString)
+      return firstPage?.length ?? 0
+    },
     staleTime: 30000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: false
   })
 
-  // Get proposals for current page
-  const { data: rawProposals = [], isLoading, error } = useQuery({
-    queryKey: ["proposals", currentPage, pageSize],
-    queryFn: () => getProposalsByPageAndSize(toHex(currentPage), toHex(pageSize)),
-    enabled: !!currentPage && !!pageSize,
-    staleTime: 30000, // 30 seconds
+  // Load proposals with pagination - fetch all pages up to current page
+  const { data: allLoadedProposals = [], isLoading: isInitialLoading, error: initialError, isFetching } = useQuery({
+    queryKey: ["allProposals", filterKey, currentPage, status, proposerFilter],
+    queryFn: async () => {
+
+      const filterString = buildFilterString()
+      // Fetch all pages from 1 to currentPage
+      const promises = []
+      for (let page = 1; page <= currentPage; page++) {
+        promises.push(getProposalsByPageAndSizeWithFilter(toHex(page), toHex(pageSize), filterString))
+      }
+
+      const results = await Promise.all(promises)
+      // Flatten all results into a single array
+      const allProposals = results.flat()
+      return allProposals
+    },
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: false
   })
 
-  // Calculate total pages
-  const totalPages = Math.ceil((totalProposals || 0) / pageSize)
-  const hasNextPage = currentPage < totalPages
-  const hasPreviousPage = currentPage > 1
+  // Check if we can load more
+  const canLoadMore = allLoadedProposals.length < (totalProposals || 0)
 
-  // Transform raw proposals data
-  const proposals: ProposalData[] = (rawProposals || []).map((item: any) => {
+  // Combined loading and error states
+  const isLoading = isInitialLoading
+  const error = initialError
+
+  // Transform all loaded proposals data
+  const allProposals: ProposalData[] = (allLoadedProposals || []).map((item: any) => {
     const yes = BigInt(item.currentTallyResult?.yes_count || "0")
     const no = BigInt(item.currentTallyResult?.no_count || "0")
     const abstain = BigInt(item.currentTallyResult?.abstain_count || "0")
-    const noWithVeto = BigInt(
-      item.currentTallyResult?.no_with_veto_count || "0"
-    )
+    const noWithVeto = BigInt(item.currentTallyResult?.no_with_veto_count || "0")
 
-    const total = yes + no + abstain + noWithVeto || 1n
-    const voteForPercent = Number((yes * 100n) / total)
-    const voteAgainstPercent = Number((no * 100n) / total)
-    const voteAbstainPercent = Number((abstain * 100n) / total)
-    const voteNoWithVetoPercent = Number((noWithVeto * 100n) / total)
+    const total = yes + no + abstain + noWithVeto
+    const safeTotal = total === 0n ? 1n : total
+
+    const voteForPercent = Number((yes * 100n) / safeTotal)
+    const voteAgainstPercent = Number((no * 100n) / safeTotal)
+    const voteAbstainPercent = Number((abstain * 100n) / safeTotal)
+    const voteNoWithVetoPercent = Number((noWithVeto * 100n) / safeTotal)
 
     // Convert from smallest unit (assuming 18 decimals)
-    const yesFormatted = (yes / 10n ** 18n).toString()
-    const noFormatted = (no / 10n ** 18n).toString()
-    const abstainFormatted = (abstain / 10n ** 18n).toString()
-    const noWithVetoFormatted = (noWithVeto / 10n ** 18n).toString()
+    const decimals = 18n
+    const yesFormatted = (yes / 10n ** decimals).toString()
+    const noFormatted = (no / 10n ** decimals).toString()
+    const abstainFormatted = (abstain / 10n ** decimals).toString()
+    const noWithVetoFormatted = (noWithVeto / 10n ** decimals).toString()
+
+    // Short K/M display for right rail numbers
+    const k = (n: bigint) => {
+      const num = Number(n / 10n ** decimals)
+      if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(2)}M`
+      if (num >= 1_000) return `${(num / 1_000).toFixed(2)}K`
+      return `${num.toFixed(2)}`
+    }
+
+    const totalVotesFormatted = k(total)
+
+    const proposer: string = item.proposer || ""
+    const isHeliosOrg =
+      proposer.toLowerCase() === "0x3ddB715dB3E32140b731aF55a7780C94019e5075".toLowerCase()
 
     return {
       id: item.id.toString(),
-      meta: `By ${item.proposer}`,
-      status: `Ends: ${new Date(item.votingEndTime).toLocaleString(
-        "en-US",
-        {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "numeric",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: true
-        }
-      )}`,
+      meta: `By ${proposer}`,
+      proposer,
+      isHeliosOrg,
+      status: `Ends: ${new Date(item.votingEndTime).toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit"
+      })}`,
+      submitDate: new Date(item.submitTime).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit"
+      }),
       votes: `${yesFormatted} For – ${noFormatted} Against – ${abstainFormatted} Abstain – ${noWithVetoFormatted} No with Vote`,
       title: item.title,
       result: item.status,
@@ -104,18 +209,40 @@ const AllProposals: React.FC = () => {
         item.status === "PASSED"
           ? styles.executed
           : item.status === "REJECTED"
-          ? styles.rejected
-          : styles.voting_period,
-      voteFor: `${yesFormatted}shares`,
-      voteAgainst: `${noFormatted}shares`,
-      voteAbstain: `${abstainFormatted}shares`,
-      voteNoWithVeto: `${noWithVetoFormatted}shares`,
+            ? styles.rejected
+            : styles.voting_period,
+      voteFor: `${yesFormatted}HLS`,
+      voteAgainst: `${noFormatted}HLS`,
+      voteAbstain: `${abstainFormatted}HLS`,
+      voteNoWithVeto: `${noWithVetoFormatted}HLS`,
       voteForPercent: `${voteForPercent}%`,
       voteAgainstPercent: `${voteAgainstPercent}%`,
       voteAbstainPercent: `${voteAbstainPercent}%`,
-      voteNoWithVetoPercent: `${voteNoWithVetoPercent}%`
+      voteNoWithVetoPercent: `${voteNoWithVetoPercent}%`,
+      yesShort: k(yes),
+      abstainShort: k(abstain),
+      noShort: k(no),
+      noWithVetoShort: k(noWithVeto),
+      totalVotesFormatted,
+      totalAddresses: 0 // placeholder until backend integration
     }
   })
+
+  // Filter proposals by search query
+  const proposals = searchQuery.trim()
+    ? allProposals.filter(p =>
+      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.meta.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.id.includes(searchQuery)
+    )
+    : allProposals
+
+  // Handle load more - simply increment the page
+  const handleLoadMore = () => {
+    if (canLoadMore && !isFetching) {
+      setCurrentPage(prev => prev + 1)
+    }
+  }
 
   const handleCreateProposal = () => {
     setIsCreateLoading(true)
@@ -125,125 +252,10 @@ const AllProposals: React.FC = () => {
     }, 200)
   }
 
-  // Handle page change
-  const handlePageChange = (page: number) => {
-    if (page < 1 || page > totalPages || page === currentPage || isLoading) return
-    setCurrentPage(page)
-  }
 
-  // Handle previous page
-  const handlePrevious = () => {
-    if (hasPreviousPage) {
-      handlePageChange(currentPage - 1)
-    }
-  }
 
-  // Handle next page
-  const handleNext = () => {
-    if (hasNextPage) {
-      handlePageChange(currentPage + 1)
-    }
-  }
-
-  // Pagination component
-  const Pagination = () => {
-    const getPageNumbers = () => {
-      const pages = []
-      const maxVisiblePages = 5
-
-      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
-      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
-
-      // Adjust start if we're near the end
-      if (endPage - startPage + 1 < maxVisiblePages) {
-        startPage = Math.max(1, endPage - maxVisiblePages + 1)
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i)
-      }
-
-      return pages
-    }
-
-    const pageNumbers = getPageNumbers()
-    const showFirstPage = pageNumbers.length > 0 && pageNumbers[0] > 1
-    const showLastPage = pageNumbers.length > 0 && pageNumbers[pageNumbers.length - 1] < totalPages
-    const showFirstEllipsis = showFirstPage && pageNumbers[0] > 2
-    const showLastEllipsis = showLastPage && pageNumbers[pageNumbers.length - 1] < totalPages - 1
-
-    return (
-      <div className={styles["pagination"]}>
-        <button
-          className={`${styles["pagination-btn"]} ${
-            !hasPreviousPage ? styles.disabled : ""
-          }`}
-          onClick={handlePrevious}
-          disabled={!hasPreviousPage || isLoading}
-        >
-          Previous
-        </button>
-
-        <div className={styles["page-numbers"]}>
-          {showFirstPage && (
-            <>
-              <button
-                className={styles["page-btn"]}
-                onClick={() => handlePageChange(1)}
-                disabled={isLoading}
-              >
-                1
-              </button>
-              {showFirstEllipsis && (
-                <span className={styles["ellipsis"]}>...</span>
-              )}
-            </>
-          )}
-
-          {pageNumbers.map((page) => (
-            <button
-              key={page}
-              className={`${styles["page-btn"]} ${
-                page === currentPage ? styles.active : ""
-              }`}
-              onClick={() => handlePageChange(page)}
-              disabled={isLoading}
-            >
-              {page}
-            </button>
-          ))}
-
-          {showLastPage && (
-            <>
-              {showLastEllipsis && (
-                <span className={styles["ellipsis"]}>...</span>
-              )}
-              <button
-                className={styles["page-btn"]}
-                onClick={() => handlePageChange(totalPages)}
-                disabled={isLoading}
-              >
-                {totalPages}
-              </button>
-            </>
-          )}
-        </div>
-
-        <button
-          className={`${styles["pagination-btn"]} ${
-            !hasNextPage ? styles.disabled : ""
-          }`}
-          onClick={handleNext}
-          disabled={!hasNextPage || isLoading}
-        >
-          Next
-        </button>
-      </div>
-    )
-  }
-
-  // Show loading state on initial load
-  if (isLoading && proposals.length === 0) {
+  // Show loading state ONLY on very first load when we have no data
+  if (isLoading) {
     return (
       <div className={styles["all-proposals"]}>
         <div className={styles.proposalContainer}>
@@ -277,7 +289,7 @@ const AllProposals: React.FC = () => {
     )
   }
 
-  // Show error state if there's an error and no data loaded
+  // Show error state if there's an error and no data available
   if (error && proposals.length === 0) {
     return (
       <div className={styles["all-proposals"]}>
@@ -322,217 +334,269 @@ const AllProposals: React.FC = () => {
 
   return (
     <>
-      <div className={styles["all-proposals"]}>
-        <div className={styles.proposalContainer}>
-          <Heading
-            icon="material-symbols:library-books-outline"
-            title="All Proposals"
-            className={styles.sectionTitle}
-          />
-          {isConnected && (
-            <button
-              className={styles["create-proposal"]}
-              onClick={handleCreateProposal}
-              disabled={isCreateLoading}
-            >
-              {isCreateLoading ? (
-                <>
-                  <span className={styles.myloader}></span>Loading…
-                </>
-              ) : (
-                "Create Proposal"
-              )}
-            </button>
-          )}
-        </div>
-
-        {/* Show error banner if there's an error but we have existing data */}
-        {error && proposals.length > 0 && (
-          <div className={styles["error-banner"]}>
-            <p>{error.message}</p>
-            <button
-              className={styles["retry-button-small"]}
-              onClick={() => window.location.reload()}
-              disabled={isLoading}
-            >
-              Retry
-            </button>
-          </div>
-        )}
-
-        {/* Proposal count and pagination info */}
-        {proposals.length > 0 && (
-          <div className={styles["proposal-stats"]}>
-            <div className={styles["stats-info"]}>
-              <span className={styles["total-count"]}>
-                {totalProposals} proposal{totalProposals !== 1 ? "s" : ""} total
-              </span>
-              <span className={styles["page-info"]}>
-                Page {currentPage} of {totalPages}
-              </span>
-            </div>
-          </div>
-        )}
-
-        <div className={styles["proposal-list"]}>
-          {proposals.length === 0 && !isLoading ? (
-            // Empty state when no proposals exist
-            <div className={styles["empty-state"]}>
-              <h3>No proposals found</h3>
-              <p>
-                There are currently no proposals to display.{" "}
-                {isConnected && "Create the first proposal to get started!"}
-              </p>
-            </div>
-          ) : (
-            // Show proposals when they exist
-            proposals.map((proposal) => (
-              <div
-                key={proposal.id}
-                className={styles["proposal-card"]}
-                onClick={() =>
-                  router.push(`/governance/proposals/${proposal.id}`)
-                }
+      <div className={styles.gridContainer}>
+        <div className={styles["all-proposals"]}>
+          <div className={styles.proposalContainer}>
+            <Heading
+              icon="material-symbols:library-books-outline"
+              title="All Proposals"
+              className={styles.sectionTitle}
+            />
+            {isConnected && (
+              <button
+                className={styles["create-proposal"]}
+                onClick={handleCreateProposal}
+                disabled={isCreateLoading}
               >
-                <div className={styles["card-content"]}>
-                  <div className={styles["proposal-header"]}>
-                    <div className={styles["proposal-info"]}>
-                      <div className={styles["proposer-info"]}>
-                        <Icon icon="material-symbols:person" />
-                        <span className={styles["proposer-label"]}>
-                          Proposal by
-                        </span>
-                        <a
-                          href={`https://explorer.helioschainlabs.org/address/${proposal.meta.replace(
-                            "By ",
-                            ""
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.proposerLink_mobile}
-                          title="View on Helios Explorer"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <span>
-                            {truncateAddress(proposal.meta.replace("By ", ""))}
-                          </span>
-                        </a>
-                        <a
-                          href={`https://explorer.helioschainlabs.org/address/${proposal.meta.replace(
-                            "By ",
-                            ""
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.proposerLink_full}
-                          title="View on Helios Explorer"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <span>{proposal.meta.replace("By ", "")}</span>
-                        </a>
-                      </div>
-                      <h3 className={styles["proposal-title"]}>
-                        {proposal.title}
-                      </h3>
-                    </div>
-                    <div className={styles["proposal-status"]}>
-                      <div className={styles["end-date"]}>
-                        <Icon icon="material-symbols:event" />
-                        &nbsp;
-                        {proposal.status}
-                      </div>
-                      <div
-                        className={`${styles["status-badge"]} ${proposal.resultClass}`}
-                      >
-                        <Icon
-                          icon={
-                            proposal.result === "PASSED"
-                              ? "material-symbols:check-circle"
-                              : proposal.result === "REJECTED"
-                              ? "material-symbols:cancel"
-                              : "material-symbols:how-to-vote"
+                {isCreateLoading ? (
+                  <>
+                    <span className={styles.myloader}></span>Loading…
+                  </>
+                ) : (
+                  "Create Proposal"
+                )}
+              </button>
+            )}
+          </div>
+
+          {/* Filters Section */}
+          <div className={styles.filtersContainer}>
+            <div className={styles.buttonGroup}>
+              <Button
+                size="small"
+                variant={status !== "all" ? "secondary" : undefined}
+                onClick={() => handleStatusChange("all")}
+              >
+                All
+              </Button>
+              <Button
+                size="small"
+                variant={status !== "active" ? "secondary" : undefined}
+                onClick={() => handleStatusChange("active")}
+              >
+                Active
+              </Button>
+              <Button
+                size="small"
+                variant={status !== "passed" ? "secondary" : undefined}
+                onClick={() => handleStatusChange("passed")}
+              >
+                Passed
+              </Button>
+              <Button
+                size="small"
+                variant={status !== "rejected" ? "secondary" : undefined}
+                onClick={() => handleStatusChange("rejected")}
+              >
+                Rejected
+              </Button>
+            </div>
+            <div className={styles.inputGroup}>
+              <div className={styles.proposerButtons}>
+                <Button
+                  size="small"
+                  variant={proposerFilter !== "all" ? "secondary" : undefined}
+                  onClick={() => handleProposerFilterChange("all")}
+                >
+                  All Proposals
+                </Button>
+                <Button
+                  size="small"
+                  variant={proposerFilter !== "helios" ? "secondary" : undefined}
+                  onClick={() => handleProposerFilterChange("helios")}
+                >
+                  Helios Proposals
+                </Button>
+              </div>
+              <Input
+                icon="hugeicons:search-01"
+                placeholder="Search a proposals..."
+                className={styles.search}
+                value={searchQuery}
+                onChange={(e: any) => setSearchQuery(e.target.value || "")}
+              />
+            </div>
+          </div>
+
+          {/* Show error banner if there's an error but we have existing data */}
+          {error && proposals.length > 0 && (
+            <div className={styles["error-banner"]}>
+              <p>{error.message}</p>
+              <button
+                className={styles["retry-button-small"]}
+                onClick={() => window.location.reload()}
+                disabled={isLoading}
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {proposals.length > 0 && (
+            <div className={styles.tableHeader}>
+              <div>Proposal</div>
+              <div>Votes</div>
+              <div>Total votes</div>
+            </div>
+          )}
+
+          <div className={styles["proposal-list"]}>
+            {proposals.length === 0 ? (
+              // Empty state when no proposals exist
+              <div className={styles["empty-state"]}>
+                <h3>No proposals found</h3>
+                <p>
+                  There are currently no proposals to display.{" "}
+                  {isConnected && "Create the first proposal to get started!"}
+                </p>
+              </div>
+            ) : (
+              // Show proposals when they exist - use index as key to avoid duplicates
+              proposals.map((proposal, index) => (
+                <div
+                  key={`proposal-${index}-${proposal.id}`}
+                  className={styles["proposal-card"]}
+                  onClick={() =>
+                    router.push(`/governance/proposals/${proposal.id}`)
+                  }
+                >
+                  <div className={styles["card-content"]}>
+                    {/* Left: Proposal & meta */}
+                    <div className={styles.leftCol}>
+                      <h3 className={styles["proposal-title"]}>{proposal.title}</h3>
+                      <div className={styles.metaRow}>
+                        <Badge
+                          status={
+                            STATUS_CONFIG[
+                              (proposal.result === "PASSED"
+                                ? "passed"
+                                : proposal.result === "REJECTED"
+                                  ? "rejected"
+                                  : "active") as "active" | "passed" | "rejected"
+                            ].color
                           }
-                        />
-                        &nbsp; {proposal.result}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={styles["vote-section"]}>
-                    <span>Voting Results</span>
-                    <div className={styles.captionContainer}>
-                      <span className={styles.captionVotes}>
-                        Total votes cast
-                      </span>
-                    </div>
-                    <div className={styles["vote-bar"]}>
-                      <div
-                        className={styles["vote-for"]}
-                        style={{ width: proposal.voteForPercent }}
-                      />
-                      <div
-                        className={styles["vote-abstain"]}
-                        style={{ width: proposal.voteAbstainPercent }}
-                      />
-                      <div
-                        className={styles["vote-against"]}
-                        style={{ width: proposal.voteAgainstPercent }}
-                      />
-                      <div
-                        className={styles["vote-no-veto"]}
-                        style={{ width: proposal.voteNoWithVetoPercent }}
-                      />
-                    </div>
-
-                    <div className={styles["vote-details"]}>
-                      <div className={styles["vote-stats"]}>
-                        <span className={styles["vote-for-text"]}>
-                          <Icon icon="material-symbols:thumb-up" />
-                          <span>
-                            For: {proposal.voteFor} ({proposal.voteForPercent})
-                          </span>
-                        </span>
-                        <span className={styles["vote-abstain-text"]}>
-                          <Icon icon="material-symbols:panorama-fish-eye" />
-                          <span>
-                            Abstain: {proposal.voteAbstain} (
-                            {proposal.voteAbstainPercent})
-                          </span>
-                        </span>
-                        <span className={styles["vote-against-text"]}>
-                          <Icon icon="material-symbols:thumb-down" />
-                          <span>
-                            Against: {proposal.voteAgainst} (
-                            {proposal.voteAgainstPercent})
-                          </span>
-                        </span>
-                        {proposal.voteNoWithVeto !== "0HLS" && (
-                          <span className={styles["vote-no-veto-text"]}>
-                            <Icon icon="material-symbols:do-not-disturb-on" />
-                            <span>
-                              No With Vote: {proposal.voteNoWithVeto} (
-                              {proposal.voteNoWithVetoPercent})
-                            </span>
-                          </span>
+                          icon={
+                            STATUS_CONFIG[
+                              (proposal.result === "PASSED"
+                                ? "passed"
+                                : proposal.result === "REJECTED"
+                                  ? "rejected"
+                                  : "active") as "active" | "passed" | "rejected"
+                            ].icon
+                          }
+                        >
+                          {proposal.result === "PASSED"
+                            ? "Passed"
+                            : proposal.result === "REJECTED"
+                              ? "Rejected"
+                              : "Active"}
+                        </Badge>
+                        {proposal.isHeliosOrg && (
+                          <Badge status="primary">Helios Organization</Badge>
                         )}
+                        <span className={styles.endDateInline}>
+                          {proposal.submitDate}
+                        </span>
                       </div>
+                      <div className={styles["proposer-info"]}>
+                        {/* Hide proposer address entirely; only show org badge near status above */}
+                        {/* Intentionally left blank to keep layout spacing consistent */}
+                      </div>
+                    </div>
+
+                    {/* Center: Votes (centered) */}
+                    <div className={styles.centerCol}>
+                      <div className={styles.centerWrap}>
+                        <div className={styles["vote-stats"]}>
+                          <span
+                            className={styles["vote-for-text"]}
+                            title={`For (${proposal.voteForPercent})`}
+                          >
+                            <span>{proposal.yesShort}</span>
+                            <span className={styles["dot"]} aria-hidden="true">•</span>
+                          </span>
+                          <span
+                            className={styles["vote-abstain-text"]}
+                            title={`Abstain (${proposal.voteAbstainPercent})`}
+                          >
+                            <span>{proposal.abstainShort}</span>
+                            <span className={styles["dot"]} aria-hidden>•</span>
+                          </span>
+                          <span
+                            className={styles["vote-against-text"]}
+                            title={`Against (${proposal.voteAgainstPercent})`}
+                          >
+                            <span>{proposal.noShort}</span>
+                            <span className={styles["dot"]} aria-hidden>•</span>
+                          </span>
+                          <span
+                            className={styles["vote-no-veto-text"]}
+                            title={`No with veto (${proposal.voteNoWithVetoPercent})`}
+                          >
+                            <span>{proposal.noWithVetoShort}</span>
+                          </span>
+                        </div>
+                        <div className={styles["vote-bar"]}>
+                          <div
+                            className={styles["vote-for"]}
+                            style={{ width: proposal.voteForPercent }}
+                            title={`For (${proposal.voteForPercent})`}
+                          />
+                          <div
+                            className={styles["vote-abstain"]}
+                            style={{ width: proposal.voteAbstainPercent }}
+                            title={`Abstain (${proposal.voteAbstainPercent})`}
+                          />
+                          <div
+                            className={styles["vote-against"]}
+                            style={{ width: proposal.voteAgainstPercent }}
+                            title={`Against (${proposal.voteAgainstPercent})`}
+                          />
+                          <div
+                            className={styles["vote-no-veto"]}
+                            style={{ width: proposal.voteNoWithVetoPercent }}
+                            title={`No with veto (${proposal.voteNoWithVetoPercent})`}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right: Total */}
+                    <div className={styles.rightCol}>
+                      <div className={styles.totalNumber}>{proposal.totalVotesFormatted}</div>
+                      {/* <div className={styles.totalAddresses}>{proposal.totalAddresses || 0} addresses</div> */}
                     </div>
                   </div>
                 </div>
-              </div>
-            ))
-          )}
+              ))
+            )}
 
-          {/* Loading indicator for page changes */}
-          {isLoading && proposals.length > 0 && (
-            <div className={styles.loader}>
-              <p>Loading proposals...</p>
-            </div>
-          )}
+            {/* Loading indicator for page changes */}
+            {isInitialLoading && proposals.length > 0 && (
+              <div className={styles.loader}>
+                <p>Loading more proposals...</p>
+              </div>
+            )}
+
+            {/* Load More Button - inside the proposal list */}
+            {canLoadMore && (
+              <div className={styles["load-more-container"]}>
+                <button
+                  className={styles["load-more-btn"]}
+                  onClick={handleLoadMore}
+                  disabled={isFetching}
+                >
+                  {isFetching ? "Loading..." : "Load more"}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Pagination Controls */}
-        {proposals.length > 0 && !isLoading && <Pagination />}
+        <div className={styles.historyColumn}>
+          <Statistics totalProposals={totalProposals} />
+          <VotingHistory />
+        </div>
       </div>
       <ModalProposal open={showModal} onClose={() => setShowModal(false)} />
     </>
@@ -541,10 +605,12 @@ const AllProposals: React.FC = () => {
 
 const ProposalDashboard: React.FC = () => {
   return (
-    <div className={styles.dashboard}>
-      <BackSection isVisible={false} />
-      <AllProposals />
-    </div>
+    <VotingHistoryProvider>
+      <div className={styles.dashboard}>
+        <BackSection isVisible={false} />
+        <AllProposals />
+      </div>
+    </VotingHistoryProvider>
   )
 }
 
