@@ -20,12 +20,15 @@ import { Empty } from "./empty"
 import { Informations } from "./informations"
 import s from "./list.module.scss"
 import HELIOS_NODE_MONIKERS from "@/config/helios-node-monikers"
+import clsx from "clsx"
 
 export const List = () => {
   const [searchTerm, setSearchTerm] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
   const { address: userAddress } = useAccount()
   const PAGE = 1
   const SIZE = 100
+  const ITEMS_PER_PAGE = 20
 
   // Fetch validators with enriched asset data using the optimized RPC method
   const { data: validatorsWithData = [], isLoading: validatorsIsLoading } = useQuery({
@@ -178,6 +181,7 @@ export const List = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value)
+    setCurrentPage(1) // Reset to first page on search
   }
 
   const filteredValidators = validators.filter((validator) =>
@@ -187,6 +191,18 @@ export const List = () => {
   const sortedValidators = filteredValidators.sort((a, b) => {
     return b.validator.status - a.validator.status || (HELIOS_NODE_MONIKERS.includes(a.validator.moniker) ? -1 : 1)
   })
+
+  // Pagination calculations
+  const totalValidators = sortedValidators.length
+  const totalPages = Math.ceil(totalValidators / ITEMS_PER_PAGE)
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const endIndex = startIndex + ITEMS_PER_PAGE
+  const paginatedValidators = sortedValidators.slice(startIndex, endIndex)
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
 
   return (
     <>
@@ -210,7 +226,7 @@ export const List = () => {
         </div>
       </Card>
       <div className={s.list}>
-        {sortedValidators.map((validator, i) => (
+        {paginatedValidators.map((validator, i) => (
           <Item
             key={"validators-" + i}
             validator={validator.validator}
@@ -236,6 +252,58 @@ export const List = () => {
           </>
         )}
       </div>
+      {!validatorsIsLoading && totalPages > 1 && (
+        <div className={s.pagination}>
+          <div className={s.paginationInfo}>
+            Showing {startIndex + 1}-{Math.min(endIndex, totalValidators)} of {totalValidators} validators
+          </div>
+          <div className={s.paginationControls}>
+            <button
+              className={s.paginationButton}
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              aria-label="Previous page"
+            >
+              <Icon icon="hugeicons:arrow-left-01" />
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+              // Show first page, last page, current page, and pages around current
+              const showPage =
+                page === 1 ||
+                page === totalPages ||
+                (page >= currentPage - 1 && page <= currentPage + 1)
+              
+              const showEllipsisBefore = page === currentPage - 2 && currentPage > 3
+              const showEllipsisAfter = page === currentPage + 2 && currentPage < totalPages - 2
+
+              return (
+                <span key={page}>
+                  {showEllipsisBefore && <span className={s.paginationEllipsis}>...</span>}
+                  {showPage && (
+                    <button
+                      className={clsx(s.paginationButton, page === currentPage && s.paginationButtonActive)}
+                      onClick={() => handlePageChange(page)}
+                      aria-label={`Page ${page}`}
+                      aria-current={page === currentPage ? "page" : undefined}
+                    >
+                      {page}
+                    </button>
+                  )}
+                  {showEllipsisAfter && <span className={s.paginationEllipsis}>...</span>}
+                </span>
+              )
+            })}
+            <button
+              className={s.paginationButton}
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              aria-label="Next page"
+            >
+              <Icon icon="hugeicons:arrow-right-01" />
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 }

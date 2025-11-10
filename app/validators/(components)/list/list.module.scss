@@ -100,3 +100,79 @@
   font-size: var(--size-8);
   color: var(--primary-medium);
 }
+
+.pagination {
+  margin-top: var(--grid-gap);
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-4);
+  align-items: center;
+  
+  @include min(768px) {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  &Info {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+  }
+
+  &Controls {
+    display: flex;
+    align-items: center;
+    gap: var(--size-2);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  &Button {
+    min-width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background-medium);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-s);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: var(--font-size-sm);
+    padding: 0 var(--size-3);
+
+    &:hover:not(:disabled) {
+      background-color: var(--background-light);
+      border-color: var(--primary-medium);
+      color: var(--primary-medium);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &Active {
+      background-color: var(--primary-medium);
+      border-color: var(--primary-medium);
+      color: var(--background-dark);
+      font-weight: 600;
+
+      &:hover {
+        background-color: var(--primary-light);
+        border-color: var(--primary-light);
+        color: var(--background-dark);
+      }
+    }
+  }
+
+  &Ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    color: var(--text-tertiary);
+    user-select: none;
+  }
+}
