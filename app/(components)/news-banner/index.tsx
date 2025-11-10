@@ -6,7 +6,7 @@ export const NewsBanner = () => {
     <div className={s.banner} data-color="warning">
       <div className={s.tag}>Announcement</div>
       <p>
-        Currently powered by Helios Testnet (RPC:{" "}
+        Currently powered by Helios Beta Mainnet (RPC:{" "}
         <Link href="https://testnet1.helioschainlabs.org/docs">
           testnet1.helioschainlabs.org
         </Link>
