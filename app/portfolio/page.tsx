@@ -3,6 +3,9 @@
 import { Stats } from "./(components)/stats";
 import { TokenList } from "./(components)/token-list";
 import { WalletWatch } from "./(components)/wallet-watch";
+import { AdvancedStats } from "./(components)/advanced-stats";
+import { PortfolioDistribution } from "./(components)/portfolio-distribution";
+import { PortfolioExport } from "./(components)/portfolio-export";
 import s from "./page.module.scss";
 import { useState, useEffect } from "react";
 
@@ -43,6 +46,9 @@ export default function PortfolioPage() {
         currentAddress={watchAddress}
       />
       <Stats watchAddress={watchAddress} />
+      <PortfolioExport watchAddress={watchAddress} />
+      <AdvancedStats watchAddress={watchAddress} />
+      <PortfolioDistribution watchAddress={watchAddress} />
       <TokenList watchAddress={watchAddress} />
     </div>
   );

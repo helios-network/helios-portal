@@ -254,6 +254,55 @@
   }
 }
 
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--background-lower);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-m);
+}
+
+.searchInput {
+  width: 100%;
+}
+
+.sortButtons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  button {
+    flex: 1;
+    min-width: 100px;
+
+    @include max(600px) {
+      flex: 1 1 calc(50% - 0.25rem);
+      min-width: unset;
+    }
+  }
+}
+
+.noResults {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem 1rem !important;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--size-4);
+
+  svg {
+    width: 48px;
+    height: 48px;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+  }
+}
+
 @include max(700px) {
   .tokenList {
     --card-padding: var(--size-8);
@@ -290,6 +339,17 @@
     width: var(--size-9);
     height: var(--size-9);
     font-size: var(--size-4);
+  }
+
+  .controls {
+    padding: 0.75rem;
+  }
+
+  .sortButtons {
+    button {
+      flex: 1 1 calc(50% - 0.25rem) !important;
+      min-width: unset;
+    }
   }
 }
 

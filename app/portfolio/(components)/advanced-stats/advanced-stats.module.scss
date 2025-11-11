@@ -1,0 +1,186 @@
+@use "styles/mixins" as *;
+
+.advancedStats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  --card-padding: var(--size-8);
+
+  @include max(1600px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @include max(1200px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include max(900px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  @include max(600px) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+.metricCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: var(--background-lower);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-m);
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--border-medium);
+    background: var(--background-low);
+  }
+}
+
+.metricHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.metricIcon {
+  width: 18px;
+  height: 18px;
+  color: var(--primary-medium);
+  flex-shrink: 0;
+}
+
+.metricTitle {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.metricValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+
+  &.risk-very-high {
+    color: #ff4444;
+  }
+
+  &.risk-high {
+    color: #ff9c07;
+  }
+
+  &.risk-medium {
+    color: #ffc107;
+  }
+
+  &.risk-low {
+    color: #4caf50;
+  }
+
+  &.risk-very-low {
+    color: #2e7d32;
+  }
+}
+
+.metricBar {
+  display: flex;
+  width: 100%;
+  height: 5px;
+  background: var(--background-medium);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.metricBarFill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--primary-light) 0%,
+    var(--primary-medium) 100%
+  );
+  border-radius: 3px;
+  transition: width 0.3s ease;
+
+  .metricCard:hover & {
+    background: linear-gradient(
+      90deg,
+      var(--primary-medium) 0%,
+      var(--primary-dark) 100%
+    );
+  }
+}
+
+.metricCard:has(.risk-very-high) .metricBarFill {
+  background: linear-gradient(90deg, #ff4444 0%, #cc0000 100%);
+}
+
+.metricCard:has(.risk-high) .metricBarFill {
+  background: linear-gradient(90deg, #ff9c07 0%, #ff6f00 100%);
+}
+
+.metricCard:has(.risk-medium) .metricBarFill {
+  background: linear-gradient(90deg, #ffc107 0%, #ffb300 100%);
+}
+
+.metricCard:has(.risk-low) .metricBarFill {
+  background: linear-gradient(90deg, #4caf50 0%, #388e3c 100%);
+}
+
+.metricCard:has(.risk-very-low) .metricBarFill {
+  background: linear-gradient(90deg, #2e7d32 0%, #1b5e20 100%);
+}
+
+.metricDescription {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.insights {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--background-lower);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-m);
+}
+
+.insightTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.insightList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.insight {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.insightIcon {
+  width: 18px;
+  height: 18px;
+  color: var(--primary-medium);
+  flex-shrink: 0;
+  margin-top: 2px;
+}

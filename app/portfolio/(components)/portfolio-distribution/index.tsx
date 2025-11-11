@@ -1,0 +1,137 @@
+"use client";
+
+import { Card } from "@/components/card";
+import { Heading } from "@/components/heading";
+import { Icon } from "@/components/icon";
+import { Symbol } from "@/components/symbol";
+import { usePortfolioInfo } from "@/hooks/usePortfolioInfo";
+import { formatCurrency } from "@/lib/utils/number";
+import Image from "next/image";
+import s from "./portfolio-distribution.module.scss";
+
+interface DistributionItem {
+  symbol: string;
+  name: string;
+  logo: string | null;
+  symbolIcon?: React.ReactNode;
+  color: string;
+  value: number;
+  percentage: number;
+}
+
+interface PortfolioDistributionProps {
+  watchAddress?: string | null;
+}
+
+export function PortfolioDistribution({ watchAddress }: PortfolioDistributionProps) {
+  const { portfolio: tokens, totalUSD, isLoading } = usePortfolioInfo({ watchAddress });
+
+  if (isLoading || tokens.length === 0) {
+    return null;
+  }
+
+  const items: DistributionItem[] = tokens.map((token) => ({
+    symbol: token.display.symbol.toUpperCase(),
+    name: token.display.name,
+    logo: token.display.logo,
+    symbolIcon: <Symbol icon={token.display.symbolIcon} color={token.display.color} />,
+    color: token.display.color,
+    value: token.balance.totalPrice || 0,
+    percentage: totalUSD > 0 ? ((token.balance.totalPrice || 0) / totalUSD) * 100 : 0
+  }));
+
+  const sortedItems = [...items].sort((a, b) => b.value - a.value);
+
+  return (
+    <Card className={s.distribution}>
+      <Heading
+        icon="hugeicons:chart-pie-02"
+        title="Portfolio Allocation"
+        description="Token distribution and holdings breakdown"
+      />
+
+      <div className={s.content}>
+        <div className={s.legend}>
+          {sortedItems.map((item) => (
+            <div key={item.symbol} className={s.legendItem}>
+              <div className={s.legendHeader}>
+                <div className={s.tokenLogo}>
+                  {item.logo ? (
+                    <Image
+                      src={item.logo}
+                      width={24}
+                      height={24}
+                      alt={item.symbol}
+                      className={s.logo}
+                    />
+                  ) : (
+                    item.symbolIcon
+                  )}
+                </div>
+                <div className={s.tokenMeta}>
+                  <div className={s.tokenSymbol}>{item.symbol}</div>
+                  <div className={s.tokenName}>{item.name}</div>
+                </div>
+              </div>
+
+              <div className={s.legendValue}>
+                <div className={s.percentage}>{item.percentage.toFixed(2)}%</div>
+                <div className={s.value}>{formatCurrency(item.value)}</div>
+              </div>
+
+              <div className={s.barContainer}>
+                <div
+                  className={s.bar}
+                  style={{
+                    width: `${item.percentage}%`,
+                    backgroundColor: item.color
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className={s.summary}>
+          <div className={s.summaryItem}>
+            <span className={s.label}>
+              <Icon icon="hugeicons:target-02" />
+              Top Holding
+            </span>
+            <span className={s.value}>
+              {sortedItems[0]?.symbol} ({sortedItems[0]?.percentage.toFixed(2)}%)
+            </span>
+          </div>
+
+          <div className={s.summaryItem}>
+            <span className={s.label}>
+              <Icon icon="hugeicons:wallet-02" />
+              Unique Tokens
+            </span>
+            <span className={s.value}>{tokens.length}</span>
+          </div>
+
+          <div className={s.summaryItem}>
+            <span className={s.label}>
+              <Icon icon="hugeicons:scale-01" />
+              Concentration
+            </span>
+            <span className={s.value}>
+              {((sortedItems[0]?.percentage || 0) / 100 * 100).toFixed(0)}%
+            </span>
+          </div>
+
+          <div className={s.summaryItem}>
+            <span className={s.label}>
+              <Icon icon="hugeicons:layers-02" />
+              Diversification
+            </span>
+            <span className={s.value}>
+              {tokens.length < 5 ? "Low" : tokens.length < 10 ? "Medium" : "High"}
+            </span>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
