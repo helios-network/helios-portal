@@ -28,7 +28,7 @@ export const usePortfolioInfo = (options?: UsePortfolioInfoOptions) => {
 
   const qTokenBalances = useQuery({
     queryKey: ["tokensBalance", address],
-    queryFn: () => getTokensBalance(address!, toHex(1), toHex(100)),
+    queryFn: () => getTokensBalance(address!, toHex(1), toHex(500)),
     enabled: !!address,
     staleTime: TOKEN_BALANCE_STALE_TIME,
     refetchInterval: TOKEN_BALANCE_REFETCH_INTERVAL
