@@ -5,7 +5,7 @@
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: 1.5rem;
-  padding: 1.5rem;
+  padding: var(--size-10);
   background: linear-gradient(135deg, var(--background-low) 0%, var(--background-lower) 100%);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-l);

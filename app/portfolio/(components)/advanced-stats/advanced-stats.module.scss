@@ -4,6 +4,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
+  --card-padding: var(--size-10);
 }
 
 .metricsGrid {

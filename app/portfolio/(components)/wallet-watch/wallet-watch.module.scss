@@ -4,6 +4,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--size-6);
+  --card-padding: var(--size-10);
 }
 
 .content {

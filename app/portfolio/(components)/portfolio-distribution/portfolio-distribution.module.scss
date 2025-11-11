@@ -1,16 +1,17 @@
 @use "styles/mixins" as *;
 
 .distribution {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  --card-padding: var(--size-8);
+  --card-padding: var(--size-10);
+  align-items: start;
 }
 
 .content {
+  width: 100%;
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
+  align-items: start;
+  margin-top: 1rem;
 }
 
 .legend {
@@ -120,7 +121,7 @@
 .value {
   font-size: 0.85rem;
   color: var(--text-secondary);
-  min-width: 100px;
+  min-width: 50px;
   text-align: right;
 
   @include max(600px) {
@@ -199,9 +200,9 @@
   }
 }
 
-.value {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  text-align: right;
+.summaryItem .value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary-medium);
+  text-align: center;
 }
