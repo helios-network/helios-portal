@@ -1,13 +1,58 @@
 @use "styles/mixins" as *;
 
 .portfolio {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--size-6);
   padding: var(--main-padding);
+  max-width: 2000px;
+  margin: 0 auto;
+  width: 100%;
+
+  @include max(1600px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @include max(1200px) {
+    grid-template-columns: 1fr;
+  }
 
   @include max(700px) {
     gap: var(--size-5);
+    padding: var(--size-4);
+  }
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.topRow {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--size-6);
+  align-items: start;
+
+  @include max(1200px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.leftSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-6);
+}
+
+.analyticsRow {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: var(--size-6);
+
+  @include max(1200px) {
+    grid-template-columns: 1fr;
   }
 }
 

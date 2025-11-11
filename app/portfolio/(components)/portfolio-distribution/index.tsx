@@ -45,7 +45,7 @@ export function PortfolioDistribution({ watchAddress }: PortfolioDistributionPro
   return (
     <Card className={s.distribution}>
       <Heading
-        icon="hugeicons:chart-pie-02"
+        icon="hugeicons:chart-rose"
         title="Portfolio Allocation"
         description="Token distribution and holdings breakdown"
       />

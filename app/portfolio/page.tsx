@@ -23,7 +23,7 @@ export default function PortfolioPage() {
 
   const handleWatchAddress = (address: string | null) => {
     setWatchAddress(address);
-    
+
     // Update URL parameters
     const params = new URLSearchParams(window.location.search);
     if (address) {
@@ -31,25 +31,31 @@ export default function PortfolioPage() {
     } else {
       params.delete("watch");
     }
-    
-    const newUrl = address 
+
+    const newUrl = address
       ? `${window.location.pathname}?${params.toString()}`
       : window.location.pathname;
-    
+
     window.history.replaceState({}, "", newUrl);
   };
 
   return (
     <div className={s.portfolio}>
-      <WalletWatch 
-        onWatchAddress={handleWatchAddress} 
-        currentAddress={watchAddress}
-      />
-      <Stats watchAddress={watchAddress} />
-      <PortfolioExport watchAddress={watchAddress} />
-      <AdvancedStats watchAddress={watchAddress} />
-      <PortfolioDistribution watchAddress={watchAddress} />
-      <TokenList watchAddress={watchAddress} />
+      <div className={s.topRow}>
+        <div className={s.leftSection}>
+          <WalletWatch
+            onWatchAddress={handleWatchAddress}
+            currentAddress={watchAddress}
+          />
+          <Stats watchAddress={watchAddress} />
+          <PortfolioExport watchAddress={watchAddress} />
+        </div>
+        <TokenList watchAddress={watchAddress} />
+      </div>
+      <div className={s.analyticsRow}>
+        <PortfolioDistribution watchAddress={watchAddress} />
+        <AdvancedStats watchAddress={watchAddress} />
+      </div>
     </div>
   );
 }

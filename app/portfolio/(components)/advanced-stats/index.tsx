@@ -67,7 +67,7 @@ export function AdvancedStats({ watchAddress }: AdvancedStatsProps) {
   return (
     <Card className={s.advancedStats}>
       <Heading
-        icon="hugeicons:chart-breakout-01"
+        icon="hugeicons:chart-breakout-circle"
         title="Advanced Analytics"
         description="Portfolio composition and risk analysis"
       />

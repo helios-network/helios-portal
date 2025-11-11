@@ -3,24 +3,20 @@
 .distribution {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
-  --card-padding: var(--size-10);
+  gap: 1.5rem;
+  --card-padding: var(--size-8);
 }
 
 .content {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-
-  @include max(1200px) {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
 }
 
 .legend {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .legendItem {
@@ -28,21 +24,35 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 1rem;
-  background: var(--background-lower);
+  background: linear-gradient(135deg, var(--background-low) 0%, var(--background-lower) 100%);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-m);
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--primary-medium), transparent);
+  }
 
   &:hover {
     border-color: var(--border-medium);
-    background: var(--background-low);
+    background: linear-gradient(135deg, var(--background-medium) 0%, var(--background-low) 100%);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 }
 
 .legendHeader {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   justify-content: space-between;
 
   @include max(600px) {
@@ -55,8 +65,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
 
   .logo {
@@ -72,24 +82,24 @@
 .tokenMeta {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.15rem;
   flex: 1;
 }
 
 .tokenSymbol {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .tokenName {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
 }
 
 .legendValue {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   align-items: center;
   justify-content: flex-end;
 
@@ -100,7 +110,7 @@
 }
 
 .percentage {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--primary-medium);
   min-width: 60px;
@@ -108,7 +118,7 @@
 }
 
 .value {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
   min-width: 100px;
   text-align: right;
@@ -137,9 +147,11 @@
 .summary {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-light);
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: var(--background-lower);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-l);
 
   @include max(1200px) {
     grid-template-columns: repeat(2, 1fr);
@@ -147,25 +159,36 @@
 
   @include max(600px) {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 }
 
 .summaryItem {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 0.5rem;
   padding: 1rem;
-  background: var(--background-low);
+  background: linear-gradient(135deg, var(--background-low) 0%, var(--background-lower) 100%);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-m);
-  gap: 1rem;
+  transition: all 0.3s ease;
+  text-align: center;
+
+  &:hover {
+    border-color: var(--border-medium);
+    background: linear-gradient(135deg, var(--background-medium) 0%, var(--background-low) 100%);
+    transform: translateY(-2px);
+  }
 }
 
 .label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
+  justify-content: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
   font-weight: 500;
 
@@ -177,7 +200,7 @@
 }
 
 .value {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-primary);
   text-align: right;

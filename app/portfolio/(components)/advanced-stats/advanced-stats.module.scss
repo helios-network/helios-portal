@@ -34,16 +34,45 @@
 .metricCard {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 1.25rem;
-  background: var(--background-lower);
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--background-low) 0%, var(--background-lower) 100%);
   border: 1px solid var(--border-light);
-  border-radius: var(--radius-m);
-  transition: all 0.2s ease;
+  border-radius: var(--radius-l);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-medium), transparent);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+      circle at top right,
+      rgba(var(--primary-medium-rgb), 0.05) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
 
   &:hover {
     border-color: var(--border-medium);
-    background: var(--background-low);
+    background: linear-gradient(135deg, var(--background-medium) 0%, var(--background-low) 100%);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -149,11 +178,23 @@
 .insights {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: var(--background-lower);
+  gap: 1.25rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--background-low) 0%, var(--background-lower) 100%);
   border: 1px solid var(--border-light);
-  border-radius: var(--radius-m);
+  border-radius: var(--radius-l);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-medium), transparent);
+  }
 }
 
 .insightTitle {
