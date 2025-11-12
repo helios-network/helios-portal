@@ -196,11 +196,12 @@
   align-items: center;
   justify-content: center;
   padding: var(--size-2) var(--size-4);
-  background-color: var(--background-lower);
+  background-color: var(--background-medium);
+  border: 1px solid var(--border-light);
   border-radius: var(--radius-m);
   font-size: var(--size-3-5);
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--primary-medium);
 }
 
 .loading,
