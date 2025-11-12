@@ -25,28 +25,17 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 1rem;
-  background: linear-gradient(135deg, var(--background-low) 0%, var(--background-lower) 100%);
+  background-color: var(--background-lower);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-m);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
 
-  &::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: linear-gradient(180deg, var(--primary-medium), transparent);
-  }
-
   &:hover {
     border-color: var(--border-medium);
-    background: linear-gradient(135deg, var(--background-medium) 0%, var(--background-low) 100%);
-    transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background-color: var(--background-low);
+    transform: translateX(2px);
   }
 }
 
@@ -171,7 +160,7 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 1rem;
-  background: linear-gradient(135deg, var(--background-low) 0%, var(--background-lower) 100%);
+  background-color: var(--background-lower);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-m);
   transition: all 0.3s ease;
@@ -179,7 +168,7 @@
 
   &:hover {
     border-color: var(--border-medium);
-    background: linear-gradient(135deg, var(--background-medium) 0%, var(--background-low) 100%);
+    background-color: var(--background-low);
     transform: translateY(-2px);
   }
 }
