@@ -9,7 +9,7 @@
 
 .metricsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.25rem;
   --card-padding: var(--size-8);
 
@@ -46,7 +46,7 @@
 
   &:hover {
     border-color: var(--border-medium);
-    background-color: var(--background-low);
+    background-color: var(--background-medium);
     transform: translateY(-2px);
   }
 }
@@ -103,6 +103,11 @@
   background: var(--background-medium);
   border-radius: 3px;
   overflow: hidden;
+  transition: background 0.3s ease;
+}
+
+.metricCard:hover .metricBar {
+  background: var(--background-low);
 }
 
 .metricBarFill {
@@ -110,10 +115,6 @@
   background-color: var(--primary-medium);
   border-radius: 3px;
   transition: width 0.3s ease;
-
-  .metricCard:hover & {
-    background-color: var(--primary-dark);
-  }
 }
 
 .metricCard:has(.risk-very-high) .metricBarFill {
