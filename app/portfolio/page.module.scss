@@ -50,10 +50,21 @@
   display: grid;
   grid-template-columns: 1.2fr 1.5fr;
   gap: var(--size-6);
-  align-items: start;
+  align-items: stretch;
 
   @include max(1200px) {
     grid-template-columns: 1fr;
+  }
+
+  > div:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-6);
+
+    > div:last-child {
+      flex: 1;
+      min-height: 0;
+    }
   }
 }
 

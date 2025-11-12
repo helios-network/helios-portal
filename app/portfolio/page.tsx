@@ -48,12 +48,14 @@ export default function PortfolioPage() {
             currentAddress={watchAddress}
           />
           <Stats watchAddress={watchAddress} />
-          <PortfolioExport watchAddress={watchAddress} />
         </div>
         <TokenList watchAddress={watchAddress} />
       </div>
       <div className={s.analyticsRow}>
-        <PortfolioDistribution watchAddress={watchAddress} />
+        <div>
+          <PortfolioExport watchAddress={watchAddress} />
+          <PortfolioDistribution watchAddress={watchAddress} />
+        </div>
         <AdvancedStats watchAddress={watchAddress} />
       </div>
     </div>
