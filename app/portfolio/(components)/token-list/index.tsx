@@ -35,10 +35,10 @@ function TokenRowComponent({ token }: TokenRowProps) {
         <div className={s.tokenInfo}>
           <div className={s.logoContainer}>
             {token.display.logo && token.display.logo !== "" ? (
-              <Image 
-                src={token.display.logo} 
-                width={40} 
-                height={40} 
+              <Image
+                src={token.display.logo}
+                width={40}
+                height={40}
                 alt={token.display.name}
                 className={s.logo}
               />
@@ -70,8 +70,8 @@ function TokenRowComponent({ token }: TokenRowProps) {
         </div>
       </TableCell>
       <TableCell align="center">
-        <button 
-          onClick={handleAddToWallet} 
+        <button
+          onClick={handleAddToWallet}
           className={s.addButton}
           title={`Add ${token.display.symbol} to wallet`}
         >
@@ -91,6 +91,7 @@ type SortDirection = "asc" | "desc";
 
 export function TokenList({ watchAddress }: TokenListProps) {
   const { portfolio: tokens, isLoading, error, isWatching } = usePortfolioInfo({ watchAddress });
+  console.log("tokens", tokens)
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<SortField>("value");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
@@ -180,8 +181,8 @@ export function TokenList({ watchAddress }: TokenListProps) {
 
   return (
     <Card className={s.tokenList}>
-      <Heading 
-        icon="hugeicons:coins-02" 
+      <Heading
+        icon="hugeicons:coins-02"
         title={isWatching ? "Watched Tokens" : "My Tokens"}
       >
         <div className={s.tokenCount}>

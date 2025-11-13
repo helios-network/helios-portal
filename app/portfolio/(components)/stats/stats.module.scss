@@ -7,20 +7,41 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--size-6);
+  gap: var(--size-5);
+
+  @include max(1920px) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--size-5);
+  }
+
+  @include max(1600px) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--size-5);
+  }
 
   @include max(1400px) {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--size-4);
   }
 
   @include max(1200px) {
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--size-5);
+    gap: var(--size-4);
   }
 
-  @include max(700px) {
-    grid-template-columns: 1fr;
+  @include max(1024px) {
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--size-4);
+  }
+
+  @include max(768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--size-3);
+  }
+
+  @include max(600px) {
+    grid-template-columns: 1fr;
+    gap: var(--size-3);
   }
 }
 
@@ -28,14 +49,23 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--size-4);
-  padding: var(--size-6);
+  gap: var(--size-3);
+  padding: var(--size-5);
   background-color: var(--background-lower);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-l);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+
+  @include max(768px) {
+    padding: var(--size-4);
+    gap: var(--size-2);
+  }
+
+  @include max(600px) {
+    padding: var(--size-4);
+  }
 
   &:hover {
     border-color: var(--border-medium);
@@ -48,13 +78,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--size-12);
-  height: var(--size-12);
+  width: var(--size-10);
+  height: var(--size-10);
   background-color: var(--primary-medium);
   border-radius: var(--radius-m);
   color: var(--white);
-  font-size: var(--size-6);
+  font-size: var(--size-5);
   flex-shrink: 0;
+
+  @include max(768px) {
+    width: var(--size-9);
+    height: var(--size-9);
+    font-size: var(--size-4);
+  }
 }
 
 .statContent {
@@ -66,22 +102,38 @@
 }
 
 .statLabel {
-  font-size: var(--size-3-5);
+  font-size: var(--size-3-4);
   color: var(--text-secondary);
   font-weight: 500;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+
+  @include max(768px) {
+    font-size: var(--size-3);
+  }
+
+  @include max(600px) {
+    font-size: var(--size-2-5);
+  }
 }
 
 .statValue {
-  font-size: var(--size-6);
+  font-size: var(--size-4-5);
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.025em;
   word-break: break-word;
 
-  @include max(700px) {
+  @include max(1024px) {
     font-size: var(--size-5);
+  }
+
+  @include max(768px) {
+    font-size: var(--size-4);
+  }
+
+  @include max(600px) {
+    font-size: var(--size-3-5);
   }
 }
 

@@ -1,5 +1,6 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAccount } from "wagmi"
+import { useEffect, useRef } from "react"
 import { getTokensBalance } from "@/helpers/rpc-calls"
 import { toHex, secondsToMilliseconds } from "@/utils/number"
 import { TokenExtended } from "@/types/token"
@@ -22,9 +23,41 @@ interface UsePortfolioInfoOptions {
 
 export const usePortfolioInfo = (options?: UsePortfolioInfoOptions) => {
   const { address: connectedAddress } = useAccount()
+  const queryClient = useQueryClient()
+  const previousAddressRef = useRef<string | null>(null)
   
   // Use watched address if provided, otherwise use connected address
   const address = options?.watchAddress || connectedAddress
+
+  // Clear cache when watched address changes to prevent mixing tokens from different wallets
+  useEffect(() => {
+    if (options?.watchAddress && address && address !== previousAddressRef.current) {
+      const prevAddress = previousAddressRef.current
+      
+      // Remove ALL enriched portfolio queries from cache
+      queryClient.removeQueries({ 
+        queryKey: ["enrichedPortfolio"],
+        exact: false
+      })
+      
+      // Remove token balance for the previous address
+      if (prevAddress) {
+        queryClient.removeQueries({ 
+          queryKey: ["tokensBalance", prevAddress]
+        })
+      }
+      
+      // Reset current address token data and force refetch
+      queryClient.setQueryData(["tokensBalance", address], undefined)
+      queryClient.invalidateQueries({ 
+        queryKey: ["tokensBalance", address],
+        exact: true,
+        refetchType: 'all'
+      })
+      
+      previousAddressRef.current = address
+    }
+  }, [address, options?.watchAddress, queryClient])
 
   const qTokenBalances = useQuery({
     queryKey: ["tokensBalance", address],

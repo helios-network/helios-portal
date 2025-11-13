@@ -4,7 +4,9 @@ import { Card } from "@/components/card";
 import { Heading } from "@/components/heading";
 import { Icon } from "@/components/icon";
 import { Symbol } from "@/components/symbol";
+import { Badge } from "@/components/badge";
 import { usePortfolioInfo } from "@/hooks/usePortfolioInfo";
+import { getChainConfig } from "@/config/chain-config";
 import { formatCurrency } from "@/lib/utils/number";
 import Image from "next/image";
 import s from "./portfolio-distribution.module.scss";
@@ -17,6 +19,8 @@ interface DistributionItem {
   color: string;
   value: number;
   percentage: number;
+  address: string;
+  originChain: string;
 }
 
 interface PortfolioDistributionProps {
@@ -25,22 +29,33 @@ interface PortfolioDistributionProps {
 
 export function PortfolioDistribution({ watchAddress }: PortfolioDistributionProps) {
   const { portfolio: tokens, totalUSD, isLoading } = usePortfolioInfo({ watchAddress });
+  console.log("tokens PortfolioDistribution", tokens)
 
   if (isLoading || tokens.length === 0) {
     return null;
   }
 
-  const items: DistributionItem[] = tokens.map((token) => ({
-    symbol: token.display.symbol.toUpperCase(),
-    name: token.display.name,
-    logo: token.display.logo,
-    symbolIcon: <Symbol icon={token.display.symbolIcon} color={token.display.color} />,
-    color: token.display.color,
-    value: token.balance.totalPrice || 0,
-    percentage: totalUSD > 0 ? ((token.balance.totalPrice || 0) / totalUSD) * 100 : 0
-  }));
+  const items: DistributionItem[] = tokens.map((token) => {
+    const chainConfig = getChainConfig(parseInt(token.originBlockchain));
+    const chainName = chainConfig ? chainConfig.name : "Unknown";
+
+    return {
+      symbol: token.display.symbol.toUpperCase(),
+      name: token.display.name,
+      logo: token.display.logo,
+      symbolIcon: <Symbol icon={token.display.symbolIcon} color={token.display.color} />,
+      color: token.display.color,
+      value: token.balance.totalPrice || 0,
+      percentage: totalUSD > 0 ? ((token.balance.totalPrice || 0) / totalUSD) * 100 : 0,
+      address: token.functionnal.address,
+      originChain: chainName
+    };
+  });
+  console.log("tokens items", items)
 
   const sortedItems = [...items].sort((a, b) => b.value - a.value);
+
+  console.log("tokens items sorted", sortedItems)
 
   return (
     <Card className={s.distribution}>
@@ -53,7 +68,7 @@ export function PortfolioDistribution({ watchAddress }: PortfolioDistributionPro
       <div className={s.content}>
         <div className={s.legend}>
           {sortedItems.map((item) => (
-            <div key={item.symbol} className={s.legendItem}>
+            <div key={item.address} className={s.legendItem}>
               <div className={s.legendHeader}>
                 <div className={s.tokenLogo}>
                   {item.logo ? (
@@ -70,7 +85,10 @@ export function PortfolioDistribution({ watchAddress }: PortfolioDistributionPro
                 </div>
                 <div className={s.tokenMeta}>
                   <div className={s.tokenSymbol}>{item.symbol}</div>
-                  <div className={s.tokenName}>{item.name}</div>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <div className={s.tokenName}>{item.name}</div>
+                    <Badge>{item.originChain}</Badge>
+                  </div>
                 </div>
               </div>
 
