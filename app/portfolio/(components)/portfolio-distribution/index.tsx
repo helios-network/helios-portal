@@ -88,7 +88,7 @@ export function PortfolioDistribution({ watchAddress }: PortfolioDistributionPro
                 </div>
               </div>
               <div className={s.legendValue}>
-                <div className={s.percentage}>{item.percentage.toFixed(2)}%</div>
+                <div className={s.percentage}>{item.percentage < 0.01 ? item.percentage.toFixed(4) : item.percentage.toFixed(2)}%</div>
                 <div className={s.value}>{formatCurrency(item.value)}</div>
               </div>
 

@@ -124,7 +124,6 @@
 .value {
   font-size: 0.85rem;
   color: var(--text-secondary);
-  min-width: 50px;
   text-align: right;
 
   @include max(600px) {
