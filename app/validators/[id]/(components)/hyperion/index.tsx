@@ -131,8 +131,9 @@ export const Hyperion = () => {
 
         {hyperionData.orchestrator_hyperion_data.map((data, index) => {
           const chainConfig = getChainConfig(data.hyperion_id)
+          console.log(data)
           const totalTransfersForChain =
-            data.tx_out_transfered + data.tx_in_transfered
+            (data.tx_out_transfered || 0) + (data.tx_in_transfered || 0)
 
           return (
             <div
