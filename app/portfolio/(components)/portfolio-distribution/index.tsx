@@ -29,7 +29,6 @@ interface PortfolioDistributionProps {
 
 export function PortfolioDistribution({ watchAddress }: PortfolioDistributionProps) {
   const { portfolio: tokens, totalUSD, isLoading } = usePortfolioInfo({ watchAddress });
-  console.log("tokens PortfolioDistribution", tokens)
 
   if (isLoading || tokens.length === 0) {
     return null;
@@ -51,11 +50,8 @@ export function PortfolioDistribution({ watchAddress }: PortfolioDistributionPro
       originChain: chainName
     };
   });
-  console.log("tokens items", items)
 
   const sortedItems = [...items].sort((a, b) => b.value - a.value);
-
-  console.log("tokens items sorted", sortedItems)
 
   return (
     <Card className={s.distribution}>
@@ -91,7 +87,6 @@ export function PortfolioDistribution({ watchAddress }: PortfolioDistributionPro
                   </div>
                 </div>
               </div>
-
               <div className={s.legendValue}>
                 <div className={s.percentage}>{item.percentage.toFixed(2)}%</div>
                 <div className={s.value}>{formatCurrency(item.value)}</div>
@@ -131,7 +126,7 @@ export function PortfolioDistribution({ watchAddress }: PortfolioDistributionPro
 
           <div className={s.summaryItem}>
             <span className={s.label}>
-              <Icon icon="hugeicons:scale-01" />
+              <Icon icon="hugeicons:3d-scale" />
               Concentration
             </span>
             <span className={s.value}>

@@ -41,21 +41,17 @@ export default function PortfolioPage() {
 
   return (
     <div className={s.portfolio}>
-      <div className={s.topRow}>
-        <div className={s.leftSection}>
-          <WalletWatch
-            onWatchAddress={handleWatchAddress}
-            currentAddress={watchAddress}
-          />
-          <Stats watchAddress={watchAddress} />
-        </div>
-        <TokenList watchAddress={watchAddress} />
+      <div className={s.leftColumn}>
+        <WalletWatch
+          onWatchAddress={handleWatchAddress}
+          currentAddress={watchAddress}
+        />
+        <Stats watchAddress={watchAddress} />
+        <PortfolioExport watchAddress={watchAddress} />
+        <PortfolioDistribution watchAddress={watchAddress} />
       </div>
-      <div className={s.analyticsRow}>
-        <div>
-          <PortfolioExport watchAddress={watchAddress} />
-          <PortfolioDistribution watchAddress={watchAddress} />
-        </div>
+      <div className={s.rightColumn}>
+        <TokenList watchAddress={watchAddress} />
         <AdvancedStats watchAddress={watchAddress} />
       </div>
     </div>

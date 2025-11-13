@@ -17,14 +17,15 @@
 .legend {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
+  padding: 1rem;
 }
 
 .legendItem {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr auto;
   gap: 0.5rem;
-  padding: 1rem;
+  padding: 1.2rem;
   background-color: var(--background-lower);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-m);
@@ -32,22 +33,29 @@
   position: relative;
   overflow: hidden;
 
+  @include max(600px) {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
   &:hover {
     border-color: var(--border-medium);
     background-color: var(--background-medium);
     transform: translateX(2px);
+    .barContainer {
+      background: var(--background-lower);
+    }
   }
 }
 
 .legendHeader {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  justify-content: space-between;
+  gap: 0.75rem;
+  flex: 1;
 
   @include max(600px) {
-    flex-direction: column;
-    align-items: flex-start;
+    flex: 1;
   }
 }
 
@@ -89,13 +97,15 @@
 
 .legendValue {
   display: flex;
-  gap: 0.75rem;
+  gap: 1rem;
   align-items: center;
   justify-content: flex-end;
+  flex-shrink: 0;
 
   @include max(600px) {
-    justify-content: space-between;
+    justify-content: flex-start;
     width: 100%;
+    gap: 1rem;
   }
 }
 
@@ -103,8 +113,12 @@
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--primary-medium);
-  min-width: 60px;
+  min-width: 65px;
   text-align: right;
+
+  @include max(600px) {
+    min-width: 55px;
+  }
 }
 
 .value {
@@ -114,7 +128,7 @@
   text-align: right;
 
   @include max(600px) {
-    min-width: auto;
+    min-width: 70px;
   }
 }
 
@@ -125,6 +139,7 @@
   background: var(--background-medium);
   border-radius: 3px;
   overflow: hidden;
+  grid-column: 1 / -1;
 }
 
 .bar {

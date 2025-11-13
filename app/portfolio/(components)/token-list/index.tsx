@@ -91,7 +91,6 @@ type SortDirection = "asc" | "desc";
 
 export function TokenList({ watchAddress }: TokenListProps) {
   const { portfolio: tokens, isLoading, error, isWatching } = usePortfolioInfo({ watchAddress });
-  console.log("tokens", tokens)
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<SortField>("value");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
