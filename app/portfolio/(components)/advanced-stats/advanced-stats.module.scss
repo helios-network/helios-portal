@@ -1,0 +1,325 @@
+@use "styles/mixins" as *;
+
+.advancedStats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  --card-padding: var(--size-10);
+
+  @include max(1200px) {
+    gap: 1.5rem;
+  }
+
+  @include max(768px) {
+    gap: 1.25rem;
+    --card-padding: var(--size-8);
+  }
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  --card-padding: var(--size-8);
+
+  @include max(1920px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  @include max(1600px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  @include max(1200px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  @include max(1024px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  @include max(768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.875rem;
+  }
+
+  @include max(600px) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+.metricCard {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background-color: var(--background-lower);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-l);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+
+  @include max(1200px) {
+    padding: 1.25rem;
+    gap: 0.875rem;
+  }
+
+  @include max(768px) {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  @include max(600px) {
+    padding: 1rem;
+  }
+
+  &:hover {
+    border-color: var(--border-medium);
+    background-color: var(--background-medium);
+    transform: translateY(-2px);
+  }
+}
+
+.metricHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.metricIcon {
+  width: 18px;
+  height: 18px;
+  color: var(--primary-medium);
+  flex-shrink: 0;
+
+  @include max(768px) {
+    width: 16px;
+    height: 16px;
+  }
+
+  @include max(600px) {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.metricTitle {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+
+  @include max(1200px) {
+    font-size: 0.8rem;
+  }
+
+  @include max(768px) {
+    font-size: 0.75rem;
+  }
+
+  @include max(600px) {
+    font-size: 0.75rem;
+  }
+}
+
+.metricValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+
+  @include max(1200px) {
+    font-size: 1.25rem;
+  }
+
+  @include max(768px) {
+    font-size: 1.1rem;
+  }
+
+  @include max(600px) {
+    font-size: 1rem;
+  }
+
+  &.risk-very-high {
+    color: #ff4444;
+  }
+
+  &.risk-high {
+    color: #ff9c07;
+  }
+
+  &.risk-medium {
+    color: #ffc107;
+  }
+
+  &.risk-low {
+    color: #4caf50;
+  }
+
+  &.risk-very-low {
+    color: #2e7d32;
+  }
+}
+
+.metricBar {
+  display: flex;
+  width: 100%;
+  height: 5px;
+  background: var(--background-medium);
+  border-radius: 3px;
+  overflow: hidden;
+  transition: background 0.3s ease;
+}
+
+.metricCard:hover .metricBar {
+  background: var(--background-low);
+}
+
+.metricBarFill {
+  height: 100%;
+  background-color: var(--primary-medium);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.metricCard:has(.risk-very-high) .metricBarFill {
+  background-color: #ff4444;
+}
+
+.metricCard:has(.risk-high) .metricBarFill {
+  background-color: #ff9c07;
+}
+
+.metricCard:has(.risk-medium) .metricBarFill {
+  background-color: #ffc107;
+}
+
+.metricCard:has(.risk-low) .metricBarFill {
+  background-color: #4caf50;
+}
+
+.metricCard:has(.risk-very-low) .metricBarFill {
+  background-color: #2e7d32;
+}
+
+.metricDescription {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+
+  @include max(1200px) {
+    font-size: 0.75rem;
+  }
+
+  @include max(768px) {
+    font-size: 0.7rem;
+  }
+
+  @include max(600px) {
+    font-size: 0.7rem;
+  }
+}
+
+.insights {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 2rem;
+  background-color: var(--background-low);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-l);
+  position: relative;
+  overflow: hidden;
+
+  @include max(1200px) {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+
+  @include max(768px) {
+    padding: 1.25rem;
+    gap: 0.875rem;
+  }
+
+  @include max(600px) {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+}
+
+.insightTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+
+  @include max(1200px) {
+    font-size: 0.9rem;
+  }
+
+  @include max(768px) {
+    font-size: 0.85rem;
+  }
+
+  @include max(600px) {
+    font-size: 0.8rem;
+  }
+}
+
+.insightList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  @include max(768px) {
+    gap: 0.625rem;
+  }
+
+  @include max(600px) {
+    gap: 0.5rem;
+  }
+}
+
+.insight {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+
+  @include max(1200px) {
+    font-size: 0.85rem;
+    gap: 0.625rem;
+  }
+
+  @include max(768px) {
+    font-size: 0.8rem;
+  }
+
+  @include max(600px) {
+    font-size: 0.75rem;
+  }
+}
+
+.insightIcon {
+  width: 18px;
+  height: 18px;
+  color: var(--primary-medium);
+  flex-shrink: 0;
+  margin-top: 2px;
+
+  @include max(768px) {
+    width: 16px;
+    height: 16px;
+    margin-top: 1px;
+  }
+
+  @include max(600px) {
+    width: 14px;
+    height: 14px;
+  }
+}

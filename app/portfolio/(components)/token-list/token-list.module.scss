@@ -12,7 +12,7 @@
 
 .table {
   --td-padding: var(--size-5);
-  --td-radius: var(--radius-xl);
+  --td-radius: var(--radius-m);
   width: 100%;
   table-layout: fixed;
   border-collapse: separate;
@@ -24,7 +24,7 @@
       color: var(--text-secondary);
       font-weight: 600;
       text-align: left;
-      padding-bottom: var(--size-5);
+      padding-bottom: var(--size-2);
       padding-left: var(--size-4) !important;
       padding-right: var(--size-4) !important;
 
@@ -79,7 +79,7 @@
 
   @include is-hover {
     td {
-      background-color: var(--background-low);
+      background-color: var(--background-lowest);
     }
   }
 }
@@ -196,11 +196,12 @@
   align-items: center;
   justify-content: center;
   padding: var(--size-2) var(--size-4);
-  background-color: var(--background-lower);
+  background-color: var(--background-medium);
+  border: 1px solid var(--border-light);
   border-radius: var(--radius-m);
   font-size: var(--size-3-5);
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--primary-medium);
 }
 
 .loading,
@@ -235,7 +236,46 @@
 }
 
 // Responsive
-@include max(1200px) {
+@include max(1920px) {
+  .table {
+    thead {
+      th {
+        font-size: var(--size-3-5);
+
+        &:nth-child(1) {
+          width: 40%;
+        }
+
+        &:nth-child(2) {
+          width: 15%;
+        }
+
+        &:nth-child(3) {
+          width: 15%;
+        }
+
+        &:nth-child(4) {
+          width: 20%;
+        }
+
+        &:nth-child(5) {
+          width: 10%;
+        }
+      }
+    }
+  }
+
+  .tokenName {
+    font-size: var(--size-4);
+  }
+
+  .balanceAmount,
+  .priceValue {
+    font-size: var(--size-4);
+  }
+}
+
+@include max(1600px) {
   .table {
     thead {
       th {
@@ -251,6 +291,282 @@
   .balanceAmount,
   .priceValue {
     font-size: var(--size-3-5);
+  }
+}
+
+@include max(1400px) {
+  .table {
+    thead {
+      th {
+        &:nth-child(1) {
+          width: 35%;
+        }
+
+        &:nth-child(2) {
+          display: none;
+        }
+
+        &:nth-child(3) {
+          width: 20%;
+        }
+
+        &:nth-child(4) {
+          width: 25%;
+        }
+
+        &:nth-child(5) {
+          width: 20%;
+        }
+      }
+    }
+  }
+
+  .row {
+    td {
+      &:nth-child(2) {
+        display: none;
+      }
+    }
+  }
+}
+
+@include max(1200px) {
+  .table {
+    thead {
+      th {
+        font-size: var(--size-3);
+
+        &:nth-child(1) {
+          width: 35%;
+        }
+
+        &:nth-child(3) {
+          width: 25%;
+        }
+
+        &:nth-child(4) {
+          width: 20%;
+        }
+
+        &:nth-child(5) {
+          width: 20%;
+        }
+      }
+    }
+  }
+
+  .tokenName {
+    font-size: var(--size-3-5);
+  }
+
+  .balanceAmount,
+  .priceValue {
+    font-size: var(--size-3-5);
+  }
+}
+
+@include max(1024px) {
+  .table {
+    thead {
+      th {
+        font-size: var(--size-2-5);
+        padding-bottom: var(--size-1) !important;
+
+        &:nth-child(1) {
+          width: 40%;
+        }
+
+        &:nth-child(3) {
+          width: 20%;
+        }
+
+        &:nth-child(4) {
+          width: 20%;
+        }
+
+        &:nth-child(5) {
+          width: 20%;
+        }
+      }
+    }
+  }
+
+  .tokenInfo {
+    gap: var(--size-3);
+  }
+
+  .logoContainer {
+    min-width: var(--size-9);
+    min-height: var(--size-9);
+  }
+
+  .tokenName {
+    font-size: var(--size-3);
+  }
+
+  .tokenSymbol {
+    font-size: var(--size-2-5);
+  }
+
+  .balance,
+  .price {
+    gap: var(--size-0);
+  }
+
+  .balanceAmount,
+  .priceValue {
+    font-size: var(--size-3);
+  }
+
+  .balanceSymbol,
+  .priceUnit {
+    font-size: var(--size-2);
+  }
+
+  .addButton {
+    width: var(--size-9);
+    height: var(--size-9);
+    font-size: var(--size-4);
+  }
+
+  .sortButtons {
+    button {
+      flex: 1 1 calc(33% - 0.35rem) !important;
+    }
+  }
+}
+
+@include max(768px) {
+  .tokenList {
+    --card-padding: var(--size-8);
+  }
+
+  .table {
+    border-spacing: 0 8px;
+    thead {
+      th {
+        font-size: var(--size-2-5);
+        padding-bottom: var(--size-1) !important;
+
+        &:nth-child(1) {
+          width: 50%;
+        }
+
+        &:nth-child(2) {
+          display: none;
+        }
+
+        &:nth-child(3) {
+          width: 25%;
+        }
+
+        &:nth-child(4) {
+          width: 15%;
+        }
+
+        &:nth-child(5) {
+          width: 10%;
+        }
+      }
+    }
+  }
+
+  .row {
+    td {
+      padding-left: var(--size-3) !important;
+      padding-right: var(--size-3) !important;
+
+      &:nth-child(2) {
+        display: none;
+      }
+    }
+  }
+
+  .tokenInfo {
+    gap: var(--size-2);
+  }
+
+  .logoContainer {
+    min-width: var(--size-8);
+    min-height: var(--size-8);
+  }
+
+  .tokenName {
+    font-size: var(--size-3);
+  }
+
+  .tokenSymbol {
+    font-size: var(--size-2);
+  }
+
+  .balanceAmount,
+  .priceValue {
+    font-size: var(--size-3);
+  }
+
+  .addButton {
+    width: var(--size-8);
+    height: var(--size-8);
+    font-size: var(--size-3);
+  }
+
+  .controls {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .sortButtons {
+    button {
+      flex: 1 1 calc(50% - 0.25rem) !important;
+      min-width: unset;
+    }
+  }
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--background-lower);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-m);
+}
+
+.searchInput {
+  width: 100%;
+}
+
+.sortButtons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  button {
+    flex: 1;
+    min-width: 100px;
+
+    @include max(600px) {
+      flex: 1 1 calc(50% - 0.25rem);
+      min-width: unset;
+    }
+  }
+}
+
+.noResults {
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem 1rem !important;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--size-4);
+
+  svg {
+    width: 48px;
+    height: 48px;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
   }
 }
 
@@ -290,6 +606,17 @@
     width: var(--size-9);
     height: var(--size-9);
     font-size: var(--size-4);
+  }
+
+  .controls {
+    padding: 0.75rem;
+  }
+
+  .sortButtons {
+    button {
+      flex: 1 1 calc(50% - 0.25rem) !important;
+      min-width: unset;
+    }
   }
 }
 

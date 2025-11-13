@@ -15,10 +15,10 @@ export function Stats({ watchAddress }: StatsProps) {
   const { totalUSD, portfolio, isLoading, isWatching } = usePortfolioInfo({ watchAddress });
 
   const tokensCount = portfolio.length;
-  const highestToken = portfolio.length > 0 
-    ? portfolio.reduce((prev, current) => 
-        (prev.balance.totalPrice || 0) > (current.balance.totalPrice || 0) ? prev : current
-      ) 
+  const highestToken = portfolio.length > 0
+    ? portfolio.reduce((prev, current) =>
+      (prev.balance.totalPrice || 0) > (current.balance.totalPrice || 0) ? prev : current
+    )
     : null;
 
   return (
@@ -28,7 +28,7 @@ export function Stats({ watchAddress }: StatsProps) {
         title={isWatching ? "Watched Portfolio" : "My Portfolio"}
         description={isWatching ? "Viewing tokens from watched wallet" : "View and manage all your tokens in one place"}
       />
-      
+
       <div className={s.grid}>
         <div className={s.statItem}>
           <div className={s.statIcon}>
@@ -37,7 +37,7 @@ export function Stats({ watchAddress }: StatsProps) {
           <div className={s.statContent}>
             <div className={s.statLabel}>Total Balance</div>
             {isLoading ? (
-              <div className={s.statValue}>Loading...</div>
+              <div className={s.statValue}>-</div>
             ) : (
               <div className={s.statValue}>{formatCurrency(totalUSD)}</div>
             )}
