@@ -11,7 +11,6 @@ import { useValidatorDetail } from "@/hooks/useValidatorDetail"
 import { ethers } from "ethers"
 import { Symbol } from "@/components/symbol"
 import { TOKEN_COLORS } from "@/config/constants"
-import { EnrichedAsset } from "@/types/validator"
 
 export const Apy = () => {
   const params = useParams()

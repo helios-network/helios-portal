@@ -13,7 +13,6 @@ import { EXPLORER_URL, HELIOS_NETWORK_ID } from "@/config/app"
 import { useState } from "react"
 import { ModalStake } from "@/app/delegations/(components)/active/stake"
 import { Message } from "@/components/message"
-import { EnrichedAsset } from "@/types/validator"
 
 export const Top = () => {
   const { isConnected } = useAccount()
@@ -58,12 +57,12 @@ export const Top = () => {
   const minDelegation = validator.minDelegation
 
   const totalDelegated = tokens.reduce(
-    (acc: number, token: EnrichedAsset) => acc + (parseFloat(token.amount) * token.price),
+    (acc: number, token) => acc + (token.balance.totalPrice),
     0
   )
 
   const ratioOptimal =
-    (tokens.find((token: EnrichedAsset) => token.denom === "hls")?.price || 0) >= totalDelegated
+    (tokens.find((token) => token.display.symbol === "hls")?.balance.totalPrice || 0) >= totalDelegated
 
   const handleOpenStake = () => {
     if (chainId !== HELIOS_NETWORK_ID) {
