@@ -22,7 +22,7 @@ interface ItemProps {
   enrichedAssets?: TokenExtended[]
 }
 
-export const Item = ({ validator, delegation, commission, enrichedAssets }: ItemProps) => {
+export const Item = ({ validator, delegation, enrichedAssets }: ItemProps) => {
   // const [favorite, setFavorite] = useState(false)
 
   // const handleFavorite = () => {
@@ -37,7 +37,7 @@ export const Item = ({ validator, delegation, commission, enrichedAssets }: Item
   const chainId = useChainId()
   const { isConnected } = useAccount()
   const { switchChain } = useSwitchChain()
-  const { userHasDelegated } = useValidatorDetail(validator.validatorAddress, { validator, delegation, commission } as any)
+  const { userHasDelegated } = useValidatorDetail(validator.validatorAddress)
 
   const isActive = validator.status === 3
   const enableDelegation = validator.delegationAuthorization && isConnected
