@@ -1,10 +1,59 @@
 @use "styles/mixins" as *;
 
 .portfolio {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--size-6);
+  padding: var(--main-padding);
+  max-width: 2000px;
+  margin: 0 auto;
+  width: 100%;
+  align-items: start;
+
+  @include max(1200px) {
+    grid-template-columns: 1fr;
+  }
+
+  @include max(700px) {
+    gap: var(--size-5);
+    padding: var(--size-4);
+  }
+}
+
+.leftColumn {
   display: flex;
   flex-direction: column;
   gap: var(--size-6);
-  padding: var(--main-padding);
+
+  > :nth-child(1),
+  > :nth-child(2),
+  > :nth-child(3) {
+    flex: 0 0 auto;
+  }
+
+  > :last-child {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  @include max(700px) {
+    gap: var(--size-5);
+  }
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-6);
+
+  > :first-child {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  > :last-child {
+    flex: 0 0 auto;
+  }
 
   @include max(700px) {
     gap: var(--size-5);

@@ -13,6 +13,9 @@ import { addTokenToWallet } from "@/utils/wallet";
 import Image from "next/image";
 import s from "./token-list.module.scss";
 import { Badge } from "@/components/badge";
+import { Input } from "@/components/input";
+import { Button } from "@/components/button";
+import { useState, useMemo } from "react";
 
 interface TokenRowProps {
   token: TokenExtended;
@@ -32,10 +35,10 @@ function TokenRowComponent({ token }: TokenRowProps) {
         <div className={s.tokenInfo}>
           <div className={s.logoContainer}>
             {token.display.logo && token.display.logo !== "" ? (
-              <Image 
-                src={token.display.logo} 
-                width={40} 
-                height={40} 
+              <Image
+                src={token.display.logo}
+                width={40}
+                height={40}
                 alt={token.display.name}
                 className={s.logo}
               />
@@ -67,8 +70,8 @@ function TokenRowComponent({ token }: TokenRowProps) {
         </div>
       </TableCell>
       <TableCell align="center">
-        <button 
-          onClick={handleAddToWallet} 
+        <button
+          onClick={handleAddToWallet}
           className={s.addButton}
           title={`Add ${token.display.symbol} to wallet`}
         >
@@ -83,8 +86,60 @@ interface TokenListProps {
   watchAddress?: string | null;
 }
 
+type SortField = "value" | "balance" | "name" | "chain";
+type SortDirection = "asc" | "desc";
+
 export function TokenList({ watchAddress }: TokenListProps) {
   const { portfolio: tokens, isLoading, error, isWatching } = usePortfolioInfo({ watchAddress });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortField, setSortField] = useState<SortField>("value");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
+  const filteredAndSortedTokens = useMemo(() => {
+    const filtered = tokens.filter((token) =>
+      token.display.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      token.display.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    filtered.sort((a, b) => {
+      let aValue: string | number = 0;
+      let bValue: string | number = 0;
+
+      switch (sortField) {
+        case "value":
+          aValue = a.balance.totalPrice || 0;
+          bValue = b.balance.totalPrice || 0;
+          break;
+        case "balance":
+          aValue = a.balance.amount || 0;
+          bValue = b.balance.amount || 0;
+          break;
+        case "name":
+          aValue = a.display.name;
+          bValue = b.display.name;
+          break;
+        case "chain":
+          aValue = getChainConfig(parseInt(a.originBlockchain))?.name || "";
+          bValue = getChainConfig(parseInt(b.originBlockchain))?.name || "";
+          break;
+      }
+
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  }, [tokens, searchQuery, sortField, sortDirection]);
+
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("desc");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -125,14 +180,50 @@ export function TokenList({ watchAddress }: TokenListProps) {
 
   return (
     <Card className={s.tokenList}>
-      <Heading 
-        icon="hugeicons:coins-02" 
+      <Heading
+        icon="hugeicons:coins-02"
         title={isWatching ? "Watched Tokens" : "My Tokens"}
       >
         <div className={s.tokenCount}>
           {tokens.length} {tokens.length === 1 ? "Token" : "Tokens"}
         </div>
       </Heading>
+
+      <div className={s.controls}>
+        <Input
+          icon="hugeicons:search-01"
+          placeholder="Search tokens..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className={s.searchInput}
+        />
+        <div className={s.sortButtons}>
+          <Button
+            variant={sortField === "value" ? "primary" : "secondary"}
+            size="small"
+            onClick={() => toggleSort("value")}
+            iconLeft={sortField === "value" && sortDirection === "desc" ? "hugeicons:arrow-down-01" : sortField === "value" ? "hugeicons:arrow-up-01" : "hugeicons:arrow-sort-vertical"}
+          >
+            Value
+          </Button>
+          <Button
+            variant={sortField === "balance" ? "primary" : "secondary"}
+            size="small"
+            onClick={() => toggleSort("balance")}
+            iconLeft={sortField === "balance" && sortDirection === "desc" ? "hugeicons:arrow-down-01" : sortField === "balance" ? "hugeicons:arrow-up-01" : "hugeicons:arrow-sort-vertical"}
+          >
+            Balance
+          </Button>
+          <Button
+            variant={sortField === "name" ? "primary" : "secondary"}
+            size="small"
+            onClick={() => toggleSort("name")}
+            iconLeft={sortField === "name" && sortDirection === "desc" ? "hugeicons:arrow-down-01" : sortField === "name" ? "hugeicons:arrow-up-01" : "hugeicons:arrow-sort-vertical"}
+          >
+            Name
+          </Button>
+        </div>
+      </div>
 
       <Table className={s.table} classNameContainer={s.tableContainer}>
         <thead>
@@ -145,9 +236,18 @@ export function TokenList({ watchAddress }: TokenListProps) {
           </tr>
         </thead>
         <tbody>
-          {tokens.map((token) => (
-            <TokenRowComponent key={token.functionnal.address} token={token} />
-          ))}
+          {filteredAndSortedTokens.length > 0 ? (
+            filteredAndSortedTokens.map((token) => (
+              <TokenRowComponent key={token.functionnal.address} token={token} />
+            ))
+          ) : (
+            <tr>
+              <td colSpan={5} className={s.noResults}>
+                <Icon icon="hugeicons:search-no-1" />
+                <span>No tokens match your search</span>
+              </td>
+            </tr>
+          )}
         </tbody>
       </Table>
     </Card>

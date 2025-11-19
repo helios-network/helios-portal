@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAccount } from "wagmi"
 import { getTokensBalance } from "@/helpers/rpc-calls"
 import { toHex, secondsToMilliseconds } from "@/utils/number"
@@ -22,9 +22,30 @@ interface UsePortfolioInfoOptions {
 
 export const usePortfolioInfo = (options?: UsePortfolioInfoOptions) => {
   const { address: connectedAddress } = useAccount()
-  
+  const queryClient = useQueryClient()
+
   // Use watched address if provided, otherwise use connected address
   const address = options?.watchAddress || connectedAddress
+
+  useQuery({
+    queryKey: ["portfolioCacheInvalidation", address, options?.watchAddress],
+    queryFn: () => {
+      if (options?.watchAddress && address) {
+        queryClient.removeQueries({
+          queryKey: ["enrichedPortfolio"],
+          exact: false
+        })
+        queryClient.invalidateQueries({
+          queryKey: ["tokensBalance", address],
+          exact: true,
+          refetchType: 'all'
+        })
+      }
+      return null
+    },
+    staleTime: Infinity,
+    gcTime: 0,
+  })
 
   const qTokenBalances = useQuery({
     queryKey: ["tokensBalance", address],
