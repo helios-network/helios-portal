@@ -20,12 +20,12 @@ git clone https://github.com/helios-network/helios-portal.git
 cd helios-portal
 ```
 
-### 2Install Dependencies
+### Install Dependencies
 ```sh
 npm install  # or yarn install
 ```
 
-### 3Run the Development Server
+### Run the Development Server
 ```sh
 npm run dev  # or yarn dev
 ```
