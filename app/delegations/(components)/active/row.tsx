@@ -6,6 +6,7 @@ import { Symbol } from "@/components/symbol"
 import { TableCell, TableRow } from "@/components/table"
 import { ValidatorRow } from "@/types/faker"
 import { useState } from "react"
+import { formatTokenAmount } from "@/lib/utils/number"
 // import { ModalClaim } from "../claim/modal"
 import s from "./active.module.scss"
 import { ModalStake } from "./stake"
@@ -93,13 +94,13 @@ ValidatorRow) => {
                   </sup>
                 )}
               </div>
-              <div className={s.amount}>{asset.balance.amount}</div>
+              <div className={s.amount}>{formatTokenAmount(asset.balance.amount)}</div>
             </li>
           ))}
         </ul>
       </TableCell>
       <TableCell className={s.apy}>
-        <strong>{apy.toFixed(2)}%</strong>
+        <strong>{formatTokenAmount(apy)}%</strong>
         {/* <small>{base}%</small> */}
       </TableCell>
       {/* <TableCell>

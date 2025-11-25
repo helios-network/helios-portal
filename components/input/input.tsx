@@ -1,7 +1,7 @@
 "use client"
 
 import { Icon } from "@/components/icon"
-import { formatNumber } from "@/lib/utils/number"
+import { formatNumber, formatTokenAmount } from "@/lib/utils/number"
 import { clsx } from "clsx"
 import {
   forwardRef,
@@ -75,7 +75,7 @@ export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, Props>(
           <label className={s.label}>
             {label}
             {balance !== undefined && (
-              <small>Balance: {formatNumber(balance, 6)}</small>
+              <small>Balance: {formatTokenAmount(balance)}</small>
             )}
           </label>
         )}

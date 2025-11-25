@@ -1,4 +1,5 @@
 import { Card } from "@/components/card"
+import { formatTokenAmount } from "@/lib/utils/number"
 import s from "./weights.module.scss"
 import { useAssetsInfo } from "@/hooks/useAssetsInfo"
 
@@ -28,7 +29,7 @@ export const Weights = () => {
             <div className={s.popover}>
               <span>{token.enriched.display.symbol.toUpperCase()}</span>
               <strong>
-                {parseFloat(token.networkPercentageSecurisation).toFixed(2)}%
+                {formatTokenAmount(parseFloat(token.networkPercentageSecurisation))}%
               </strong>
             </div>
           </div>

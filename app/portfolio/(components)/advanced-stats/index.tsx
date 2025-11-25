@@ -4,7 +4,7 @@ import { Card } from "@/components/card";
 import { Heading } from "@/components/heading";
 import { Icon } from "@/components/icon";
 import { usePortfolioInfo } from "@/hooks/usePortfolioInfo";
-import { formatCurrency } from "@/lib/utils/number";
+import { formatCurrency, formatTokenAmount } from "@/lib/utils/number";
 import s from "./advanced-stats.module.scss";
 
 interface AdvancedStatsProps {
@@ -78,7 +78,7 @@ export function AdvancedStats({ watchAddress }: AdvancedStatsProps) {
             <Icon icon="hugeicons:layers-02" className={s.metricIcon} />
             <span className={s.metricTitle}>Diversification Score</span>
           </div>
-          <div className={s.metricValue}>{diversification.toFixed(1)}/100</div>
+          <div className={s.metricValue}>{formatTokenAmount(diversification)}/100</div>
           <div className={s.metricBar}>
             <div
               className={s.metricBarFill}
@@ -99,7 +99,7 @@ export function AdvancedStats({ watchAddress }: AdvancedStatsProps) {
             <Icon icon="hugeicons:target-02" className={s.metricIcon} />
             <span className={s.metricTitle}>Top Holding %</span>
           </div>
-          <div className={s.metricValue}>{concentration.toFixed(2)}%</div>
+          <div className={s.metricValue}>{formatTokenAmount(concentration)}%</div>
           <div className={s.metricBar}>
             <div
               className={s.metricBarFill}
@@ -126,7 +126,7 @@ export function AdvancedStats({ watchAddress }: AdvancedStatsProps) {
             />
           </div>
           <div className={s.metricDescription}>
-            Herfindahl Index: {herfindahlIndex.toFixed(0)}
+            Herfindahl Index: {formatTokenAmount(herfindahlIndex)}
           </div>
         </div>
 

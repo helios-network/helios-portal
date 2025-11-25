@@ -4,7 +4,7 @@ import { Button } from "@/components/button"
 import { Icon } from "@/components/icon"
 import { Symbol } from "@/components/symbol"
 import { Link } from "@/components/link"
-import { formatCurrency } from "@/lib/utils/number"
+import { formatCurrency, formatTokenAmount } from "@/lib/utils/number"
 import s from "./portfolio.module.scss"
 import { usePortfolioInfo } from "@/hooks/usePortfolioInfo"
 import { addTokenToWallet } from "@/utils/wallet"
@@ -32,7 +32,7 @@ const Line = ({
   token
 }: LineProps) => {
   // const percent = (price / totalPriceUsd) * 100
-  const amountFixed = amount ? parseFloat(amount).toFixed(4) : 0
+  const amountFixed = amount ? formatTokenAmount(parseFloat(amount)) : "0"
 
   const handleAddToWallet = () => {
     if (token) {

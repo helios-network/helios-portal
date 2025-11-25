@@ -9,6 +9,7 @@ import { Delegation } from "@/types/delegation"
 import { useWhitelistedAssets } from "@/hooks/useWhitelistedAssets"
 import { getAssetSymbol, getAssetDisplayProps } from "@/utils/assets"
 import { fetchCGTokenData } from "@/utils/price"
+import { formatTokenAmount } from "@/lib/utils/number"
 import { ethers } from "ethers"
 import Image from "next/image"
 import styles from "./delegation-info.module.scss"
@@ -203,12 +204,12 @@ export function DelegationInfo({
         </div>
         <div className={styles.statItem}>
           <span className={styles.statLabel}>Voting Power</span>
-          <span className={styles.statValue}>{totalShares.toFixed(2)}</span>
+          <span className={styles.statValue}>{formatTokenAmount(totalShares)}</span>
         </div>
         <div className={styles.statItem}>
           <span className={styles.statLabel}>Pending Rewards</span>
           <span className={styles.statValue}>
-            {totalRewards.toFixed(6)} {getAssetSymbol("ahelios", assets)}
+            {formatTokenAmount(totalRewards)} {getAssetSymbol("ahelios", assets)}
           </span>
         </div>
       </div>

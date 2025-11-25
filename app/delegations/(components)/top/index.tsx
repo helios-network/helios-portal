@@ -4,7 +4,7 @@ import { Heading } from "@/components/heading"
 import { Claim } from "../claim"
 import s from "./top.module.scss"
 import { useDelegationInfo } from "@/hooks/useDelegationInfo"
-import { formatBigNumber } from "@/lib/utils/number"
+import { formatBigNumber, formatTokenAmount } from "@/lib/utils/number"
 
 export const Top = () => {
   const { totalDelegatedUSD, validatorsCount, averageApr } = useDelegationInfo()
@@ -19,7 +19,7 @@ export const Top = () => {
     },
     {
       title: "Average APY",
-      value: `${averageApr.toFixed(2)}%`,
+      value: `${formatTokenAmount(averageApr)}%`,
       bottom: "Weighted average",
       color: "success"
     }

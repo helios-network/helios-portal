@@ -1,7 +1,7 @@
 import { Badge } from "@/components/badge"
 import { Button } from "@/components/button"
 import { Icon } from "@/components/icon"
-import { formatBigNumber } from "@/lib/utils/number"
+import { formatBigNumber, formatTokenAmount } from "@/lib/utils/number"
 import { TokenExtended } from "@/types/token"
 import s from "./item.module.scss"
 import { StatItem } from "./stat"
@@ -41,11 +41,11 @@ export const Item = ({ validator, delegation, enrichedAssets }: ItemProps) => {
 
   const isActive = validator.status === 3
   const enableDelegation = validator.delegationAuthorization && isConnected
-  const formattedApr = parseFloat(validator.apr).toFixed(2) + "%"
+  const formattedApr = formatTokenAmount(parseFloat(validator.apr)) + "%"
   const formattedCommission =
-    parseFloat(validator.commission.commission_rates.rate) * 100 + "%"
+    formatTokenAmount(parseFloat(validator.commission.commission_rates.rate) * 100) + "%"
   const formattedBoost =
-    Math.min((parseFloat(validator.boostPercentage) * 15) / 100, 15) + "%"
+    formatTokenAmount(Math.min((parseFloat(validator.boostPercentage) * 15) / 100, 15)) + "%"
 
   // Use enrichedAssets if available, otherwise convert delegation.assets to display format
   const tokens: TokenExtended[] = enrichedAssets && enrichedAssets.length > 0

@@ -6,7 +6,8 @@ import { Symbol } from "@/components/symbol"
 import {
   formatBigNumber,
   formatCurrency,
-  formatNumber
+  formatNumber,
+  formatTokenAmount
 } from "@/lib/utils/number"
 import { formatNumberWithNotation } from "@/helpers/format"
 import s from "./tvl.module.scss"
@@ -152,7 +153,7 @@ export const TVL = () => {
                 <div key={asset.denom} className={s.topAsset}>
                   <span className={s.topAssetSymbol}>{asset.symbol}</span>
                   <span className={s.topAssetPercentage}>
-                    {parseFloat(asset.networkPercentageSecurisation).toFixed(2)}
+                    {formatTokenAmount(parseFloat(asset.networkPercentageSecurisation))}
                     %
                   </span>
                 </div>
@@ -183,7 +184,7 @@ export const TVL = () => {
               <div className={s.weightsPopover}>
                 <span>{token.enriched.display.symbol.toUpperCase()}</span>
                 <strong>
-                  {parseFloat(token.networkPercentageSecurisation).toFixed(2)}%
+                  {formatTokenAmount(parseFloat(token.networkPercentageSecurisation))}%
                 </strong>
               </div>
             </div>

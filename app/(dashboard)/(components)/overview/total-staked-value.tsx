@@ -6,6 +6,7 @@ import { useWhitelistedAssets } from "@/hooks/useWhitelistedAssets"
 import {
     formatNumberWithNotation
 } from "@/helpers/format"
+import { formatTokenAmount } from "@/lib/utils/number"
 import { Card } from "@/components/card"
 import { Heading } from "@/components/heading"
 import { RechartsTooltip } from "@/components/recharts/tooltip"
@@ -117,7 +118,7 @@ export function TotalStakedValue() {
                                 <div key={asset.denom} className={s.assetWeight}>
                                     <span className={s.assetSymbol}>{asset.symbol}</span>
                                     <span className={s.assetPercentage}>
-                                        {parseFloat(asset.networkPercentageSecurisation).toFixed(2)}%
+                                        {formatTokenAmount(parseFloat(asset.networkPercentageSecurisation))}%
                                     </span>
                                 </div>
                             ))}

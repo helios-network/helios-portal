@@ -1,6 +1,7 @@
 import { Card } from "@/components/card"
 import { Heading } from "@/components/heading"
 import { Symbol } from "@/components/symbol"
+import { formatTokenAmount } from "@/lib/utils/number"
 // import { TOKENS } from "@/config/tokens"
 // import { formatNumber } from "@/lib/utils/number"
 import s from "./staking.module.scss"
@@ -22,7 +23,7 @@ export const Staking = () => {
   const minStakeAssets = assets
     .map(
       (asset) =>
-        (minDelegation / asset.baseWeight).toFixed(2) +
+        formatTokenAmount(minDelegation / asset.baseWeight) +
         " " +
         asset.enriched.display.symbol.toUpperCase()
     )
@@ -39,11 +40,11 @@ export const Staking = () => {
     // },
     {
       label: "Commission Rate",
-      value: parseFloat(validator.commission.commission_rates.rate) + "%"
+      value: formatTokenAmount(parseFloat(validator.commission.commission_rates.rate)) + "%"
     },
     {
       label: "Commission Max Rate",
-      value: parseFloat(validator.commission.commission_rates.max_rate) + "%"
+      value: formatTokenAmount(parseFloat(validator.commission.commission_rates.max_rate)) + "%"
     }
   ]
 

@@ -5,7 +5,7 @@ import { Card } from "@/components/card"
 import { Heading } from "@/components/heading"
 import { Icon } from "@/components/icon"
 import { Modal } from "@/components/modal"
-import { formatNumber } from "@/lib/utils/number"
+import { formatNumber, formatTokenAmount } from "@/lib/utils/number"
 import clsx from "clsx"
 import Image from "next/image"
 import { ChangeEvent, useEffect, useState, useCallback, useMemo } from "react"
@@ -805,7 +805,7 @@ export const Interface = () => {
                 >
                   <p className={s.feeLabel}>Low</p>
                   <p className={s.feeAmount}>
-                    {Number(lowFee).toFixed(6)} HLS
+                    {formatTokenAmount(Number(lowFee))} HLS
                   </p>
                 </div>
                 <div
@@ -816,7 +816,7 @@ export const Interface = () => {
                 >
                   <p className={s.feeLabel}>Average</p>
                   <p className={s.feeAmount}>
-                    {Number(averageFee).toFixed(6)} HLS
+                    {formatTokenAmount(Number(averageFee))} HLS
                   </p>
                 </div>
                 <div
@@ -827,7 +827,7 @@ export const Interface = () => {
                 >
                   <p className={s.feeLabel}>High</p>
                   <p className={s.feeAmount}>
-                    {Number(highFee).toFixed(6)} HLS
+                    {formatTokenAmount(Number(highFee))} HLS
                   </p>
                 </div>
                 <div
@@ -856,7 +856,7 @@ export const Interface = () => {
                   "No Fees"
                 ) : (
                   <>
-                    {Number(estimatedFees).toFixed(6)} HLS
+                    {formatTokenAmount(Number(estimatedFees))} HLS
                   </>
                 )}
               </strong>
