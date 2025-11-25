@@ -17,6 +17,7 @@ import { Badge } from "@/components/badge"
 import { STATUS_CONFIG } from "@/config/vote"
 import { Button } from "@/components/button"
 import { Input } from "@/components/input/input"
+import { formatTokenAmount } from "@/lib/utils/number"
 
 interface ProposalData {
   id: string
@@ -176,9 +177,9 @@ const AllProposals: React.FC = () => {
     // Short K/M display for right rail numbers
     const k = (n: bigint) => {
       const num = Number(n / 10n ** decimals)
-      if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(2)}M`
-      if (num >= 1_000) return `${(num / 1_000).toFixed(2)}K`
-      return `${num.toFixed(2)}`
+      if (num >= 1_000_000) return `${formatTokenAmount(num / 1_000_000)}M`
+      if (num >= 1_000) return `${formatTokenAmount(num / 1_000)}K`
+      return formatTokenAmount(num)
     }
 
     const totalVotesFormatted = k(total)

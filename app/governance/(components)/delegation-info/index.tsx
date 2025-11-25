@@ -228,9 +228,9 @@ export function DelegationInfo({
                   {truncateAddress(delegation.validatorAddress)}
                 </Link>
                 <span className={styles.sharesAmount}>
-                  {parseFloat(
+                  {formatTokenAmount(parseFloat(
                     ethers.formatUnits(delegation.shares, 18)
-                  ).toFixed(2)}{" "}
+                  ))}{" "}
                   shares
                 </span>
               </div>
@@ -272,24 +272,24 @@ export function DelegationInfo({
                           </span>
                         </div>
                         <span className={styles.assetAmount}>
-                          {parseFloat(
+                          {formatTokenAmount(parseFloat(
                             ethers.formatUnits(asset.amount, 18)
-                          ).toFixed(6)}
+                          ))}
                         </span>
                       </div>
                       <div className={styles.assetDetails}>
                         <div className={styles.assetDetailsLeft}>
                           <span className={styles.assetDetail}>
                             Base:{" "}
-                            {parseFloat(
+                            {formatTokenAmount(parseFloat(
                               ethers.formatUnits(asset.baseAmount, 18)
-                            ).toFixed(6)}
+                            ))}
                           </span>
                           <span className={styles.assetDetail}>
                             Weighted:{" "}
-                            {parseFloat(
+                            {formatTokenAmount(parseFloat(
                               ethers.formatUnits(asset.weightedAmount, 18)
-                            ).toFixed(6)}
+                            ))}
                           </span>
                         </div>
                         {(() => {
@@ -338,9 +338,9 @@ export function DelegationInfo({
                     )
                   })()}
                   <span className={styles.rewardAmount}>
-                    {parseFloat(
+                    {formatTokenAmount(parseFloat(
                       ethers.formatUnits(delegation.rewards.amount, 18)
-                    ).toFixed(6)}{" "}
+                    ))}{" "}
                     {getAssetSymbol(delegation.rewards.denom, assets)}
                   </span>
                 </div>
@@ -352,9 +352,9 @@ export function DelegationInfo({
                 <Icon icon="mdi:rocket-launch-outline" width={16} height={16} />
                 <span className={styles.boostLabel}>Total Boost:</span>
                 <span className={styles.boostAmount}>
-                  {parseFloat(
+                  {formatTokenAmount(parseFloat(
                     ethers.formatUnits(delegation.totalBoost, 18)
-                  ).toFixed(6)}
+                  ))}
                 </span>
               </div>
             )}

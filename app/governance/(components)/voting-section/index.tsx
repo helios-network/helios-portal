@@ -10,7 +10,7 @@ import { Message } from "@/components/message"
 import { useVote } from "@/hooks/useVote"
 import { useUserVote, getVoteOptionName, getVoteOptionColor } from "@/hooks/useUserVote"
 import { useProposalDelegations } from "@/hooks/useProposalDelegations"
-import { formatNumber } from "@/lib/utils/number"
+import { formatNumber, formatTokenAmount } from "@/lib/utils/number"
 import clsx from "clsx"
 import { useEffect, useState, useMemo } from "react"
 import { toast } from "sonner"
@@ -118,8 +118,8 @@ const formatDepositAmount = (amount: string, decimals: number = 18): string => {
   try {
     const bn = BigInt(amount)
     const divisor = BigInt(10 ** decimals)
-    const formatted = (Number(bn) / Number(divisor)).toFixed(2)
-    return formatNumber(parseFloat(formatted), 2)
+    const formatted = Number(bn) / Number(divisor)
+    return formatTokenAmount(formatted)
   } catch {
     return amount
   }
