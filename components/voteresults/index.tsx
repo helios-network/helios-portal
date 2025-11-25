@@ -119,16 +119,6 @@ export function VoteResults({
       <RechartsPieLegend data={votes} className={s.legend} />
 
       <div className={s.divider} />
-
-      {/* <div className={s.progress} data-color="primary">
-        <h3 className={s.progressTitle}>Quorum progress</h3>
-        <Progress value={quorumProgress} max={100} />
-        <div className={s.progressBottom}>
-          <span>{quorumProgress.toFixed(1)}% of quorum</span>
-          <span>{formatNumber(totalVotes.toString())} / {quorum}</span>
-        </div>
-      </div> */}
-
       <div className={s.meta}>
         <Badge
           className={s.statusBadge}

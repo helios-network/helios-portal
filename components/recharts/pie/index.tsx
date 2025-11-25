@@ -4,7 +4,7 @@ import clsx from "clsx"
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
 import { RechartsTooltip } from "../tooltip"
 import s from "./pie.module.scss"
-import { formatNumber, formatTokenAmount } from "@/lib/utils/number"
+import { formatTokenAmount } from "@/lib/utils/number"
 
 interface RechartsPieProps {
   data: {

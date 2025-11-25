@@ -10,7 +10,7 @@ import { Message } from "@/components/message"
 import { useVote } from "@/hooks/useVote"
 import { useUserVote, getVoteOptionName, getVoteOptionColor } from "@/hooks/useUserVote"
 import { useProposalDelegations } from "@/hooks/useProposalDelegations"
-import { formatNumber, formatTokenAmount } from "@/lib/utils/number"
+import { formatTokenAmount } from "@/lib/utils/number"
 import clsx from "clsx"
 import { useEffect, useState, useMemo } from "react"
 import { toast } from "sonner"
@@ -652,7 +652,7 @@ export function VotingSection({
             </ul>
 
             <div className={styles.power}>
-              <span>Your Voting Power:</span> <strong>{formatNumber(votingPower, 2)} votes</strong>
+              <span>Your Voting Power:</span> <strong>{formatTokenAmount(votingPower)} votes</strong>
             </div>
 
             <div className={styles.metadataSection}>
