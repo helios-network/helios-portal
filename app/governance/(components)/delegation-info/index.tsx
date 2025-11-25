@@ -299,7 +299,7 @@ export function DelegationInfo({
                           )
                           return price ? (
                             <span className={styles.assetPrice}>
-                              ${(amount * price).toFixed(2)}
+                              ${formatTokenAmount(amount * price)}
                             </span>
                           ) : null
                         })()}

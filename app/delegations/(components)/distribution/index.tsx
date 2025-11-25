@@ -15,12 +15,15 @@ const getValidatorColorByIndex = (index: number) => {
 export const Distribution = () => {
   const { delegationsByValidator, totalDelegatedUSD } = useDelegationInfo()
 
-  const data = delegationsByValidator.map((validator, i) => ({
-    name: validator.moniker,
-    price: validator.totalUSD,
-    percentage: (validator.totalUSD / totalDelegatedUSD) * 100,
-    color: getValidatorColorByIndex(i)
-  }))
+  const data = delegationsByValidator.map((validator, i) => {
+    return {
+      name: validator.moniker,
+      value: validator.totalUSD,
+      price: validator.totalUSD,
+      percentage: (validator.totalUSD / totalDelegatedUSD) * 100,
+      color: getValidatorColorByIndex(i)
+    }
+  })
 
   return (
     <Card className={s.distribution} auto>
