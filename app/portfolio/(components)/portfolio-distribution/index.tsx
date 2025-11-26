@@ -7,7 +7,7 @@ import { Symbol } from "@/components/symbol";
 import { Badge } from "@/components/badge";
 import { usePortfolioInfo } from "@/hooks/usePortfolioInfo";
 import { getChainConfig } from "@/config/chain-config";
-import { formatCurrency } from "@/lib/utils/number";
+import { formatCurrency, formatTokenAmount } from "@/lib/utils/number";
 import Image from "next/image";
 import s from "./portfolio-distribution.module.scss";
 
@@ -88,7 +88,7 @@ export function PortfolioDistribution({ watchAddress }: PortfolioDistributionPro
                 </div>
               </div>
               <div className={s.legendValue}>
-                <div className={s.percentage}>{item.percentage < 0.01 ? item.percentage.toFixed(4) : item.percentage.toFixed(2)}%</div>
+                <div className={s.percentage}>{formatTokenAmount(item.percentage)}%</div>
                 <div className={s.value}>{formatCurrency(item.value)}</div>
               </div>
 
@@ -112,7 +112,7 @@ export function PortfolioDistribution({ watchAddress }: PortfolioDistributionPro
               Top Holding
             </span>
             <span className={s.value}>
-              {sortedItems[0]?.symbol} ({sortedItems[0]?.percentage.toFixed(2)}%)
+              {sortedItems[0]?.symbol} ({formatTokenAmount(sortedItems[0]?.percentage)}%)
             </span>
           </div>
 
@@ -130,7 +130,7 @@ export function PortfolioDistribution({ watchAddress }: PortfolioDistributionPro
               Concentration
             </span>
             <span className={s.value}>
-              {((sortedItems[0]?.percentage || 0) / 100 * 100).toFixed(0)}%
+              {formatTokenAmount((sortedItems[0]?.percentage || 0) / 100 * 100)}%
             </span>
           </div>
 

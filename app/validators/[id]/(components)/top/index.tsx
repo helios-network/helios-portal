@@ -3,7 +3,7 @@ import { Card } from "@/components/card"
 import { Area, Grid } from "@/components/grid"
 import { Heading } from "@/components/heading"
 import { Icon } from "@/components/icon"
-import { formatBigNumber } from "@/lib/utils/number"
+import { formatBigNumber, formatTokenAmount } from "@/lib/utils/number"
 import { StatItem } from "../../../(components)/item/stat"
 import s from "./top.module.scss"
 import { useParams } from "next/navigation"
@@ -47,12 +47,12 @@ export const Top = () => {
 
   const isActive = validator.status === 3
   const enableDelegation = validator.delegationAuthorization
-  const formattedApr = parseFloat(validator.apr).toFixed(2) + "%"
+  const formattedApr = formatTokenAmount(parseFloat(validator.apr)) + "%"
   const formattedCommission =
-    parseFloat(validator.commission.commission_rates.rate) * 100 + "%"
+    formatTokenAmount(parseFloat(validator.commission.commission_rates.rate) * 100) + "%"
 
   const formattedBoost =
-    Math.min((parseFloat(validator.boostPercentage) * 15) / 100, 15) + "%"
+    formatTokenAmount(Math.min((parseFloat(validator.boostPercentage) * 15) / 100, 15)) + "%"
   const tokens = delegation.assets
   const minDelegation = validator.minDelegation
 

@@ -7,7 +7,7 @@ import { Symbol } from "@/components/symbol";
 import { Table, TableCell, TableRow } from "@/components/table";
 import { getChainConfig } from "@/config/chain-config";
 import { usePortfolioInfo } from "@/hooks/usePortfolioInfo";
-import { formatCurrency } from "@/lib/utils/number";
+import { formatCurrency, formatTokenAmount } from "@/lib/utils/number";
 import { TokenExtended } from "@/types/token";
 import { addTokenToWallet } from "@/utils/wallet";
 import Image from "next/image";
@@ -57,7 +57,7 @@ function TokenRowComponent({ token }: TokenRowProps) {
       </TableCell>
       <TableCell align="right">
         <div className={s.balance}>
-          <div className={s.balanceAmount}>{token.balance.amount.toFixed(4)}</div>
+          <div className={s.balanceAmount}>{formatTokenAmount(token.balance.amount)}</div>
           <div className={s.balanceSymbol}>{token.display.symbol.toUpperCase()}</div>
         </div>
       </TableCell>

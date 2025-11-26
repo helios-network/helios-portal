@@ -1,6 +1,7 @@
 // import { Blocks } from "@/components/blocks"
 import { Card } from "@/components/card"
 import { Heading } from "@/components/heading"
+import { formatTokenAmount } from "@/lib/utils/number"
 // import { Message } from "@/components/message"
 // import { Progress } from "@/components/progress"
 import { RechartsPie, RechartsPieLegend } from "@/components/recharts/pie"
@@ -63,9 +64,9 @@ export const Apy = () => {
   //   { name: "BNB", value: 250000, percentage: 10, color: TOKEN_COLORS.bnb }
   // ]
 
-  const formattedBoost = parseFloat(
+  const formattedBoost = formatTokenAmount(parseFloat(
     ethers.formatEther(validator.totalBoost.split(".")[0])
-  ).toFixed(6)
+  ))
 
   return (
     <Card auto>

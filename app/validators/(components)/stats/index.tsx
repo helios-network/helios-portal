@@ -6,7 +6,7 @@ import { useAssetsInfo } from "@/hooks/useAssetsInfo"
 import { useValidatorInfo } from "@/hooks/useValidatorInfo"
 import { Stat } from "./stat"
 import s from "./stats.module.scss"
-import { formatBigNumber } from "@/lib/utils/number"
+import { formatBigNumber, formatTokenAmount } from "@/lib/utils/number"
 
 export const Stats = () => {
   const { activeValidators, maxValidators, avgApr, networkSecurity } =
@@ -30,7 +30,7 @@ export const Stats = () => {
         <strong>{activeValidators} validators</strong>
       </Stat>
       <Stat title="Average APY" icon="hugeicons:percent-square">
-        <strong>{avgApr.toFixed(2)}</strong>
+        <strong>{formatTokenAmount(avgApr)}</strong>
         <span>%</span>
       </Stat>
       <Stat title="Total Staked Value" icon="hugeicons:stake">

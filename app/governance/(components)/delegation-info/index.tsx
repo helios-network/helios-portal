@@ -9,6 +9,7 @@ import { Delegation } from "@/types/delegation"
 import { useWhitelistedAssets } from "@/hooks/useWhitelistedAssets"
 import { getAssetSymbol, getAssetDisplayProps } from "@/utils/assets"
 import { fetchCGTokenData } from "@/utils/price"
+import { formatTokenAmount } from "@/lib/utils/number"
 import { ethers } from "ethers"
 import Image from "next/image"
 import styles from "./delegation-info.module.scss"
@@ -203,12 +204,12 @@ export function DelegationInfo({
         </div>
         <div className={styles.statItem}>
           <span className={styles.statLabel}>Voting Power</span>
-          <span className={styles.statValue}>{totalShares.toFixed(2)}</span>
+          <span className={styles.statValue}>{formatTokenAmount(totalShares)}</span>
         </div>
         <div className={styles.statItem}>
           <span className={styles.statLabel}>Pending Rewards</span>
           <span className={styles.statValue}>
-            {totalRewards.toFixed(6)} {getAssetSymbol("ahelios", assets)}
+            {formatTokenAmount(totalRewards)} {getAssetSymbol("ahelios", assets)}
           </span>
         </div>
       </div>
@@ -227,9 +228,9 @@ export function DelegationInfo({
                   {truncateAddress(delegation.validatorAddress)}
                 </Link>
                 <span className={styles.sharesAmount}>
-                  {parseFloat(
+                  {formatTokenAmount(parseFloat(
                     ethers.formatUnits(delegation.shares, 18)
-                  ).toFixed(2)}{" "}
+                  ))}{" "}
                   shares
                 </span>
               </div>
@@ -271,24 +272,24 @@ export function DelegationInfo({
                           </span>
                         </div>
                         <span className={styles.assetAmount}>
-                          {parseFloat(
+                          {formatTokenAmount(parseFloat(
                             ethers.formatUnits(asset.amount, 18)
-                          ).toFixed(6)}
+                          ))}
                         </span>
                       </div>
                       <div className={styles.assetDetails}>
                         <div className={styles.assetDetailsLeft}>
                           <span className={styles.assetDetail}>
                             Base:{" "}
-                            {parseFloat(
+                            {formatTokenAmount(parseFloat(
                               ethers.formatUnits(asset.baseAmount, 18)
-                            ).toFixed(6)}
+                            ))}
                           </span>
                           <span className={styles.assetDetail}>
                             Weighted:{" "}
-                            {parseFloat(
+                            {formatTokenAmount(parseFloat(
                               ethers.formatUnits(asset.weightedAmount, 18)
-                            ).toFixed(6)}
+                            ))}
                           </span>
                         </div>
                         {(() => {
@@ -298,7 +299,7 @@ export function DelegationInfo({
                           )
                           return price ? (
                             <span className={styles.assetPrice}>
-                              ${(amount * price).toFixed(2)}
+                              ${formatTokenAmount(amount * price)}
                             </span>
                           ) : null
                         })()}
@@ -337,9 +338,9 @@ export function DelegationInfo({
                     )
                   })()}
                   <span className={styles.rewardAmount}>
-                    {parseFloat(
+                    {formatTokenAmount(parseFloat(
                       ethers.formatUnits(delegation.rewards.amount, 18)
-                    ).toFixed(6)}{" "}
+                    ))}{" "}
                     {getAssetSymbol(delegation.rewards.denom, assets)}
                   </span>
                 </div>
@@ -351,9 +352,9 @@ export function DelegationInfo({
                 <Icon icon="mdi:rocket-launch-outline" width={16} height={16} />
                 <span className={styles.boostLabel}>Total Boost:</span>
                 <span className={styles.boostAmount}>
-                  {parseFloat(
+                  {formatTokenAmount(parseFloat(
                     ethers.formatUnits(delegation.totalBoost, 18)
-                  ).toFixed(6)}
+                  ))}
                 </span>
               </div>
             )}

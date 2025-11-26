@@ -7,6 +7,7 @@ import { VotingHistoryProvider } from "@/context/VotingHistoryContext"
 import styles from "./proposal.module.scss"
 import { Power } from "../../(components)/power"
 import { Heading } from "@/components/heading"
+import { formatTokenAmount } from "@/lib/utils/number"
 
 interface TallyResult {
   yes_count: string
@@ -98,10 +99,10 @@ export default async function ProposalDetail({
   const vetoVotes = BigInt(proposal.currentTallyResult.no_with_veto_count || "0")
 
   // Format votes for VoteResults component
-  const forVotes = (Number(yesVotes) / 1e18).toFixed(2) // Assuming 18 decimals
-  const againstVotes = (Number(noVotes) / 1e18).toFixed(2)
-  const abstainVotesFormatted = (Number(abstainVotes) / 1e18).toFixed(2)
-  const vetoVotesFormatted = (Number(vetoVotes) / 1e18).toFixed(2)
+  const forVotes = formatTokenAmount(Number(yesVotes) / 1e18) // Assuming 18 decimals
+  const againstVotes = formatTokenAmount(Number(noVotes) / 1e18)
+  const abstainVotesFormatted = formatTokenAmount(Number(abstainVotes) / 1e18)
+  const vetoVotesFormatted = formatTokenAmount(Number(vetoVotes) / 1e18)
   // const quorum = "4,000,000" // Replace with actual quorum data
 
   return (

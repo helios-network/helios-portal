@@ -1,7 +1,7 @@
 "use client"
 
 import { Icon } from "@/components/icon"
-import { formatNumber } from "@/lib/utils/number"
+import { formatTokenAmount } from "@/lib/utils/number"
 import { clsx } from "clsx"
 import {
   forwardRef,
@@ -29,13 +29,13 @@ interface BaseInputProps {
 
 interface InputProps
   extends BaseInputProps,
-    Omit<InputHTMLAttributes<HTMLInputElement>, "className"> {
+  Omit<InputHTMLAttributes<HTMLInputElement>, "className"> {
   type?: "text" | "number" | "password" | "email" | "tel" | "url"
 }
 
 interface TextareaProps
   extends BaseInputProps,
-    Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "className"> {
+  Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "className"> {
   type: "textarea"
 }
 
@@ -75,7 +75,7 @@ export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, Props>(
           <label className={s.label}>
             {label}
             {balance !== undefined && (
-              <small>Balance: {formatNumber(balance, 6)}</small>
+              <small>Balance: {formatTokenAmount(balance)}</small>
             )}
           </label>
         )}
