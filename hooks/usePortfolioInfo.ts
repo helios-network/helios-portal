@@ -83,10 +83,12 @@ export const usePortfolioInfo = (options?: UsePortfolioInfoOptions) => {
 
         // Find origin blockchain
         let originBlockchain = "42000"
-        for (const chainMetadata of metadata.metadata.chainsMetadatas) {
-          if (chainMetadata.isOriginated) {
-            originBlockchain = `${chainMetadata.chainId}`
-            break
+        if (metadata.metadata.chainsMetadatas && metadata.metadata.chainsMetadatas.length > 0) {
+          for (const chainMetadata of metadata.metadata.chainsMetadatas) {
+            if (chainMetadata.isOriginated) {
+              originBlockchain = `${chainMetadata.chainId}`
+              break
+            }
           }
         }
 

@@ -160,6 +160,7 @@ export function TokenList({ watchAddress }: TokenListProps) {
         <div className={s.error}>
           <Icon icon="hugeicons:alert-circle" />
           <span>Error loading tokens. Please try again later.</span>
+          <p className={s.errorHint}>{error.message}</p>
         </div>
       </Card>
     );
