@@ -108,7 +108,8 @@ export const TokenSearchModal = ({
                     onClick={() => handleTokenSelect(token.functionnal?.address)}
                   >
                     <div className={s.tokenLogoWrapper}>
-                      {token.display?.logo &&token.display.logo !== "" && (
+                      
+                      {token.display?.logo && token.display.logo !== "" && (
                         <Image
                           src={token.display.logo}
                           alt=""

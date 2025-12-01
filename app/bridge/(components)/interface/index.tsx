@@ -33,6 +33,7 @@ import { getTokenDetailsInBatch } from "@/hooks/useTokenEnrichmentBatch"
 import { fetchCGTokenData } from "@/utils/price"
 import { TOKEN_COLORS } from "@/config/constants"
 import { APP_COLOR_DEFAULT } from "@/config/app"
+import { TokenDenom } from "@/types/denom"
 
 type BridgeForm = {
   asset: string | null
@@ -91,7 +92,7 @@ export const Interface = () => {
   const qTokensByChain = useQuery({
     queryKey: ["tokensByChain", form.to?.chainId],
     queryFn: () =>
-      getTokensByChainIdAndPageAndSize(form.to!.chainId, toHex(1), toHex(5)),
+      getTokensByChainIdAndPageAndSize(form.to!.chainId, toHex(1), toHex(50)),
     enabled: !!form.to,
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: false
@@ -105,8 +106,15 @@ export const Interface = () => {
       form.from?.chainId
     ],
     queryFn: async () => {
-      const tokensToEnrich = qTokensByChain.data!.slice(0, 3)
-      const tokenAddresses = tokensToEnrich.map(
+      // Take more tokens to account for potential HLS filtering
+      const tokensToEnrich = qTokensByChain.data!.slice(0, 100);
+      const filteredDuplicates = tokensToEnrich.reduce((acc: TokenDenom[], token: TokenDenom) => {
+        if (acc.find(t => t.metadata.symbol.toLowerCase() === token.metadata.symbol.toLowerCase())) {
+          return acc
+        }
+        return [...acc, token]
+      }, [] as TokenDenom[]);
+      const tokenAddresses = filteredDuplicates.map(
         (t) => t.metadata.contract_address
       )
 
@@ -120,7 +128,7 @@ export const Interface = () => {
       const cgData = await fetchCGTokenData(symbols)
 
       // Map raw tokens to enriched format
-      const results = tokensToEnrich.map((token) => {
+      const results = filteredDuplicates.map((token) => {
         const metadata = batchMetadata[token.metadata.contract_address]
         if (!metadata) return null
 
@@ -177,7 +185,12 @@ export const Interface = () => {
         }
       })
 
-      return results.filter((v) => v !== null)
+      console.log('results', results.map(r => r?.enriched?.display.symbol))
+
+      // Filter out null values and HLS token, then take first 3
+      return results
+        .filter((v) => v !== null)
+        // .filter((v) => v!.enriched.display.symbol.toLowerCase() !== "hls")
     },
     enabled: !!form.from && !!qTokensByChain.data?.length,
     staleTime: 30000, // 30 seconds
@@ -971,7 +984,7 @@ export const Interface = () => {
       <TokenSearchModal
         open={openTokenSearch}
         onClose={() => setOpenTokenSearch(false)}
-        tokens={tokensByChain}
+        tokens={tokensByChain.map(token => token.enriched)}
         onTokenSelect={(tokenAddress) => {
           handleTokenSearchChange({
             target: {
