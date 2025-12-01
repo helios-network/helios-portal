@@ -136,12 +136,15 @@ export const Interface = () => {
         const cgToken = cgData[symbol]
 
         let originBlockchain = "42000"
+        const tokenAddressesByTargetChain: any = {
+          ["42000"]: token.metadata.contract_address,
+        };
         if (metadata.metadata.chainsMetadatas && metadata.metadata.chainsMetadatas.length > 0) {
           for (const chainMetadata of metadata.metadata.chainsMetadatas) {
             if (chainMetadata.isOriginated) {
               originBlockchain = `${chainMetadata.chainId}`
-              break
             }
+            tokenAddressesByTargetChain[`${chainMetadata.chainId}`] = chainMetadata.contractAddress;
           }
         }
 
@@ -180,7 +183,8 @@ export const Interface = () => {
               holdersCount: metadata.holdersCount,
               totalSupply: metadata.total_supply
             },
-            originBlockchain: originBlockchain
+            originBlockchain: originBlockchain,
+            tokenAddressesByTargetChain: tokenAddressesByTargetChain
           }
         }
       })
@@ -592,13 +596,13 @@ export const Interface = () => {
                           ? token.enriched.display.symbolIcon
                           : undefined
                       }
-                      key={token.enriched.functionnal.address}
+                      key={token.enriched.tokenAddressesByTargetChain[`${form.from?.chainId}`] || token.enriched.functionnal.address}//token.enriched.functionnal.address
                       variant="secondary"
                       size="xsmall"
                       onClick={() =>
                         handleTokenSearchChange({
                           target: {
-                            value: token.enriched.functionnal.address
+                            value: token.enriched.tokenAddressesByTargetChain[`${form.from?.chainId}`] || token.enriched.functionnal.address//token.enriched.functionnal.address
                           }
                         })
                       }
@@ -664,7 +668,7 @@ export const Interface = () => {
                       {token.enriched.display.symbol.toUpperCase()} -{" "}
                       {getOriginChainName(token.enriched.originBlockchain)}
                       {isTokenWhitelisted(
-                        token.enriched.functionnal.address
+                        token.enriched.tokenAddressesByTargetChain[`${form.from?.chainId}`] || token.enriched.functionnal.address
                       ) && <span className={s.whitelistedIcon}>⭐</span>}
                     </Button>
                   ))}
