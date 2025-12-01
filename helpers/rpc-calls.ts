@@ -102,6 +102,9 @@ export const getValidatorsByPageAndSizeWithHisAssetsAndCommissionAndDelegation =
 export const getActiveValidatorCount = () =>
   request<number>("eth_getActiveValidatorCount", [])
 
+export const getValidatorsCount = () =>
+  request<number>("eth_getValidatorCount", [])
+
 export const getAllWhitelistedAssets = () =>
   request<WhitelistedAsset[]>("eth_getAllWhitelistedAssets", [])
 
