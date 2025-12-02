@@ -8,7 +8,7 @@ type UseAssetsInfoOptions = { updateBalance?: boolean }
 
 export const useAssetsInfo = (options: UseAssetsInfoOptions = {}) => {
   const { updateBalance = false } = options
-  const { getTokenByAddress } = useTokenRegistry()
+  const { getTokenByAddresses } = useTokenRegistry()
 
   const qAssets = useQuery({
     queryKey: ["whitelistedAssets"],
@@ -27,32 +27,35 @@ export const useAssetsInfo = (options: UseAssetsInfoOptions = {}) => {
     enabled: !!qAssets.data,
     queryFn: async () => {
       const data = qAssets.data || []
+      if (!data || data.length === 0) return []
 
-      const enrichedAssets = await Promise.all(
-        data.map(async (asset) => {
-          const enriched = await getTokenByAddress(
-            asset.contractAddress,
-            HELIOS_NETWORK_ID,
-            { updateBalance }
-          )
-          if (!enriched) return null
-
-          const tokenAmount = parseFloat(asset.totalShares) / asset.baseWeight
-          const tokenAmountString = tokenAmount.toLocaleString("fullwide", {
-            useGrouping: false
-          })
-          const tokenAmountFormatted = fromWeiToEther(tokenAmountString)
-          const tvlUSD = parseFloat(tokenAmountFormatted) * enriched.price.usd
-
-          return {
-            ...asset,
-            tokenAmount: tokenAmountFormatted,
-            tvlUSD,
-            enriched,
-            holders: enriched.stats.holdersCount
-          }
-        })
+      // Batch fetch all token metadata in single call
+      const tokenAddresses = data.map(a => a.contractAddress)
+      const enrichedTokens = await getTokenByAddresses(
+        tokenAddresses,
+        HELIOS_NETWORK_ID,
+        { updateBalance }
       )
+
+      const enrichedAssets = data.map((asset, idx) => {
+        const enriched = enrichedTokens[idx]
+        if (!enriched) return null
+
+        const tokenAmount = parseFloat(asset.totalShares) / asset.baseWeight
+        const tokenAmountString = tokenAmount.toLocaleString("fullwide", {
+          useGrouping: false
+        })
+        const tokenAmountFormatted = fromWeiToEther(tokenAmountString)
+        const tvlUSD = parseFloat(tokenAmountFormatted) * enriched.price.usd
+
+        return {
+          ...asset,
+          tokenAmount: tokenAmountFormatted,
+          tvlUSD,
+          enriched,
+          holders: enriched.stats.holdersCount
+        }
+      })
 
       return enrichedAssets.filter((v) => v !== null)
     }
