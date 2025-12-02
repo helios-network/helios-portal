@@ -34,6 +34,7 @@ import { fetchCGTokenData } from "@/utils/price"
 import { TOKEN_COLORS } from "@/config/constants"
 import { APP_COLOR_DEFAULT } from "@/config/app"
 import { TokenDenom } from "@/types/denom"
+import { useQueryStates, parseAsInteger } from "nuqs"
 
 type BridgeForm = {
   asset: string | null
@@ -70,6 +71,12 @@ export const Interface = () => {
   const [openTokenSearch, setOpenTokenSearch] = useState(false)
   const [selectedFeeType, setSelectedFeeType] = useState<FeeType>(FeeType.AVERAGE)
   const [customFeeAmount, setCustomFeeAmount] = useState<string>("0")
+
+  // URL parameters for src and dst chain IDs
+  const [urlParams, setUrlParams] = useQueryStates({
+    src: parseAsInteger,
+    dst: parseAsInteger
+  })
 
   const { isWrappable } = useWrapper({
     enableNativeBalance: openWrapModal,
@@ -189,8 +196,6 @@ export const Interface = () => {
         }
       })
 
-      console.log('results', results.map(r => r?.enriched?.display.symbol))
-
       // Filter out null values and HLS token, then take first 3
       return results
         .filter((v) => v !== null)
@@ -306,9 +311,31 @@ export const Interface = () => {
       (chainType === "from" || forceChainType === "from") &&
       chain.chainId !== form.from?.chainId
     ) {
-      switchChain({ chainId: chain.chainId })
+      // Ensure the new from chain is different from to chain
+      if (chain.chainId === form.to?.chainId && chains.length > 1) {
+        // If they would be the same, find a different chain for to
+        const newTo = chains.find((c) => c.chainId !== chain.chainId) || chains[0]
+        setForm({
+          ...form,
+          from: chain,
+          to: newTo,
+          amount: "0",
+          asset: null
+        })
+        setUrlParams({ src: chain.chainId, dst: newTo.chainId })
+      } else {
+        switchChain({ chainId: chain.chainId })
+        setUrlParams({ src: chain.chainId, dst: urlParams.dst ?? undefined })
+      }
       setOpenChain(false)
 
+      return
+    }
+
+    // Ensure the new to chain is different from from chain
+    if (chain.chainId === form.from?.chainId) {
+      // If they would be the same, don't change
+      setOpenChain(false)
       return
     }
 
@@ -318,12 +345,35 @@ export const Interface = () => {
       amount: "0",
       asset: null
     })
+    setUrlParams({ src: urlParams.src ?? undefined, dst: chain.chainId })
     setOpenChain(false)
   }
 
   const handleSwap = () => {
-    if (form.to) {
-      handleChangeChain(form.to, "from")
+    if (form.to && form.from && form.to.chainId !== form.from.chainId) {
+      // Swap the chains directly
+      const newFrom = form.to
+      const newTo = form.from
+      
+      // Update URL params
+      setUrlParams({
+        src: newFrom.chainId,
+        dst: newTo.chainId
+      })
+      
+      // Update form
+      setForm({
+        ...form,
+        from: newFrom,
+        to: newTo,
+        amount: "0",
+        asset: null
+      })
+      
+      // Switch the wallet chain if needed
+      if (newFrom.chainId !== chainId) {
+        switchChain({ chainId: newFrom.chainId })
+      }
     }
   }
 
@@ -433,24 +483,81 @@ export const Interface = () => {
     if (chains.length < 2) return
     lightResetForm()
 
-    const currentChainIndex = chains.findIndex(
-      (chain) => chain.chainId === chainId
-    )
-    const heliosIndex = heliosChainIndex ?? 0
+    // Check if src and dst are the same - if so, use default logic
+    const srcEqualsDst = urlParams.src !== null && urlParams.dst !== null && urlParams.src === urlParams.dst
 
-    const from = chains[currentChainIndex]
-    let to = chains[heliosIndex]
+    // Try to get chains from URL parameters first
+    let from: HyperionChain | undefined
+    let to: HyperionChain | undefined
 
-    if (heliosIndex === currentChainIndex) {
-      to = chains.find((_, i) => i !== currentChainIndex) || chains[0]
+    if (!srcEqualsDst) {
+      if (urlParams.src) {
+        from = chains.find((chain) => chain.chainId === urlParams.src)
+      }
+      if (urlParams.dst) {
+        to = chains.find((chain) => chain.chainId === urlParams.dst)
+      }
+    }
+
+    // If URL params don't provide valid chains or src equals dst, use default logic
+    if (!from || !to || srcEqualsDst) {
+      const currentChainIndex = chains.findIndex(
+        (chain) => chain.chainId === chainId
+      )
+      const heliosIndex = heliosChainIndex ?? 0
+
+      if (!from || srcEqualsDst) {
+        from = chains[currentChainIndex]
+      }
+      if (!to || srcEqualsDst) {
+        to = chains[heliosIndex]
+        if (heliosIndex === currentChainIndex) {
+          to = chains.find((_, i) => i !== currentChainIndex) || chains[0]
+        }
+      }
+
+      // Ensure from and to are different
+      if (from && to && from.chainId === to.chainId) {
+        to = chains.find((chain) => chain.chainId !== from!.chainId) || chains[0]
+      }
+
+      // Update URL params with the determined chains
+      setUrlParams({
+        src: from?.chainId ?? undefined,
+        dst: to?.chainId ?? undefined
+      })
+    } else {
+      // Ensure from and to are different even if found from URL
+      if (from && to && from.chainId === to.chainId) {
+        const currentChainIndex = chains.findIndex(
+          (chain) => chain.chainId === chainId
+        )
+        const heliosIndex = heliosChainIndex ?? 0
+        
+        // If from is the current chain, set to to helios or another chain
+        if (from.chainId === chainId) {
+          to = chains[heliosIndex]
+          if (heliosIndex === currentChainIndex) {
+            to = chains.find((_, i) => i !== currentChainIndex) || chains[0]
+          }
+        } else {
+          // Otherwise, keep from and find a different to
+          to = chains.find((chain) => chain.chainId !== from!.chainId) || chains[0]
+        }
+        
+        setUrlParams({
+          src: from?.chainId ?? undefined,
+          dst: to?.chainId ?? undefined
+        })
+      }
     }
 
     setForm((prevForm) => ({
       ...prevForm,
-      from,
-      to
+      from: from || prevForm.from,
+      to: to || prevForm.to
     }))
-  }, [chains, heliosChainIndex, chainId, lightResetForm])
+  }, [chains, heliosChainIndex, chainId, lightResetForm, urlParams.src, urlParams.dst, setUrlParams])
 
   const amountNb = parseFloat(form.amount)
   const heliosInOrOut =

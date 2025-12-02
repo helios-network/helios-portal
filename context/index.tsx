@@ -18,6 +18,7 @@ import { createAppKit } from "@reown/appkit/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { type ReactNode } from "react"
 import { cookieToInitialState, WagmiProvider, type Config } from "wagmi"
+import { NuqsAdapter } from "nuqs/adapters/next/app"
 
 const queryClient = new QueryClient()
 queryClient.setDefaultOptions({
@@ -77,12 +78,14 @@ function ContextProvider({ children, cookies }: ContextProviderProps) {
   // No need to check for sessions anymore as we've removed the signature requirement
 
   return (
-    <WagmiProvider
-      config={wagmiAdapter.wagmiConfig as Config}
-      initialState={initialState}
-    >
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </WagmiProvider>
+    <NuqsAdapter>
+      <WagmiProvider
+        config={wagmiAdapter.wagmiConfig as Config}
+        initialState={initialState}
+      >
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </WagmiProvider>
+    </NuqsAdapter>
   )
 }
 
