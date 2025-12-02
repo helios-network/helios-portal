@@ -239,29 +239,6 @@ export const getHomePageCoreDataBatch = (txSize: string) =>
   ])
 
 /**
- * Batch: Get governance info (proposals + count)
- * Reduces 2 separate calls to 1 batched HTTP request
- */
-export const getGovernanceInfoBatch = (page: string, size: string) =>
-  batchRequest<[Proposal[], string]>([
-    { method: "eth_getProposalsByPageAndSize", params: [page, size] },
-    { method: "eth_getProposalsCount", params: [] }
-  ])
-
-/**
- * Batch: Get validator detail + assets for SINGLE validator
- * Combines delegation/commission + assets/commission into 1 batched request
- * Reduces 2 separate calls to 1 HTTP request
- * Latency improvement: ~50% (one round-trip instead of two)
- * Impact: Detail page loads 2x faster
- */
-export const getValidatorDetailAndAssetsBatch = (validatorAddress: string) =>
-  batchRequest<[ValidatorWithDelegationCommission, ValidatorWithAssetsCommission]>([
-    { method: "eth_getValidatorWithHisDelegationAndCommission", params: [validatorAddress] },
-    { method: "eth_getValidatorWithHisAssetsAndCommission", params: [validatorAddress] }
-  ])
-
-/**
  * Batch: Get delegations for specific validators for a user
  * Single RPC call returns user's delegations to specified validators
  * Replaces N parallel getDelegation() calls with 1 request
