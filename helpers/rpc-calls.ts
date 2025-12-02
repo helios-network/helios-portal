@@ -28,6 +28,9 @@ export const getTokensBalance = (address: string, page: string, size: string) =>
 export const getTokenDetail = (address: string) =>
   request<TokenMetadataResponse>("eth_getTokenDetails", [address])
 
+export const getTokensDetails = (addresses: string[]) =>
+  request<TokenMetadataResponse[]>("eth_getTokensDetails", [addresses])
+
 export const getBlocksByPageAndSize = (
   page: number,
   size: number,
