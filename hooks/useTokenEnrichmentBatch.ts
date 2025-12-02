@@ -35,6 +35,12 @@ export const getTokenDetailsInBatch = async (
         chunk.forEach((address, idx) => {
             if (batchResults && batchResults[idx]) {
                 result[address] = batchResults[idx]
+
+                // case HEL- symbol (shorted tokens)
+                if (result[address]?.metadata?.symbol.startsWith("HEL-") && result[address]?.metadata?.symbol.length <= 6) {
+                    result[address].metadata.symbol = result[address].metadata.symbol.substring(4)
+                    result[address].metadata.name = result[address].metadata.name.substring(4)
+                }
             }
         })
     }
