@@ -216,29 +216,6 @@ export const getBlockAndPreviousBlock = (blockNumber: string) => {
 }
 
 /**
- * Batch: Get validators info (count + list)
- * Reduces 2 separate calls to 1 batched HTTP request
- */
-export const getValidatorsInfoBatch = (page: string, size: string) =>
-  batchRequest<[Validator[], number]>([
-    { method: "eth_getValidatorsByPageAndSize", params: [page, size] },
-    { method: "eth_getActiveValidatorCount", params: [] }
-  ])
-
-/**
- * Batch: Get home page core data
- * Combines: block number + gas price + last transactions
- * Reduces 3 separate calls to 1 batched HTTP request
- * Impact: ~200-300ms latency improvement on typical networks
- */
-export const getHomePageCoreDataBatch = (txSize: string) =>
-  batchRequest<[string, string, TransactionLast[]]>([
-    { method: "eth_blockNumber", params: [] },
-    { method: "eth_gasPrice", params: [] },
-    { method: "eth_getLastTransactionsInfo", params: [txSize] }
-  ])
-
-/**
  * Batch: Get delegations for specific validators for a user
  * Single RPC call returns user's delegations to specified validators
  * Replaces N parallel getDelegation() calls with 1 request
