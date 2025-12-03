@@ -12,7 +12,6 @@ import { HELIOS_NETWORK_ID } from "@/config/app"
 import Link from "next/link"
 import HELIOS_NODE_MONIKERS from "@/config/helios-node-monikers"
 import { Validator, Delegation, EnrichedAsset } from "@/types/validator"
-import { useValidatorDetail } from "@/hooks/useValidatorDetail"
 
 interface ItemProps {
   validator: Validator
@@ -20,24 +19,14 @@ interface ItemProps {
   delegation: Delegation
   commission: { denom: string; amount: string }
   enrichedAssets?: TokenExtended[]
+  userHasDelegated?: boolean
 }
 
-export const Item = ({ validator, delegation, enrichedAssets }: ItemProps) => {
-  // const [favorite, setFavorite] = useState(false)
-
-  // const handleFavorite = () => {
-  //   setFavorite(!favorite)
-  //   if (favorite) {
-  //     toast.success(`Validator "${name}" added to favorites.`)
-  //   } else {
-  //     toast.success(`Validator "${name}" removed from favorites.`)
-  //   }
-  // }
+export const Item = ({ validator, delegation, enrichedAssets, userHasDelegated = false }: ItemProps) => {
   const [openStake, setOpenStake] = useState(false)
   const chainId = useChainId()
   const { isConnected } = useAccount()
   const { switchChain } = useSwitchChain()
-  const { userHasDelegated } = useValidatorDetail(validator.validatorAddress)
 
   const isActive = validator.status === 3
   const enableDelegation = validator.delegationAuthorization && isConnected

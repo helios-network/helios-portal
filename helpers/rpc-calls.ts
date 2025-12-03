@@ -28,6 +28,9 @@ export const getTokensBalance = (address: string, page: string, size: string) =>
 export const getTokenDetail = (address: string) =>
   request<TokenMetadataResponse>("eth_getTokenDetails", [address])
 
+export const getTokensDetails = (addresses: string[]) =>
+  request<TokenMetadataResponse[]>("eth_getTokensDetails", [addresses])
+
 export const getBlocksByPageAndSize = (
   page: number,
   size: number,
@@ -211,52 +214,6 @@ export const getBlockAndPreviousBlock = (blockNumber: string) => {
     { method: "eth_getBlockByNumber", params: [previousBlock, false] }
   ])
 }
-
-/**
- * Batch: Get validators info (count + list)
- * Reduces 2 separate calls to 1 batched HTTP request
- */
-export const getValidatorsInfoBatch = (page: string, size: string) =>
-  batchRequest<[Validator[], number]>([
-    { method: "eth_getValidatorsByPageAndSize", params: [page, size] },
-    { method: "eth_getActiveValidatorCount", params: [] }
-  ])
-
-/**
- * Batch: Get home page core data
- * Combines: block number + gas price + last transactions
- * Reduces 3 separate calls to 1 batched HTTP request
- * Impact: ~200-300ms latency improvement on typical networks
- */
-export const getHomePageCoreDataBatch = (txSize: string) =>
-  batchRequest<[string, string, TransactionLast[]]>([
-    { method: "eth_blockNumber", params: [] },
-    { method: "eth_gasPrice", params: [] },
-    { method: "eth_getLastTransactionsInfo", params: [txSize] }
-  ])
-
-/**
- * Batch: Get governance info (proposals + count)
- * Reduces 2 separate calls to 1 batched HTTP request
- */
-export const getGovernanceInfoBatch = (page: string, size: string) =>
-  batchRequest<[Proposal[], string]>([
-    { method: "eth_getProposalsByPageAndSize", params: [page, size] },
-    { method: "eth_getProposalsCount", params: [] }
-  ])
-
-/**
- * Batch: Get validator detail + assets for SINGLE validator
- * Combines delegation/commission + assets/commission into 1 batched request
- * Reduces 2 separate calls to 1 HTTP request
- * Latency improvement: ~50% (one round-trip instead of two)
- * Impact: Detail page loads 2x faster
- */
-export const getValidatorDetailAndAssetsBatch = (validatorAddress: string) =>
-  batchRequest<[ValidatorWithDelegationCommission, ValidatorWithAssetsCommission]>([
-    { method: "eth_getValidatorWithHisDelegationAndCommission", params: [validatorAddress] },
-    { method: "eth_getValidatorWithHisAssetsAndCommission", params: [validatorAddress] }
-  ])
 
 /**
  * Batch: Get delegations for specific validators for a user

@@ -10,8 +10,8 @@ import {
 import { TokenExtended } from "@/types/token"
 import { fetchCGTokenData } from "@/utils/price"
 import { TOKEN_COLORS } from "@/config/constants"
-import { APP_COLOR_DEFAULT } from "@/config/app"
-import { getTokenDetail } from "@/helpers/rpc-calls"
+import { APP_COLOR_DEFAULT, HELIOS_NETWORK_ID } from "@/config/app"
+import { getTokenDetail, getTokensDetails } from "@/helpers/rpc-calls"
 
 export const useTokenRegistry = () => {
   const [tokens, setTokens] = useState<TokenExtended[]>([])
@@ -87,7 +87,7 @@ export const useTokenRegistry = () => {
           display: {
             name: data.metadata.name,
             description: "",
-            logo: cgToken?.logo || "",
+            logo: cgToken?.logo || data.metadata.logo || "",
             symbol,
             symbolIcon: symbol === "hls" ? "helios" : "token:" + symbol,
             color:
@@ -165,9 +165,136 @@ export const useTokenRegistry = () => {
     )
   }
 
+  const getTokenByAddresses = async (
+    tokenAddresses: string[],
+    tempChainId?: number,
+    opts: GetTokenOpts = { updateBalance: false }
+  ): Promise<(TokenExtended | null)[]> => {
+    const chainId = tempChainId || currentChainId
+
+    if (!tokenAddresses || tokenAddresses.length === 0) return []
+
+    // Check which tokens are already cached
+    const cachedTokens: (TokenExtended | null)[] = []
+    const uncachedAddresses: string[] = []
+    const uncachedIndices: number[] = []
+
+    tokenAddresses.forEach((address, idx) => {
+      const existing = tokens.find(
+        (t) =>
+          t.functionnal.address.toLowerCase() === address.toLowerCase() &&
+          t.functionnal.chainId === chainId
+      )
+      if (existing) {
+        cachedTokens[idx] = existing
+      } else {
+        cachedTokens[idx] = null
+        uncachedAddresses.push(address)
+        uncachedIndices.push(idx)
+      }
+    })
+
+    // If all cached, return early
+    if (uncachedAddresses.length === 0) return cachedTokens
+
+    // Batch fetch uncached token metadata
+    try {
+      const tokenDetails = await getTokensDetails(uncachedAddresses)
+      if (!tokenDetails || tokenDetails.length === 0) return cachedTokens
+
+      const symbols = tokenDetails.map(t => t?.metadata?.symbol?.toLowerCase()).filter(Boolean)
+      const cgData = await fetchCGTokenData(symbols)
+
+      // Enrich each uncached token
+      const enrichedTokens = uncachedAddresses.map((address, idx) => {
+        const metadata = tokenDetails[idx]
+        if (!metadata) return null
+
+        const symbol = metadata.metadata.symbol.toLowerCase()
+        const cgToken = cgData[symbol]
+        const unitPrice = cgToken?.price || 0
+
+        let originBlockchain = "42000"
+        if (metadata.metadata.chainsMetadatas && metadata.metadata.chainsMetadatas.length > 0) {
+          for (const chainMetadata of metadata.metadata.chainsMetadatas) {
+            if (chainMetadata.isOriginated) {
+              originBlockchain = `${chainMetadata.chainId}`
+              break
+            }
+          }
+        }
+
+        const newToken: TokenExtended = {
+          display: {
+            name: metadata.metadata.name,
+            description: "",
+            logo: cgToken?.logo || metadata.metadata.logo || "",
+            symbol,
+            symbolIcon: symbol === "hls" ? "helios" : `token:${symbol}`,
+            color: TOKEN_COLORS[symbol as keyof typeof TOKEN_COLORS] || APP_COLOR_DEFAULT
+          },
+          price: { usd: unitPrice },
+          balance: {
+            amount: 0,
+            totalPrice: 0
+          },
+          functionnal: {
+            address,
+            chainId,
+            denom: metadata.metadata.base,
+            decimals: metadata.metadata.decimals
+          },
+          stats: {
+            holdersCount: metadata.holdersCount,
+            totalSupply: metadata.total_supply
+          },
+          originBlockchain
+        }
+
+        // Update balances if requested
+        if (opts.updateBalance && userAddress) {
+          return (async () => {
+            try {
+              const info = await fetchTokenBalanceOnly(
+                address,
+                chainId,
+                userAddress,
+                newToken.functionnal.decimals
+              )
+              newToken.balance.amount = info.readableBalance
+              newToken.balance.totalPrice = info.readableBalance * newToken.price.usd
+            } catch (e) {
+              console.error("Failed to update balance for token:", address, e)
+            }
+            return newToken
+          })()
+        }
+
+        return newToken
+      })
+
+      // Wait for all balance updates if needed
+      const resolvedTokens = await Promise.all(enrichedTokens)
+
+      // Add newly enriched tokens to cache
+      setTokens((prev) => [...prev, ...resolvedTokens.filter((t): t is TokenExtended => t !== null)])
+
+      // Map results back to original indices
+      resolvedTokens.forEach((token, idx) => {
+        cachedTokens[uncachedIndices[idx]] = token
+      })
+
+      return cachedTokens
+    } catch (err) {
+      console.error("Error while fetching tokens:", err)
+      return cachedTokens
+    }
+  }
+
   return {
     tokens,
     getTokenByAddress,
+    getTokenByAddresses,
     getTokenBySymbol
   }
 }

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { batchRequest } from "@/helpers/batchRequest"
+import { getTokensDetails } from "@/helpers/rpc-calls"
 import { Token, TokenMetadataResponse } from "@/types/token"
 import { secondsToMilliseconds } from "@/utils/number"
 
@@ -7,10 +7,6 @@ const TOKEN_METADATA_STALE_TIME = secondsToMilliseconds(60)
 const TOKEN_METADATA_REFETCH_INTERVAL = secondsToMilliseconds(300)
 const MAX_TOKENS_PER_BATCH = 50 // Safe limit for batch size
 
-/**
- * Batch fetch token metadata for multiple token addresses
- * Automatically chunks into multiple batches if needed
- */
 export const getTokenDetailsInBatch = async (
     tokenAddresses: string[]
 ): Promise<Record<string, TokenMetadataResponse>> => {
@@ -22,14 +18,7 @@ export const getTokenDetailsInBatch = async (
     for (let i = 0; i < tokenAddresses.length; i += MAX_TOKENS_PER_BATCH) {
         const chunk = tokenAddresses.slice(i, i + MAX_TOKENS_PER_BATCH)
 
-        // Build batch requests for this chunk
-        const requests = chunk.map((address) => ({
-            method: "eth_getTokenDetails",
-            params: [address],
-        }))
-
-        // Execute batch request
-        const batchResults = await batchRequest<TokenMetadataResponse[]>(requests)
+        const batchResults = await getTokensDetails(chunk)
 
         // Map results back to addresses
         chunk.forEach((address, idx) => {

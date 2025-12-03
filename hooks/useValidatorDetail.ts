@@ -2,17 +2,18 @@ import { useQuery } from "@tanstack/react-query"
 import {
   getDelegation,
   getValidatorWithHisAssetsAndCommission,
-  getValidatorWithHisDelegationAndCommission
+  getValidatorWithHisDelegationAndCommission,
+  getTokensDetails
 } from "@/helpers/rpc-calls"
-import { useTokenRegistry } from "@/hooks/useTokenRegistry"
+import { fetchCGTokenData } from "@/utils/price"
 import { ethers } from "ethers"
 import { TokenExtended } from "@/types/token"
-import { HELIOS_NETWORK_ID } from "@/config/app"
+import { HELIOS_NETWORK_ID, APP_COLOR_DEFAULT } from "@/config/app"
+import { TOKEN_COLORS } from "@/config/constants"
 import { useAccount } from "wagmi"
 
 export const useValidatorDetail = (address: string) => {
   const { address: userAddress } = useAccount()
-  const { getTokenByAddress } = useTokenRegistry()
 
   const qValidatorDetail = useQuery({
     queryKey: ["validatorDetail", address],
@@ -37,34 +38,53 @@ export const useValidatorDetail = (address: string) => {
     enabled: !!qValidatorAssets.data?.assets?.length,
     queryFn: async (): Promise<TokenExtended[]> => {
       const assets = qValidatorAssets.data!.assets
+      const tokenAddresses = assets.map(a => a.contractAddress)
 
-      const results = await Promise.all(
-        assets.map(async (asset) => {
-          const enriched = await getTokenByAddress(
-            asset.contractAddress,
-            HELIOS_NETWORK_ID
-          )
-          if (!enriched) return null
+      // Batch fetch all token metadata in single RPC call
+      const tokenDetails = await getTokensDetails(tokenAddresses)
+      if (!tokenDetails || tokenDetails.length === 0) return []
 
-          const amount = parseFloat(
-            ethers.formatUnits(asset.baseAmount, enriched.functionnal.decimals)
-          )
+      const symbols = tokenDetails.map(t => t?.metadata?.symbol?.toLowerCase()).filter(Boolean)
+      const cgData = await fetchCGTokenData(symbols)
 
-          return {
-            ...enriched,
-            display: {
-              ...enriched.display,
-              symbolIcon:
-                enriched.display.symbolIcon ||
-                `token:${enriched.display.symbol.toLowerCase()}`
-            },
-            balance: {
-              amount,
-              totalPrice: amount * enriched.price.usd
-            }
+      const results = assets.map((asset, idx) => {
+        const metadata = tokenDetails[idx]
+        if (!metadata) return null
+
+        const symbol = metadata.metadata.symbol.toLowerCase()
+        const cgToken = cgData[symbol]
+        const unitPrice = cgToken?.price || 0
+
+        const amount = parseFloat(
+          ethers.formatUnits(asset.baseAmount, metadata.metadata.decimals)
+        )
+
+        return {
+          display: {
+            name: metadata.metadata.name,
+            description: "",
+            logo: cgToken?.logo || metadata.metadata.logo || "",
+            symbol,
+            symbolIcon: symbol === "hls" ? "helios" : `token:${symbol}`,
+            color: TOKEN_COLORS[symbol as keyof typeof TOKEN_COLORS] || APP_COLOR_DEFAULT
+          },
+          price: { usd: unitPrice },
+          balance: {
+            amount,
+            totalPrice: amount * unitPrice
+          },
+          functionnal: {
+            address: asset.contractAddress,
+            chainId: HELIOS_NETWORK_ID,
+            denom: metadata.metadata.base,
+            decimals: metadata.metadata.decimals
+          },
+          stats: {
+            holdersCount: metadata.holdersCount,
+            totalSupply: metadata.total_supply
           }
-        })
-      )
+        } as TokenExtended
+      })
 
       return results.filter((token): token is TokenExtended => token !== null)
     }

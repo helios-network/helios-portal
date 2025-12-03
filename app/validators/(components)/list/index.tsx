@@ -306,6 +306,7 @@ export const List = () => {
             delegation={validator.delegation}
             commission={validator.commission}
             enrichedAssets={validator.cachedDetails?.enrichedAssets}
+            userHasDelegated={validator.userHasDelegated}
           />
         ))}
         {displayValidators.length === 0 && !validatorsIsLoading && (
