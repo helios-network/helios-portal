@@ -1,0 +1,61 @@
+@use "styles/mixins" as *;
+
+.modal {
+  max-width: 500px;
+  width: 100%;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-8);
+  padding: var(--size-4);
+}
+
+.tokenInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2);
+  padding: var(--size-6);
+  background-color: var(--background-lower);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-m);
+}
+
+.tokenName {
+  font-size: var(--size-5);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tokenSymbol {
+  font-size: var(--size-3-5);
+  color: var(--text-secondary);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-6);
+}
+
+.input {
+  width: 100%;
+}
+
+.message {
+  margin-top: var(--size-2);
+}
+
+.actions {
+  display: flex;
+  gap: var(--size-4);
+  justify-content: flex-end;
+  margin-top: var(--size-4);
+
+  button {
+    flex: 1;
+    max-width: 150px;
+  }
+}
+

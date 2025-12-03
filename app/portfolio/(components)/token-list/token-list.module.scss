@@ -166,28 +166,60 @@
   color: var(--text-secondary);
 }
 
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--size-2);
+  flex-shrink: 0;
+}
+
+.sendButton,
 .addButton {
   display: flex;
   align-items: center;
   justify-content: center;
   width: var(--size-10);
   height: var(--size-10);
+  min-width: var(--size-10);
+  min-height: var(--size-10);
+  flex-shrink: 0;
   border-radius: var(--radius-m);
-  background-color: var(--primary-medium);
   color: var(--white);
   border: none;
   cursor: pointer;
   font-size: var(--size-5);
-  margin: 0 auto;
+  padding: 0;
   @include transition(0.2, (background-color, transform));
 
+  svg {
+    // width: 100%;
+    height: 100%;
+    display: block;
+  }
+
   @include is-hover {
-    background-color: var(--primary-high);
     transform: scale(1.05);
   }
 
   &:active {
     transform: scale(0.95);
+  }
+}
+
+.sendButton {
+  background-color: var(--primary-medium);
+
+  @include is-hover {
+    background-color: var(--primary-high);
+  }
+}
+
+.addButton {
+  background-color: var(--primary-medium);
+
+  @include is-hover {
+    background-color: var(--primary-high);
   }
 }
 
@@ -259,7 +291,7 @@
         }
 
         &:nth-child(5) {
-          width: 10%;
+          width: 15%;
         }
       }
     }
@@ -423,6 +455,7 @@
     font-size: var(--size-2);
   }
 
+  .sendButton,
   .addButton {
     width: var(--size-9);
     height: var(--size-9);
@@ -504,6 +537,7 @@
     font-size: var(--size-3);
   }
 
+  .sendButton,
   .addButton {
     width: var(--size-8);
     height: var(--size-8);
@@ -602,6 +636,7 @@
     min-height: var(--size-8);
   }
 
+  .sendButton,
   .addButton {
     width: var(--size-9);
     height: var(--size-9);

@@ -16,12 +16,14 @@ import { Badge } from "@/components/badge";
 import { Input } from "@/components/input";
 import { Button } from "@/components/button";
 import { useState, useMemo } from "react";
+import { TransferTokenModal } from "../transfer-token-modal";
 
 interface TokenRowProps {
   token: TokenExtended;
+  onSendClick: (token: TokenExtended) => void;
 }
 
-function TokenRowComponent({ token }: TokenRowProps) {
+function TokenRowComponent({ token, onSendClick }: TokenRowProps) {
   const handleAddToWallet = () => {
     addTokenToWallet(token);
   };
@@ -70,13 +72,22 @@ function TokenRowComponent({ token }: TokenRowProps) {
         </div>
       </TableCell>
       <TableCell align="center">
-        <button
-          onClick={handleAddToWallet}
-          className={s.addButton}
-          title={`Add ${token.display.symbol} to wallet`}
-        >
-          <Icon icon="hugeicons:wallet-add-02" />
-        </button>
+        <div className={s.actions}>
+          <button
+            onClick={() => onSendClick(token)}
+            className={s.sendButton}
+            title={`Send ${token.display.symbol}`}
+          >
+            <Icon icon="hugeicons:arrow-data-transfer-horizontal" />
+          </button>
+          <button
+            onClick={handleAddToWallet}
+            className={s.addButton}
+            title={`Add ${token.display.symbol} to wallet`}
+          >
+            <Icon icon="hugeicons:wallet-add-02" />
+          </button>
+        </div>
       </TableCell>
     </TableRow>
   );
@@ -94,6 +105,18 @@ export function TokenList({ watchAddress }: TokenListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<SortField>("value");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [transferModalOpen, setTransferModalOpen] = useState(false);
+  const [selectedToken, setSelectedToken] = useState<TokenExtended | null>(null);
+
+  const handleSendClick = (token: TokenExtended) => {
+    setSelectedToken(token);
+    setTransferModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setTransferModalOpen(false);
+    setSelectedToken(null);
+  };
 
   const filteredAndSortedTokens = useMemo(() => {
     const filtered = tokens.filter((token) =>
@@ -239,7 +262,11 @@ export function TokenList({ watchAddress }: TokenListProps) {
         <tbody>
           {filteredAndSortedTokens.length > 0 ? (
             filteredAndSortedTokens.map((token) => (
-              <TokenRowComponent key={token.functionnal.address} token={token} />
+              <TokenRowComponent
+                key={token.functionnal.address}
+                token={token}
+                onSendClick={handleSendClick}
+              />
             ))
           ) : (
             <tr>
@@ -251,6 +278,12 @@ export function TokenList({ watchAddress }: TokenListProps) {
           )}
         </tbody>
       </Table>
+
+      <TransferTokenModal
+        open={transferModalOpen}
+        onClose={handleCloseModal}
+        token={selectedToken}
+      />
     </Card>
   );
 }
