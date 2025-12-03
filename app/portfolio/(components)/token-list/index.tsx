@@ -33,7 +33,7 @@ function TokenRowComponent({ token, onSendClick }: TokenRowProps) {
 
   return (
     <TableRow className={s.row}>
-      <TableCell>
+      <TableCell data-label="Token">
         <div className={s.tokenInfo}>
           <div className={s.logoContainer}>
             {token.display.logo && token.display.logo !== "" ? (
@@ -54,24 +54,24 @@ function TokenRowComponent({ token, onSendClick }: TokenRowProps) {
           </div>
         </div>
       </TableCell>
-      <TableCell align="center">
+      <TableCell align="center" data-label="Chain">
         <Badge className={s.chainBadge}>{originBlockchainName}</Badge>
       </TableCell>
-      <TableCell align="right">
+      <TableCell align="right" data-label="Balance">
         <div className={s.balance}>
           <div className={s.balanceAmount}>{formatTokenAmount(token.balance.amount)}</div>
           <div className={s.balanceSymbol}>{token.display.symbol.toUpperCase()}</div>
         </div>
       </TableCell>
-      <TableCell align="right">
+      <TableCell align="right" data-label="Value">
         <div className={s.price}>
           <div className={s.priceValue}>{formatCurrency(token.balance.totalPrice || 0)}</div>
           {token.price.usd > 0 && (
-            <div className={s.priceUnit}>@ {formatCurrency(token.price.usd)}</div>
+            <div className={s.priceUnit}> {formatCurrency(token.price.usd)}</div>
           )}
         </div>
       </TableCell>
-      <TableCell align="center">
+      <TableCell align="center" data-label="Actions">
         <div className={s.actions}>
           <button
             onClick={() => onSendClick(token)}
