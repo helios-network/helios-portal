@@ -100,7 +100,7 @@ export const usePortfolioInfo = (options?: UsePortfolioInfoOptions) => {
           display: {
             name: metadata.metadata.name,
             description: "",
-            logo: cgToken?.logo || "",
+            logo: cgToken?.logo || metadata.metadata.logo || "",
             symbol,
             symbolIcon: symbol === "hls" ? "helios" : `token:${symbol}`,
             color: TOKEN_COLORS[symbol as keyof typeof TOKEN_COLORS] || APP_COLOR_DEFAULT
