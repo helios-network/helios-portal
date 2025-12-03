@@ -96,10 +96,12 @@ export const Interface = () => {
   const tokenInfo = useTokenInfo(form.asset)
   const chainConfig = chainId ? getChainConfig(chainId) : undefined
 
+  const chainIdWhereLookingForTokens = form.to?.chainId === HELIOS_NETWORK_ID ? form.from?.chainId || HELIOS_NETWORK_ID : form.to?.chainId || HELIOS_NETWORK_ID
+
   const qTokensByChain = useQuery({
-    queryKey: ["tokensByChain", form.to?.chainId],
+    queryKey: ["tokensByChain", chainIdWhereLookingForTokens],
     queryFn: () =>
-      getTokensByChainIdAndPageAndSize(form.to!.chainId, toHex(1), toHex(50)),
+      getTokensByChainIdAndPageAndSize(chainIdWhereLookingForTokens, toHex(1), toHex(50)),
     enabled: !!form.to,
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: false
@@ -1096,10 +1098,10 @@ export const Interface = () => {
         open={openTokenSearch}
         onClose={() => setOpenTokenSearch(false)}
         tokens={tokensByChain.map(token => token.enriched)}
-        onTokenSelect={(tokenAddress) => {
+        onTokenSelect={(token) => {
           handleTokenSearchChange({
             target: {
-              value: tokenAddress
+              value: token.tokenAddressesByTargetChain[`${form.from?.chainId}`] || token.functionnal.address//token.enriched.functionnal.address
             }
           })
         }}

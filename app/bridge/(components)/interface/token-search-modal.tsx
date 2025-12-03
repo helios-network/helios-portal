@@ -12,7 +12,7 @@ interface TokenSearchModalProps {
   open: boolean
   onClose: () => void
   tokens: any[]
-  onTokenSelect: (tokenAddress: string) => void
+  onTokenSelect: (token: any) => void
 }
 
 export const TokenSearchModal = ({ 
@@ -61,8 +61,8 @@ export const TokenSearchModal = ({
   }, [])
 
   // Function to handle token selection
-  const handleTokenSelect = useCallback((tokenAddress: string) => {
-    onTokenSelect(tokenAddress)
+  const handleTokenSelect = useCallback((token: any) => {
+    onTokenSelect(token)
     onClose()
     setTokenSearchQuery("")
   }, [onTokenSelect, onClose])
@@ -105,7 +105,7 @@ export const TokenSearchModal = ({
                 <tr key={token.functionnal?.address} className={s.tokenRow}>
                   <td 
                     className={s.tokenCell}
-                    onClick={() => handleTokenSelect(token.functionnal?.address)}
+                    onClick={() => handleTokenSelect(token)}
                   >
                     <div className={s.tokenLogoWrapper}>
                       
@@ -139,7 +139,7 @@ export const TokenSearchModal = ({
                   </td>
                   <td 
                     className={s.tokenCell}
-                    onClick={() => handleTokenSelect(token.functionnal?.address)}
+                    onClick={() => handleTokenSelect(token)}
                   >
                     <div className={s.tokenInfo}>
                       <div className={s.tokenName}>{token.display?.name}</div>
