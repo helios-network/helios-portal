@@ -2,16 +2,35 @@
 
 .button {
   @include max($responsiveMobile) {
-    width: var(--btn-base-height);
-    height: var(--btn-base-height);
-    padding: 0;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    max-width: 48px !important;
+    max-height: 48px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 
     [data-icon] {
-      transform: scale(1.75);
+      font-size: 28px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 20px !important;
+      height: 20px !important;
+      transform: none !important;
+      
+      svg {
+        width: 100% !important;
+        height: 100% !important;
+      }
     }
 
     span {
-      display: none;
+      display: none !important;
     }
   }
 }

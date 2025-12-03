@@ -5,12 +5,21 @@
   grid-template-columns: 1fr;
   gap: var(--size-6);
   --card-padding: var(--size-10);
+
+  @include max(500px) {
+    --card-padding: var(--size-6);
+    gap: var(--size-4);
+  }
 }
 
 .content {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+
+  @include max(500px) {
+    gap: var(--size-4);
+  }
 }
 
 .inputWrapper {
@@ -27,10 +36,18 @@
     grid-template-columns: 1fr;
     gap: 0.75rem;
   }
+
+  @include max(500px) {
+    gap: var(--size-3);
+  }
 }
 
 .input {
   width: 100%;
+
+  @include max(500px) {
+    font-size: 16px;
+  }
 }
 
 .actions {
@@ -46,6 +63,11 @@
     width: 100%;
     grid-column: auto;
   }
+
+  @include max(500px) {
+    width: 100%;
+    gap: var(--size-2);
+  }
 }
 
 .watchButton,
@@ -60,6 +82,18 @@
   @include max(700px) {
     flex: 1;
   }
+
+  @include max(500px) {
+    flex: 1;
+    font-size: var(--size-3);
+    font-weight: 700;
+    height: auto;
+    padding: var(--size-2-5) var(--size-3) !important;
+
+    svg {
+      font-size: var(--size-5);
+    }
+  }
 }
 
 .watchingInfo {
@@ -73,22 +107,63 @@
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
 
+  @include max(500px) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-3);
+    padding: var(--size-4);
+    border-radius: var(--radius-m);
+    background: linear-gradient(135deg, var(--background-lowest) 0%, var(--background-low) 100%);
+    border: 1px solid var(--border-light);
+    align-items: flex-start;
+  }
+
   svg {
     width: 18px;
     height: 18px;
     color: var(--primary-medium);
     flex-shrink: 0;
+
+    @include max(500px) {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  span {
+    @include max(500px) {
+      display: flex;
+      flex-direction: column;
+      gap: var(--size-2);
+      font-size: var(--size-3);
+      font-weight: 600;
+      color: var(--text-secondary);
+      width: 100%;
+    }
   }
 
   code {
     font-family: var(--font-mono);
     color: var(--primary-medium);
-    background-color: var(--background-lower);
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--radius-s);
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
     font-size: var(--font-size-xs);
-    border: 1px solid var(--border-light);
+    border: none;
     word-break: break-all;
+
+    @include max(500px) {
+      font-size: var(--size-2-5);
+      padding: 0;
+      background-color: transparent;
+      border: none;
+      border-radius: 0;
+      font-weight: 500;
+      display: block;
+      word-break: break-all;
+      line-height: 1.4;
+      color: var(--primary-medium);
+    }
   }
 }
 

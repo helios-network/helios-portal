@@ -3,6 +3,10 @@
 .tokenList {
   --card-padding: var(--size-10);
   width: 100%;
+
+  @include max(500px) {
+    --card-padding: var(--size-6);
+  }
 }
 
 .tableContainer {
@@ -14,7 +18,7 @@
   --td-padding: var(--size-5);
   --td-radius: var(--radius-m);
   width: 100%;
-  table-layout: fixed;
+  table-layout: auto;
   border-collapse: separate;
   border-spacing: 0 10px;
   
@@ -27,20 +31,22 @@
       padding-bottom: var(--size-2);
       padding-left: var(--size-4) !important;
       padding-right: var(--size-4) !important;
+      white-space: nowrap;
 
       &:nth-child(1) {
         width: 40%;
         text-align: left;
+        padding-left: var(--size-5) !important;
       }
 
       &:nth-child(2) {
         text-align: center;
-        width: 15%;
+        width: 14%;
       }
 
       &:nth-child(3) {
         text-align: right;
-        width: 15%;
+        width: 16%;
       }
 
       &:nth-child(4) {
@@ -51,6 +57,7 @@
       &:nth-child(5) {
         text-align: center;
         width: 10%;
+        padding-right: var(--size-5) !important;
       }
     }
   }
@@ -60,13 +67,26 @@
       td {
         padding-left: var(--size-4) !important;
         padding-right: var(--size-4) !important;
+        vertical-align: middle;
+        height: auto;
+        min-height: 60px;
         
-        &:not(:last-child) {
-          padding-right: var(--size-3) !important;
+        &:first-child {
+          padding-left: var(--size-5) !important;
         }
         
-        &:not(:first-child) {
+        &:last-child {
+          padding-right: var(--size-5) !important;
+        }
+
+        @include max(1024px) {
+          min-height: 55px;
           padding-left: var(--size-3) !important;
+          padding-right: var(--size-3) !important;
+        }
+
+        @include max(768px) {
+          min-height: 48px;
         }
       }
     }
@@ -74,12 +94,27 @@
 }
 
 .row {
-  @include transition(0.2, (background-color, transform));
+  @include transition(0.2, (background-color, transform, box-shadow));
   cursor: pointer;
+  height: auto;
+}
 
-  @include is-hover {
-    td {
-      background-color: var(--background-lowest);
+@media (min-width: 501px) {
+  .row {
+    @include is-hover {
+      td {
+        background-color: var(--background-lowest);
+      }
+    }
+  }
+
+  @include max(768px) {
+    .row {
+      @include is-hover {
+        td {
+          background-color: var(--background-low);
+        }
+      }
     }
   }
 }
@@ -88,6 +123,11 @@
   display: flex;
   align-items: center;
   gap: var(--size-4);
+  min-width: 0;
+
+  @include max(768px) {
+    gap: var(--size-3);
+  }
 }
 
 .logoContainer {
@@ -109,13 +149,16 @@
   display: flex;
   flex-direction: column;
   gap: var(--size-0-5);
+  min-width: 0;
+  flex: 1;
 }
 
 .tokenName {
   font-size: var(--size-4);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
   @include ellipsis;
+  line-height: 1.3;
 }
 
 .tokenSymbol {
@@ -134,18 +177,23 @@
   flex-direction: column;
   align-items: flex-end;
   gap: var(--size-0-5);
+  width: 100%;
+  min-width: 0;
 }
 
 .balanceAmount {
   font-size: var(--size-4);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
+  line-height: 1.2;
+  @include ellipsis;
 }
 
 .balanceSymbol {
   font-size: var(--size-3);
   color: var(--text-secondary);
   text-transform: uppercase;
+  opacity: 0.8;
 }
 
 .price {
@@ -153,17 +201,23 @@
   flex-direction: column;
   align-items: flex-end;
   gap: var(--size-0-5);
+  width: 100%;
+  min-width: 0;
 }
 
 .priceValue {
   font-size: var(--size-4);
   font-weight: 700;
   color: var(--text-primary);
+  line-height: 1.2;
+  @include ellipsis;
 }
 
 .priceUnit {
   font-size: var(--size-3);
   color: var(--text-secondary);
+  opacity: 0.8;
+  @include ellipsis;
 }
 
 .actions {
@@ -267,23 +321,38 @@
   margin-top: var(--size-2);
 }
 
-// Responsive
+// ============================================
+// RESPONSIVE DESIGN BREAKPOINTS
+// ============================================
+// 1920px+        : Desktop (All 5 columns)
+// 1600-1920px    : Large Desktop
+// 1400-1600px    : Laptop (Hide chain)
+// 1200-1400px    : Tablet Landscape
+// 1024-1200px    : Tablet
+// 768-1024px     : iPad
+// 500-768px      : Mobile (Card layout)
+// <500px         : Small Mobile
+// ============================================
+
+// Desktop: 1920px and above (Full layout)
 @include max(1920px) {
   .table {
+    border-spacing: 0 12px;
     thead {
       th {
         font-size: var(--size-3-5);
+        padding: var(--size-3) var(--size-4);
 
         &:nth-child(1) {
           width: 40%;
         }
 
         &:nth-child(2) {
-          width: 15%;
+          width: 14%;
         }
 
         &:nth-child(3) {
-          width: 15%;
+          width: 16%;
         }
 
         &:nth-child(4) {
@@ -291,7 +360,7 @@
         }
 
         &:nth-child(5) {
-          width: 15%;
+          width: 10%;
         }
       }
     }
@@ -299,19 +368,52 @@
 
   .tokenName {
     font-size: var(--size-4);
+    font-weight: 700;
+  }
+
+  .tokenSymbol {
+    font-size: var(--size-3);
   }
 
   .balanceAmount,
   .priceValue {
     font-size: var(--size-4);
+    font-weight: 700;
+  }
+
+  .balanceSymbol,
+  .priceUnit {
+    font-size: var(--size-3);
   }
 }
 
+// Large desktop: 1600px - 1920px
 @include max(1600px) {
   .table {
+    border-spacing: 0 10px;
     thead {
       th {
         font-size: var(--size-3);
+
+        &:nth-child(1) {
+          width: 38%;
+        }
+
+        &:nth-child(2) {
+          width: 15%;
+        }
+
+        &:nth-child(3) {
+          width: 17%;
+        }
+
+        &:nth-child(4) {
+          width: 20%;
+        }
+
+        &:nth-child(5) {
+          width: 10%;
+        }
       }
     }
   }
@@ -326,12 +428,15 @@
   }
 }
 
+// Laptop: 1400px - 1600px (Hide chain column)
 @include max(1400px) {
   .table {
     thead {
       th {
+        font-size: var(--size-3);
+
         &:nth-child(1) {
-          width: 35%;
+          width: 36%;
         }
 
         &:nth-child(2) {
@@ -339,15 +444,15 @@
         }
 
         &:nth-child(3) {
-          width: 20%;
+          width: 19%;
         }
 
         &:nth-child(4) {
-          width: 25%;
+          width: 27%;
         }
 
         &:nth-child(5) {
-          width: 20%;
+          width: 18%;
         }
       }
     }
@@ -360,28 +465,40 @@
       }
     }
   }
+
+  .tokenName {
+    font-size: var(--size-3-5);
+  }
+
+  .balanceAmount,
+  .priceValue {
+    font-size: var(--size-3-5);
+  }
 }
 
+// Tablet landscape: 1200px - 1400px
 @include max(1200px) {
   .table {
+    border-spacing: 0 8px;
     thead {
       th {
         font-size: var(--size-3);
+        padding: var(--size-2) var(--size-3);
 
         &:nth-child(1) {
-          width: 35%;
+          width: 34%;
         }
 
         &:nth-child(3) {
-          width: 25%;
+          width: 22%;
         }
 
         &:nth-child(4) {
-          width: 20%;
+          width: 28%;
         }
 
         &:nth-child(5) {
-          width: 20%;
+          width: 16%;
         }
       }
     }
@@ -397,43 +514,60 @@
   }
 }
 
+// Tablet: 1024px - 1200px
 @include max(1024px) {
   .table {
+    border-spacing: 0 8px;
     thead {
       th {
         font-size: var(--size-2-5);
-        padding-bottom: var(--size-1) !important;
+        padding: var(--size-2) var(--size-3);
 
         &:nth-child(1) {
-          width: 40%;
+          width: 32%;
+        }
+
+        &:nth-child(2) {
+          display: none;
         }
 
         &:nth-child(3) {
-          width: 20%;
+          width: 24%;
         }
 
         &:nth-child(4) {
-          width: 20%;
+          width: 32%;
         }
 
         &:nth-child(5) {
-          width: 20%;
+          width: 12%;
         }
+      }
+    }
+  }
+
+  .row {
+    td {
+      &:nth-child(2) {
+        display: none;
       }
     }
   }
 
   .tokenInfo {
     gap: var(--size-3);
+    min-width: 0;
   }
 
   .logoContainer {
     min-width: var(--size-9);
     min-height: var(--size-9);
+    flex-shrink: 0;
   }
 
   .tokenName {
     font-size: var(--size-3);
+    font-weight: 700;
   }
 
   .tokenSymbol {
@@ -442,12 +576,13 @@
 
   .balance,
   .price {
-    gap: var(--size-0);
+    gap: var(--size-1);
   }
 
   .balanceAmount,
   .priceValue {
     font-size: var(--size-3);
+    font-weight: 700;
   }
 
   .balanceSymbol,
@@ -460,29 +595,37 @@
     width: var(--size-9);
     height: var(--size-9);
     font-size: var(--size-4);
+    flex-shrink: 0;
   }
 
   .sortButtons {
     button {
       flex: 1 1 calc(33% - 0.35rem) !important;
+      font-size: var(--size-3-5);
     }
+  }
+
+  .controls {
+    padding: var(--size-3);
+    gap: var(--size-2-5);
   }
 }
 
+// iPad/Medium tablet: 768px - 1024px
 @include max(768px) {
   .tokenList {
     --card-padding: var(--size-8);
   }
 
   .table {
-    border-spacing: 0 8px;
+    border-spacing: 0 6px;
     thead {
       th {
         font-size: var(--size-2-5);
-        padding-bottom: var(--size-1) !important;
+        padding: var(--size-2) var(--size-2-5);
 
         &:nth-child(1) {
-          width: 50%;
+          width: 30%;
         }
 
         &:nth-child(2) {
@@ -490,15 +633,15 @@
         }
 
         &:nth-child(3) {
-          width: 25%;
+          width: 23%;
         }
 
         &:nth-child(4) {
-          width: 15%;
+          width: 29%;
         }
 
         &:nth-child(5) {
-          width: 10%;
+          width: 18%;
         }
       }
     }
@@ -512,47 +655,74 @@
       &:nth-child(2) {
         display: none;
       }
+
+      &:first-child {
+        padding-left: var(--size-4) !important;
+      }
+
+      &:last-child {
+        padding-right: var(--size-4) !important;
+      }
     }
   }
 
   .tokenInfo {
-    gap: var(--size-2);
+    gap: var(--size-2-5);
+    min-width: 0;
   }
 
   .logoContainer {
     min-width: var(--size-8);
     min-height: var(--size-8);
+    flex-shrink: 0;
   }
 
   .tokenName {
     font-size: var(--size-3);
+    font-weight: 700;
   }
 
   .tokenSymbol {
     font-size: var(--size-2);
   }
 
+  .balance {
+    gap: var(--size-0-5);
+  }
+
+  .price {
+    gap: var(--size-0-5);
+  }
+
   .balanceAmount,
   .priceValue {
     font-size: var(--size-3);
+    font-weight: 700;
+  }
+
+  .balanceSymbol,
+  .priceUnit {
+    font-size: var(--size-2);
   }
 
   .sendButton,
   .addButton {
-    width: var(--size-8);
-    height: var(--size-8);
-    font-size: var(--size-3);
+    width: var(--size-9);
+    height: var(--size-9);
+    font-size: var(--size-4);
+    flex-shrink: 0;
   }
 
   .controls {
-    padding: 0.75rem;
-    gap: 0.75rem;
+    padding: var(--size-3);
+    gap: var(--size-2);
   }
 
   .sortButtons {
     button {
       flex: 1 1 calc(50% - 0.25rem) !important;
       min-width: unset;
+      font-size: var(--size-3-5);
     }
   }
 }
@@ -565,10 +735,25 @@
   background: var(--background-lower);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-m);
+  margin-bottom: var(--size-2);
+
+  @include max(768px) {
+    gap: var(--size-3);
+    padding: var(--size-3);
+  }
+
+  @include max(500px) {
+    gap: var(--size-2);
+    padding: var(--size-2);
+  }
 }
 
 .searchInput {
   width: 100%;
+
+  @include max(768px) {
+    font-size: 16px;
+  }
 }
 
 .sortButtons {
@@ -579,10 +764,24 @@
   button {
     flex: 1;
     min-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    @include max(768px) {
+      flex: 1 1 calc(50% - 0.25rem);
+      min-width: unset;
+      font-size: var(--size-3-5);
+    }
 
     @include max(600px) {
       flex: 1 1 calc(50% - 0.25rem);
       min-width: unset;
+    }
+
+    @include max(500px) {
+      font-size: var(--size-3);
+      padding: var(--size-2) var(--size-1) !important;
     }
   }
 }
@@ -629,11 +828,29 @@
 
   .tokenInfo {
     gap: var(--size-3);
+    min-width: 0;
   }
 
   .logoContainer {
     min-width: var(--size-8);
     min-height: var(--size-8);
+    flex-shrink: 0;
+  }
+
+  .tokenName {
+    font-size: var(--size-3-5);
+    font-weight: 700;
+  }
+
+  .balance,
+  .price {
+    gap: var(--size-0-5);
+  }
+
+  .balanceAmount,
+  .priceValue {
+    font-size: var(--size-3-5);
+    font-weight: 700;
   }
 
   .sendButton,
@@ -641,6 +858,7 @@
     width: var(--size-9);
     height: var(--size-9);
     font-size: var(--size-4);
+    flex-shrink: 0;
   }
 
   .controls {
@@ -651,7 +869,374 @@
     button {
       flex: 1 1 calc(50% - 0.25rem) !important;
       min-width: unset;
+      font-size: var(--size-3-5);
     }
+  }
+}
+
+// Mobile-specific responsive design for screens under 500px
+@include max(500px) {
+  .tokenList {
+    --card-padding: var(--size-6);
+  }
+
+  .table {
+    border-spacing: 0 6px;
+    table-layout: auto;
+
+    thead {
+      display: none;
+    }
+
+    tbody {
+      display: flex;
+      flex-direction: column;
+      gap: var(--size-4);
+
+      tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--size-4);
+        background: linear-gradient(135deg, var(--background-lowest) 0%, var(--background-low) 100%);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-l);
+        padding: var(--size-4);
+        @include transition(0.15, (border-color, box-shadow, transform));
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+        &:active {
+          background: linear-gradient(135deg, var(--background-low) 0%, var(--background-medium) 100%);
+          border-color: var(--border-medium);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+          transform: scale(0.98);
+        }
+
+        td {
+          padding: 0 !important;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          align-items: flex-start;
+          gap: var(--size-1-5);
+          min-width: 0;
+          background-color: transparent !important;
+          background: transparent !important;
+
+          &::before {
+            content: attr(data-label);
+            font-weight: 700;
+            color: var(--text-secondary);
+            font-size: var(--size-2);
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            opacity: 0.65;
+          }
+
+          &:nth-child(1) {
+            grid-column: 1 / -1;
+            flex-direction: row;
+            align-items: center;
+            gap: var(--size-3);
+            padding-bottom: var(--size-2);
+            border-bottom: 1px solid var(--border-light);
+
+            &::before {
+              content: '';
+              display: none;
+            }
+          }
+
+          &:nth-child(2) {
+            display: none;
+          }
+
+          &:nth-child(3) {
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            gap: var(--size-2);
+
+            &::before {
+              content: 'Balance';
+              display: block;
+            }
+
+            .balance {
+              width: 100%;
+              flex-direction: column;
+              justify-content: flex-start;
+              align-items: flex-start;
+              gap: var(--size-1);
+            }
+
+            .balanceAmount {
+              font-size: var(--size-4) !important;
+              font-weight: 800 !important;
+              color: var(--text-primary) !important;
+              line-height: 1.2 !important;
+            }
+
+            .balanceSymbol {
+              font-size: var(--size-2-5) !important;
+              color: var(--text-secondary) !important;
+              opacity: 0.75 !important;
+              font-weight: 600 !important;
+            }
+          }
+
+          &:nth-child(4) {
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            gap: var(--size-2);
+
+            &::before {
+              content: 'Value';
+              display: block;
+            }
+
+            .price {
+              width: 100%;
+              flex-direction: column;
+              justify-content: flex-start;
+              align-items: flex-start;
+              gap: var(--size-1);
+            }
+
+            .priceValue {
+              font-size: var(--size-4) !important;
+              font-weight: 800 !important;
+              color: var(--primary-medium) !important;
+              line-height: 1.2 !important;
+            }
+
+            .priceUnit {
+              font-size: var(--size-2-5) !important;
+              color: var(--text-secondary) !important;
+              opacity: 0.75 !important;
+              font-weight: 600 !important;
+            }
+          }
+
+          &:nth-child(5) {
+            grid-column: 1 / -1;
+            flex-direction: row;
+            justify-content: flex-end;
+            align-items: center;
+            gap: var(--size-3);
+            margin-top: var(--size-2);
+            padding-top: var(--size-3);
+            border-top: 1px solid var(--border-light);
+
+            &::before {
+              display: none;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .tokenInfo {
+    flex: 1;
+    gap: var(--size-3);
+    min-width: 0;
+    width: 100%;
+    align-items: center;
+  }
+
+  .logoContainer {
+    min-width: var(--size-10);
+    min-height: var(--size-10);
+    max-width: var(--size-10);
+    max-height: var(--size-10);
+    flex-shrink: 0;
+    border-radius: var(--radius-m);
+    overflow: hidden;
+    background: var(--background-medium);
+  }
+
+  .tokenDetails {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-1);
+  }
+
+  .tokenName {
+    font-size: var(--size-4-5);
+    font-weight: 800;
+    line-height: 1.3;
+    color: var(--text-primary);
+    @include ellipsis;
+  }
+
+  .tokenSymbol {
+    font-size: var(--size-3);
+    opacity: 0.65;
+    color: var(--text-secondary);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .balance {
+    align-items: flex-start;
+    text-align: left;
+    gap: var(--size-0-5);
+    width: 100%;
+
+    .balanceAmount {
+      font-size: var(--size-3-5);
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--text-primary);
+    }
+
+    .balanceSymbol {
+      font-size: var(--size-2);
+      opacity: 0.75;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+  }
+
+  .price {
+    align-items: flex-start;
+    text-align: left;
+    gap: var(--size-0-5);
+    width: 100%;
+
+    .priceValue {
+      font-size: var(--size-3-5);
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--primary-medium);
+    }
+
+    .priceUnit {
+      font-size: var(--size-2);
+      opacity: 0.75;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+  }
+
+  .chainBadge {
+    font-size: var(--size-2);
+    padding: var(--size-1) var(--size-2) !important;
+  }
+
+  .actions {
+    gap: var(--size-3);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+  }
+
+  .sendButton,
+  .addButton {
+    width: var(--size-12);
+    height: var(--size-12);
+    min-width: var(--size-12);
+    min-height: var(--size-12);
+    font-size: var(--size-6);
+    flex-shrink: 0;
+    border-radius: var(--radius-m);
+    @include transition(0.15, (transform, background-color, box-shadow));
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:active {
+      transform: scale(0.88);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    svg {
+      width: 60%;
+      height: 60%;
+    }
+  }
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-3);
+    padding: var(--size-4);
+    background: linear-gradient(135deg, var(--background-lower) 0%, var(--background-low) 100%);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-l);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+  }
+
+  .searchInput {
+    width: 100%;
+    font-size: 16px;
+    padding: var(--size-2) var(--size-3) !important;
+    border-radius: var(--radius-m);
+    border: 1px solid var(--border-light) !important;
+    background: var(--background-lowest) !important;
+    color: var(--text-primary) !important;
+    font-weight: 500;
+
+    &::placeholder {
+      color: var(--text-tertiary);
+    }
+  }
+
+  .sortButtons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--size-2);
+
+    button {
+      flex: 1 !important;
+      min-width: unset !important;
+      font-size: var(--size-3) !important;
+      font-weight: 700 !important;
+      padding: var(--size-2-5) var(--size-2) !important;
+      height: auto !important;
+      border-radius: var(--radius-m) !important;
+      @include transition(0.15, (background-color, color, transform));
+
+      &:active {
+        transform: scale(0.96);
+      }
+    }
+  }
+
+  .noResults {
+    gap: var(--size-3);
+    padding: var(--size-8) var(--size-4) !important;
+    font-size: var(--size-3-5);
+    color: var(--text-secondary);
+
+    svg {
+      width: 48px;
+      height: 48px;
+      color: var(--text-tertiary);
+    }
+
+    span {
+      font-weight: 600;
+    }
+  }
+
+  .tokenCount {
+    font-size: var(--size-3-5);
+    font-weight: 700;
+    padding: var(--size-2) var(--size-4);
+    background: linear-gradient(135deg, var(--primary-low) 0%, var(--primary-lowest) 100%);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-m);
+    color: var(--primary-medium);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
