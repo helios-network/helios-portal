@@ -575,9 +575,7 @@ export const Interface = () => {
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: false
   })
-  const assetDisabled =
-    tokenInfo.data &&
-    form.to?.chainId !== HELIOS_NETWORK_ID
+  const assetDisabled = false
   const isDisabled =
     form.inProgress ||
     !tokenInfo.data ||
