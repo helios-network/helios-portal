@@ -577,7 +577,6 @@ export const Interface = () => {
   })
   const assetDisabled =
     tokenInfo.data &&
-    tokenInfo.data.symbol === "HLS" &&
     form.to?.chainId !== HELIOS_NETWORK_ID
   const isDisabled =
     form.inProgress ||
