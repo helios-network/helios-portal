@@ -6,6 +6,9 @@ export interface HyperionChain {
   logo: string
   hyperionId: number
   paused: boolean
+  averageCounterpartyBlockTime?: number
+  latestObservedBlockHeight?: number
+  latestObservedBlockTime?: number
 }
 
 export interface HyperionBridgeTx {

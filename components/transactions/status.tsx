@@ -9,7 +9,8 @@ export const StatusConfig = {
     variant: "warning"
   },
   "failed": { name: "Failed", icon: "hugeicons:cancel-01", variant: "danger" },
-  "completed": { name: "Success", icon: "hugeicons:tick-01", variant: "success" }
+  "completed": { name: "Success", icon: "hugeicons:tick-01", variant: "success" },
+  "expired": { name: "Expired", icon: "hugeicons:time-01", variant: "danger" }
 }
 
 const Status = ({ status }: { status: string }) => {

@@ -35,3 +35,22 @@ export const formatDate = (dateString: string): string => {
     hour12: false
   }).format(date)
 }
+
+export const formatDuration = (milliseconds: number): string => {
+  const seconds = Math.floor(milliseconds / 1000)
+  
+  if (seconds < 60) {
+    return `${seconds} sec`
+  } else if (seconds < 3600) {
+    const minutes = Math.floor(seconds / 60)
+    return `${minutes} min`
+  } else if (seconds < 86400) {
+    const hours = Math.floor(seconds / 3600)
+    const remainingMinutes = Math.floor((seconds % 3600) / 60)
+    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}min` : `${hours}h`
+  } else {
+    const days = Math.floor(seconds / 86400)
+    const remainingHours = Math.floor((seconds % 86400) / 3600)
+    return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days}d`
+  }
+}
