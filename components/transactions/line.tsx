@@ -12,9 +12,12 @@ import { getLogoByHash } from "@/utils/url"
 import { Icon } from "../icon"
 import { getChainConfig } from "@/config/chain-config"
 import { useBridge } from "@/hooks/useBridge"
+import { useChains } from "@/hooks/useChains"
+import { calculateTimeRemaining } from "@/lib/utils/time-remaining"
 
 export const TransactionsLine = ({ transaction, isClientTxs }: { transaction: TransactionLight, isClientTxs?: boolean }) => {
   const { cancelSendToChain } = useBridge()
+  const { chains } = useChains()
   const isCosmosHash = !transaction.hash?.startsWith("0x")
   let explorerLink = !isCosmosHash ? EXPLORER_URL + "/tx/" + transaction.hash : undefined
 
@@ -25,6 +28,16 @@ export const TransactionsLine = ({ transaction, isClientTxs }: { transaction: Tr
     explorerLink = `${EXPLORER_URL}/tx/${transaction.hash.split(",")[0]}`
   }
 
+  const chain = transaction.chainId
+    ? chains.find((c) => c.chainId === transaction.chainId)
+    : undefined
+  const timeRemaining =
+    transaction.timeout && transaction.timeout > 0
+      ? calculateTimeRemaining(transaction.timeout, chain)
+      : null
+
+  const displayStatus = timeRemaining === "expired" ? "expired" : transaction.status
+
   return (
     <TableRow>
       <TableCell>
@@ -32,13 +45,25 @@ export const TransactionsLine = ({ transaction, isClientTxs }: { transaction: Tr
           <Tooltip.Root>
             <Tooltip.Trigger asChild>
               <div>
-                <Category type={transaction.type} status={transaction.status} />
+                <Category type={transaction.type} status={displayStatus} />
               </div>
             </Tooltip.Trigger>
             {transaction.timeout && transaction.timeout > 0 && (
               <Tooltip.Portal>
                 <Tooltip.Content className={s.tooltipContent} sideOffset={5}>
-                  Expire at block <strong>{transaction.timeout}</strong> on chain <strong>{transaction.chainName}</strong> {transaction.status_bridge_tx} {transaction.fees && `(fees: ${transaction.fees} HLS)`}
+                  {timeRemaining === "expired" ? (
+                    <>
+                      Expired on chain <strong>{transaction.chainName}</strong> {transaction.status_bridge_tx} {transaction.fees && `(fees: ${transaction.fees} HLS)`}
+                    </>
+                  ) : timeRemaining ? (
+                    <>
+                      Expires in <strong>{timeRemaining}</strong> on chain <strong>{transaction.chainName}</strong> {transaction.status_bridge_tx} {transaction.fees && `(fees: ${transaction.fees} HLS)`}
+                    </>
+                  ) : (
+                    <>
+                      Expire at block <strong>{transaction.timeout}</strong> on chain <strong>{transaction.chainName}</strong> {transaction.status_bridge_tx} {transaction.fees && `(fees: ${transaction.fees} HLS)`}
+                    </>
+                  )}
                   <Tooltip.Arrow className={s.tooltipArrow} />
                 </Tooltip.Content>
               </Tooltip.Portal>
