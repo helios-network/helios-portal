@@ -13,10 +13,15 @@ import s from "./supported.module.scss"
 import { getLogoByHash } from "@/utils/url"
 import { useChains } from "@/hooks/useChains"
 import { useSwitchChain } from "wagmi"
+import { useBlockInfo } from "@/hooks/useBlockInfo"
+import { formatNumber } from "@/lib/utils/number"
+import { useChainBlockNumbers } from "@/hooks/useChainBlockNumbers"
 
 export const Supported = () => {
   const { chains } = useChains()
   const { switchChain } = useSwitchChain()
+  const { lastBlockNumber } = useBlockInfo({ forceEnable: true })
+  const { blockNumbers } = useChainBlockNumbers()
 
   const sliderRef = useRef<SwiperRef>(null)
 
@@ -32,6 +37,13 @@ export const Supported = () => {
 
   const handleSwitchNetwork = (chainId: number) => {
     switchChain({ chainId })
+  }
+
+  const getCurrentBlock = (chain: { hyperionId: number; chainId: number }) => {
+    if (chain.hyperionId === 0) {
+      return lastBlockNumber || 0
+    }
+    return blockNumbers[chain.chainId] || 0
   }
 
   return (
@@ -58,25 +70,30 @@ export const Supported = () => {
           spaceBetween={12}
           slidesPerView="auto"
         >
-          {chains.map((chain) => (
-            <SwiperSlide key={chain.chainId} className={s.item}>
-              <div
-                className={s.symbol}
-                onClick={() => handleSwitchNetwork(chain.chainId)}
-              >
-                {chain.logo !== "" && (
-                  <Image
-                    src={getLogoByHash(chain.logo)}
-                    alt=""
-                    width={40}
-                    height={40}
-                  />
+          {chains.map((chain) => {
+            const currentBlock = getCurrentBlock(chain)
+            return (
+              <SwiperSlide key={chain.chainId} className={s.item}>
+                <div
+                  className={s.symbol}
+                  onClick={() => handleSwitchNetwork(chain.chainId)}
+                >
+                  {chain.logo !== "" && (
+                    <Image
+                      src={getLogoByHash(chain.logo)}
+                      alt=""
+                      width={40}
+                      height={40}
+                    />
+                  )}
+                </div>
+                <span className={s.name}>{chain.name}</span>
+                {currentBlock > 0 && (
+                  <time className={s.time}>~Block {formatNumber(currentBlock, 0)}</time>
                 )}
-              </div>
-              <span className={s.name}>{chain.name}</span>
-              {/* <time className={s.time}>~30 seconds</time> */}
-            </SwiperSlide>
-          ))}
+              </SwiperSlide>
+            )
+          })}
         </Swiper>
       </div>
     </Card>
