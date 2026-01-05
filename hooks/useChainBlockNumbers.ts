@@ -18,8 +18,8 @@ import {
 import { HELIOS_NETWORK_ID } from "@/config/app"
 import { heliosChain } from "@/config/wagmi"
 
-const BLOCK_NUMBER_STALE_TIME = secondsToMilliseconds(15)
-const BLOCK_NUMBER_REFETCH_INTERVAL = secondsToMilliseconds(30)
+const BLOCK_NUMBER_STALE_TIME = secondsToMilliseconds(5)
+const BLOCK_NUMBER_REFETCH_INTERVAL = secondsToMilliseconds(10)
 
 const chainMap: Record<number, Chain> = {
   [HELIOS_NETWORK_ID]: heliosChain,
@@ -65,6 +65,7 @@ export const useChainBlockNumbers = () => {
         enabled: !!rpcUrl && !!viemChain,
         staleTime: BLOCK_NUMBER_STALE_TIME,
         refetchInterval: BLOCK_NUMBER_REFETCH_INTERVAL,
+        refetchIntervalInBackground: true,
         retry: 1,
         retryDelay: 1000
       }
