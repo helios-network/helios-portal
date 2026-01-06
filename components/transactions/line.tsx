@@ -15,6 +15,19 @@ import { useBridge } from "@/hooks/useBridge"
 import { useChains } from "@/hooks/useChains"
 import { calculateTimeRemaining } from "@/lib/utils/time-remaining"
 
+function formatBridgeStatus(status?: string, isExpired?: boolean): string {
+  if (!status) return ""
+  
+  const statusMap: Record<string, string> = {
+    "PROGRESS_BATCHED": isExpired ? "Batched (timed out)" : "Batched and in progress",
+    "PROGRESS_UNBATCHED": isExpired ? "Unbatched (timed out)" : "In progress (unbatched)",
+    "BRIDGED": "Completed",
+    "FAILED": "Failed"
+  }
+  
+  return statusMap[status] || status.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+}
+
 export const TransactionsLine = ({ transaction, isClientTxs }: { transaction: TransactionLight, isClientTxs?: boolean }) => {
   const { cancelSendToChain } = useBridge()
   const { chains } = useChains()
@@ -36,7 +49,11 @@ export const TransactionsLine = ({ transaction, isClientTxs }: { transaction: Tr
       ? calculateTimeRemaining(transaction.timeout, chain)
       : null
 
-  const displayStatus = timeRemaining === "expired" ? "expired" : transaction.status
+  const isExpired = timeRemaining === "expired"
+  const displayStatus = isExpired ? "expired" : transaction.status
+  const canCancel = transaction.type === "BRIDGE_OUT" && 
+    transaction.status_bridge_tx === "PROGRESS_UNBATCHED" && 
+    isClientTxs
 
   return (
     <TableRow>
@@ -51,17 +68,28 @@ export const TransactionsLine = ({ transaction, isClientTxs }: { transaction: Tr
             {transaction.timeout && transaction.timeout > 0 && (
               <Tooltip.Portal>
                 <Tooltip.Content className={s.tooltipContent} sideOffset={5}>
-                  {timeRemaining === "expired" ? (
+                  {isExpired ? (
                     <>
-                      Expired on chain <strong>{transaction.chainName}</strong> {transaction.status_bridge_tx} {transaction.fees && `(fees: ${transaction.fees} HLS)`}
+                      Transaction timed out on chain <strong>{transaction.chainName}</strong>
+                      {transaction.status_bridge_tx && transaction.status_bridge_tx !== "BRIDGED" && transaction.status_bridge_tx !== "FAILED" && (
+                        <> - Status: <strong>{formatBridgeStatus(transaction.status_bridge_tx, true)}</strong></>
+                      )}
+                      {canCancel && (
+                        <> (can be cancelled)</>
+                      )}
+                      {transaction.fees && ` - Fees: ${transaction.fees} HLS`}
                     </>
                   ) : timeRemaining ? (
                     <>
-                      Expires in <strong>{timeRemaining}</strong> on chain <strong>{transaction.chainName}</strong> {transaction.status_bridge_tx} {transaction.fees && `(fees: ${transaction.fees} HLS)`}
+                      Expires in <strong>{timeRemaining}</strong> on chain <strong>{transaction.chainName}</strong>
+                      {transaction.status_bridge_tx && ` - ${formatBridgeStatus(transaction.status_bridge_tx, false)}`}
+                      {transaction.fees && ` (fees: ${transaction.fees} HLS)`}
                     </>
                   ) : (
                     <>
-                      Expire at block <strong>{transaction.timeout}</strong> on chain <strong>{transaction.chainName}</strong> {transaction.status_bridge_tx} {transaction.fees && `(fees: ${transaction.fees} HLS)`}
+                      Expire at block <strong>{transaction.timeout}</strong> on chain <strong>{transaction.chainName}</strong>
+                      {transaction.status_bridge_tx && ` - ${formatBridgeStatus(transaction.status_bridge_tx, false)}`}
+                      {transaction.fees && ` (fees: ${transaction.fees} HLS)`}
                     </>
                   )}
                   <Tooltip.Arrow className={s.tooltipArrow} />
@@ -121,7 +149,7 @@ export const TransactionsLine = ({ transaction, isClientTxs }: { transaction: Tr
         )}
       </TableCell>
       <TableCell align="right" className={s.cellRight}>
-        {isClientTxs && transaction.type === "BRIDGE_OUT" && transaction.status_bridge_tx === "PROGRESS_UNBATCHED" && (
+        {canCancel && (
           <Button
             icon="hugeicons:cancel-01"
             variant="danger"
