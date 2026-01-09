@@ -5,7 +5,7 @@ import { Card } from "@/components/card"
 import { Heading } from "@/components/heading"
 import Image from "next/image"
 
-import { useCallback, useRef } from "react"
+import { useCallback, useRef, useState, useEffect } from "react"
 import "swiper/css"
 import "swiper/css/navigation"
 import { Swiper, SwiperRef, SwiperSlide } from "swiper/react"
@@ -13,17 +13,23 @@ import s from "./supported.module.scss"
 import { getLogoByHash } from "@/utils/url"
 import { useChains } from "@/hooks/useChains"
 import { useSwitchChain } from "wagmi"
-import { useBlockInfo } from "@/hooks/useBlockInfo"
 import { formatNumber } from "@/lib/utils/number"
-import { useChainBlockNumbers } from "@/hooks/useChainBlockNumbers"
+import type { HyperionChain } from "@/types/hyperion"
 
 export const Supported = () => {
   const { chains } = useChains()
   const { switchChain } = useSwitchChain()
-  const { lastBlockNumber } = useBlockInfo({ forceEnable: true })
-  const { blockNumbers } = useChainBlockNumbers()
+  const [currentTime, setCurrentTime] = useState(Date.now())
 
   const sliderRef = useRef<SwiperRef>(null)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now())
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   const handlePrev = useCallback(() => {
     if (!sliderRef.current) return
@@ -39,11 +45,27 @@ export const Supported = () => {
     switchChain({ chainId })
   }
 
-  const getCurrentBlock = (chain: { hyperionId: number; chainId: number }) => {
-    if (chain.hyperionId === 0) {
-      return lastBlockNumber || 0
+  const getCurrentBlock = (chain: HyperionChain): number => {
+    if (
+      !chain.latestObservedBlockHeight ||
+      !chain.latestObservedBlockTime ||
+      !chain.averageCounterpartyBlockTime
+    ) {
+      return 0
     }
-    return blockNumbers[chain.chainId] || 0
+
+    const now = currentTime
+    const lastObservedTimeMs = chain.latestObservedBlockTime * 1000
+    const timeSinceLastObservedMs = now - lastObservedTimeMs
+
+    const blocksSinceLastObserved = Math.floor(
+      timeSinceLastObservedMs / chain.averageCounterpartyBlockTime
+    )
+
+    const estimatedBlock =
+      chain.latestObservedBlockHeight + blocksSinceLastObserved
+
+    return Math.max(estimatedBlock, chain.latestObservedBlockHeight)
   }
 
   return (
