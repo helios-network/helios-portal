@@ -35,6 +35,7 @@ import { TOKEN_COLORS } from "@/config/constants"
 import { APP_COLOR_DEFAULT } from "@/config/app"
 import { TokenDenom } from "@/types/denom"
 import { useQueryStates, parseAsInteger } from "nuqs"
+import { useChainBlockNumbers } from "@/hooks/useChainBlockNumbers"
 
 type BridgeForm = {
   asset: string | null
@@ -575,6 +576,51 @@ export const Interface = () => {
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: false
   })
+
+  const { blockNumbers, isLoading: blockNumbersLoading } = useChainBlockNumbers()
+  const [currentTime, setCurrentTime] = useState(Date.now())
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now())
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const targetChain = form.to
+  const isHeliosOutdated = useMemo(() => {
+    if (!targetChain || targetChain.chainId === HELIOS_NETWORK_ID) {
+      return false
+    }
+
+    if (
+      !targetChain.latestObservedBlockHeight ||
+      !targetChain.latestObservedBlockTime ||
+      !targetChain.averageCounterpartyBlockTime ||
+      !blockNumbers[targetChain.chainId]
+    ) {
+      return false
+    }
+
+    const lastObservedTimeMs = targetChain.latestObservedBlockTime * 1000
+    const timeSinceLastObservedMs = currentTime - lastObservedTimeMs
+    const blocksSinceLastObserved = Math.floor(
+      timeSinceLastObservedMs / targetChain.averageCounterpartyBlockTime
+    )
+    const estimatedCurrentBlock = targetChain.latestObservedBlockHeight + blocksSinceLastObserved
+
+    const TIMEOUT_MS = 10 * 60 * 60 * 1000
+    const blocksIn10h = Math.floor(TIMEOUT_MS / targetChain.averageCounterpartyBlockTime)
+    const estimatedBlockWith10hTimeout = estimatedCurrentBlock + blocksIn10h
+    const currentBlockTargetChain = blockNumbers[targetChain.chainId]
+
+    return estimatedBlockWith10hTimeout < currentBlockTargetChain
+  }, [
+    targetChain,
+    blockNumbers,
+    currentTime
+  ])
+
   const assetDisabled = false
   const isDisabled =
     form.inProgress ||
@@ -586,7 +632,9 @@ export const Interface = () => {
     !heliosInOrOut ||
     chainIsPaused ||
     assetDisabled ||
-    chainPausedLoading
+    chainPausedLoading ||
+    isHeliosOutdated ||
+    blockNumbersLoading
 
   return (
     <>
@@ -853,6 +901,11 @@ export const Interface = () => {
               <Message title="Chain paused" variant={"warning"}>
                 The destination chain is currently paused. Please try again
                 later.
+              </Message>
+            )}
+            {isHeliosOutdated && form.to && (
+              <Message title="Bridge unavailable" variant={"warning"}>
+                The blockchain Helios is outdated with the blockchain {form.to.name}, need one deposit from it to refresh the blocktime of this chain on Helios.
               </Message>
             )}
             {assetDisabled && (
