@@ -578,14 +578,6 @@ export const Interface = () => {
   })
 
   const { blockNumbers, isLoading: blockNumbersLoading } = useChainBlockNumbers()
-  const [currentTime, setCurrentTime] = useState(Date.now())
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(Date.now())
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [])
 
   const targetChain = form.to
   const isHeliosOutdated = useMemo(() => {
@@ -602,6 +594,7 @@ export const Interface = () => {
       return false
     }
 
+    const currentTime = Date.now()
     const lastObservedTimeMs = targetChain.latestObservedBlockTime * 1000
     const timeSinceLastObservedMs = currentTime - lastObservedTimeMs
     const blocksSinceLastObserved = Math.floor(
@@ -617,8 +610,7 @@ export const Interface = () => {
     return estimatedBlockWith10hTimeout < currentBlockTargetChain
   }, [
     targetChain,
-    blockNumbers,
-    currentTime
+    blockNumbers
   ])
 
   const assetDisabled = false
