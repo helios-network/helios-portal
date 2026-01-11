@@ -577,10 +577,10 @@ export const Interface = () => {
     refetchOnWindowFocus: false
   })
 
-  const { blockNumbers, isLoading: blockNumbersLoading } = useChainBlockNumbers()
-
   const targetChain = form.to
+  const { blockNumbers, isLoading: blockNumbersLoading } = useChainBlockNumbers(targetChain?.chainId)
   const isHeliosOutdated = useMemo(() => {
+
     if (!targetChain || targetChain.chainId === HELIOS_NETWORK_ID) {
       return false
     }
@@ -606,8 +606,9 @@ export const Interface = () => {
     const blocksIn10h = Math.floor(TIMEOUT_MS / targetChain.averageCounterpartyBlockTime)
     const estimatedBlockWith10hTimeout = estimatedCurrentBlock + blocksIn10h
     const currentBlockTargetChain = blockNumbers[targetChain.chainId]
-
-    return estimatedBlockWith10hTimeout < currentBlockTargetChain
+    const result = estimatedBlockWith10hTimeout < currentBlockTargetChain
+    
+    return result
   }, [
     targetChain,
     blockNumbers
