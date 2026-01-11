@@ -1,8 +1,7 @@
-import { useQueries } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { createPublicClient, http, Chain } from "viem"
 import { getChainConfig } from "@/config/chain-config"
 import { secondsToMilliseconds } from "@/utils/number"
-import { useChains } from "./useChains"
 import {
   mainnet,
   sepolia,
@@ -35,60 +34,42 @@ const chainMap: Record<number, Chain> = {
   137: polygon
 }
 
-export const useChainBlockNumbers = () => {
-  const { chains } = useChains()
+export const useChainBlockNumbers = (chainId?: number) => {
+  const chainConfig = chainId ? getChainConfig(chainId) : undefined
+  const rpcUrl = chainConfig?.rpcUrl
+  const viemChain = chainId ? chainMap[chainId] : undefined
 
-  const queries = useQueries({
-    queries: (chains || []).map((chain) => {
-      const chainConfig = getChainConfig(chain.chainId)
-      const rpcUrl = chainConfig?.rpcUrl
-      const viemChain = chainMap[chain.chainId]
+  const query = useQuery({
+    queryKey: ["chainBlockNumber", chainId],
+    queryFn: async (): Promise<number | null> => {
+      if (!rpcUrl || !viemChain || !chainId) return null
 
-      return {
-        queryKey: ["chainBlockNumber", chain.chainId],
-        queryFn: async (): Promise<number | null> => {
-          if (!rpcUrl || !viemChain) return null
+      try {
+        const client = createPublicClient({
+          chain: viemChain,
+          transport: http(rpcUrl)
+        })
 
-          try {
-            const client = createPublicClient({
-              chain: viemChain,
-              transport: http(rpcUrl)
-            })
-
-            const blockNumber = await client.getBlockNumber()
-            return Number(blockNumber)
-          } catch (error) {
-            console.error(`Error fetching block for chain ${chain.chainId}:`, error)
-            return null
-          }
-        },
-        enabled: !!rpcUrl && !!viemChain,
-        staleTime: BLOCK_NUMBER_STALE_TIME,
-        refetchInterval: BLOCK_NUMBER_REFETCH_INTERVAL,
-        refetchIntervalInBackground: true,
-        retry: 1,
-        retryDelay: 1000
+        const blockNumber = await client.getBlockNumber()
+        return Number(blockNumber)
+      } catch (error) {
+        console.error(`Error fetching block for chain ${chainId}:`, error)
+        return null
       }
-    })
+    },
+    enabled: !!chainId && !!rpcUrl && !!viemChain,
+    staleTime: BLOCK_NUMBER_STALE_TIME
   })
 
   const blockNumbers: Record<number, number> = {}
-  queries.forEach((query, index) => {
-    if (query.data !== undefined && query.data !== null) {
-      const chainId = chains?.[index]?.chainId
-      if (chainId) {
-        blockNumbers[chainId] = query.data
-      }
-    }
-  })
+  if (query.data !== undefined && query.data !== null && chainId) {
+    blockNumbers[chainId] = query.data
+  }
 
   return {
     blockNumbers,
-    isLoading: queries.some((q) => q.isLoading),
-    errors: queries.filter((q) => q.error).map((q, i) => ({
-      chainId: chains?.[i]?.chainId,
-      error: q.error
-    }))
+    isLoading: query.isLoading,
+    errors: query.error ? [{ chainId, error: query.error }] : []
   }
 }
 
